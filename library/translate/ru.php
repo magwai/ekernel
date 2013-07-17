@@ -3,8 +3,9 @@
 return array(
 	'form_element_error_fileerror' => 'Ошибка загрузки файла',
 	'form_element_error_filesize' => 'Файл слишком большой',
-	'form_element_error_empty' => 'Обязятельно для заполнения',
+	'form_element_error_empty' => 'Обязательно для заполнения',
 	'form_element_error_date' => 'Неверная дата',
+	'form_element_error_regex' => 'Значение не соответствует маске',
 	'form_element_file_delete' => 'удалить',
 	'form_element_select_no_results_text' => 'Не найдено',
 	'form_element_select_placeholder_text' => 'Введите слово',

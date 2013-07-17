@@ -3,18 +3,18 @@
 if (count($this->data)) {
 
 ?>
-	<div class="nNote nFailure">
+	<ul class="e-form-el-error">
 <?php
 
 	foreach ($this->data as $el) {
 
 ?>
-	<p><?php echo $el ?></p>
+	<li><?php echo $el ?></li>
 <?php
 
 	}
 
 ?>
-	</div>
+	</ul>
 <?php
 }

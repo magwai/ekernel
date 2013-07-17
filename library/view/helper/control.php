@@ -437,7 +437,7 @@ class k_view_helper_control extends view_helper  {
 		if ($this->config->field) {
 			$n = 0;
 			foreach ($this->config->field as $k => $v) {
-				if (!$v->active) continue;
+				if (!$v->active || $v->hidden) continue;
 				$p = clone $v;
 				$p->label = $p->title;
 				$this->config->form->add($p->type, $k, $p);
@@ -480,67 +480,71 @@ class k_view_helper_control extends view_helper  {
 				$this->config->data = $this->config->form->get();
 				if (count($this->config->post_field_extend)) $this->config->data = $this->config->post_field_extend;
 
-				$this->config->m2m_changed = false;
-				foreach ($this->config->data as $k => $v) {
-					if (@$this->config->field->$k->m2m) {
-						$m2m_new = $this->config->data->$k ? $this->config->data->$k->to_array() : array();
-						$m2m_orderid = (int)$this->config->field->$k->m2m->orderid;
-						$m2m_model_class = $this->config->field->$k->m2m->model;
-						$m2m_model = new $m2m_model_class();
-						$m2m_self = $this->config->field->$k->m2m->self;
-						$m2m_foreign = $this->config->field->$k->m2m->foreign;
-
-						$m2m_old = $m2m_model->fetch_all(array(
-							$m2m_self => $this->config->id
-						));
-
-						$m2m_ids = array();
-						if ($m2m_old) {
-							// Удаляем несуществующие связи
-							foreach ($m2m_old as $m2m_el) {
-								if (!$m2m_new || !in_array($m2m_el->$m2m_foreign, $m2m_new)) {
-									$this->config->m2m_changed = true;
-									$m2m_model->delete(array(
-										'id' => $m2m_el->id
-									));
-								}
-								else $m2m_ids[] = $m2m_el->$m2m_foreign;
-							}
-						}
-						// Добавляем
-						if ($m2m_new) {
-							foreach ($m2m_new as $m2m_el) {
-								if (!in_array($m2m_el, $m2m_ids)) {
-									$this->config->m2m_changed = true;
-									$m2md = array(
-										$m2m_self => $this->config->id,
-										$m2m_foreign => $m2m_el
-									);
-									if ($m2m_orderid) {
-										$nid = $m2m_model->fetch_max('orderid');
-										$m2md['orderid'] = $nid + 1;
-									}
-									$m2m_model->insert($m2md);
-								}
-							}
-						}
-						unset($this->config->data->$k);
-					}
-				}
+				$this->config->ok = true;
 
 				if ($this->config->callback->before) {
 					$f = $this->config->callback->before;
 					$f($this);
 				}
-				$this->config->ok = true;
-				if ($this->config->model && $this->config->use_db) {
-					if ($this->config->type == 'add') {
-						$this->config->ok = $this->config->model->insert_control($this->config->data->to_array());
+				
+				if ($this->config->ok) {
+					$this->config->m2m_changed = false;
+					foreach ($this->config->data as $k => $v) {
+						if (@$this->config->field->$k->m2m) {
+							$m2m_new = $this->config->data->$k ? $this->config->data->$k->to_array() : array();
+							$m2m_orderid = (int)$this->config->field->$k->m2m->orderid;
+							$m2m_model_class = $this->config->field->$k->m2m->model;
+							$m2m_model = new $m2m_model_class();
+							$m2m_self = $this->config->field->$k->m2m->self;
+							$m2m_foreign = $this->config->field->$k->m2m->foreign;
+
+							$m2m_old = $m2m_model->fetch_all(array(
+								$m2m_self => $this->config->id
+							));
+
+							$m2m_ids = array();
+							if ($m2m_old) {
+								// Удаляем несуществующие связи
+								foreach ($m2m_old as $m2m_el) {
+									if (!$m2m_new || !in_array($m2m_el->$m2m_foreign, $m2m_new)) {
+										$this->config->m2m_changed = true;
+										$m2m_model->delete(array(
+											'id' => $m2m_el->id
+										));
+									}
+									else $m2m_ids[] = $m2m_el->$m2m_foreign;
+								}
+							}
+							// Добавляем
+							if ($m2m_new) {
+								foreach ($m2m_new as $m2m_el) {
+									if (!in_array($m2m_el, $m2m_ids)) {
+										$this->config->m2m_changed = true;
+										$m2md = array(
+											$m2m_self => $this->config->id,
+											$m2m_foreign => $m2m_el
+										);
+										if ($m2m_orderid) {
+											$nid = $m2m_model->fetch_max('orderid');
+											$m2md['orderid'] = $nid + 1;
+										}
+										$m2m_model->insert($m2md);
+									}
+								}
+							}
+							unset($this->config->data->$k);
+						}
 					}
-					else {
-						$this->config->ok = $this->config->model->update_control($this->config->data->to_array(), $this->config->where->to_array());
+					if ($this->config->model && $this->config->use_db) {
+						if ($this->config->type == 'add') {
+							$this->config->ok = $this->config->model->insert_control($this->config->data->to_array());
+						}
+						else {
+							$this->config->ok = $this->config->model->update_control($this->config->data->to_array(), $this->config->where->to_array());
+						}
 					}
 				}
+
 				if (!$this->config->ok && $this->config->m2m_changed) $this->config->ok = $this->config->m2m_changed;
 				if ($this->config->callback->after) {
 					$f = $this->config->callback->after;
@@ -728,6 +732,14 @@ class k_view_helper_control extends view_helper  {
 	}
 
 	public function route_text() {
+		if ($this->config->callback->before) {
+			$f = $this->config->callback->before;
+			$f($this);
+		}
 		$this->config->content = $this->config->text;
+		if ($this->config->callback->after) {
+			$f = $this->config->callback->after;
+			$f($this);
+		}
 	}
 }
