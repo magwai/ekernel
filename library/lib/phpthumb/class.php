@@ -1,7 +1,7 @@
 <?php
 
-include 'ThumbLib.inc.php';
+include 'phpthumb.class.php';
 
-class k_lib_phpthumb_class extends PhpThumbFactory {
+class k_lib_phpthumb_class extends phpthumb {
 
 }

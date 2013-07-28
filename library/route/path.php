@@ -5,22 +5,38 @@ class k_route_path extends route {
 		$url = trim($request->url, '/ ');
 		$p = explode('?', $url);
 		if (count($p) > 1) $url = $p[0];
-		if ($url) {
-			$parts = explode('/', $url);
-			$request->controller = $parts ? (string)array_shift($parts) : 'index';
-			$request->action = $parts ? (string)array_shift($parts) : 'index';
-			if ($parts) {
-				for ($i = 0; $i < count($parts); $i += 2) {
-					if ($parts[$i]) $request->param[$parts[$i]] = (string)$parts[$i + 1];
-				}
+		$parts = explode('/', $url);
+		if (!@$parts[0]) $parts = array();
+		$controller = $parts ? (string)array_shift($parts) : 'index';
+		$action = $parts ? (string)array_shift($parts) : 'index';
+		$param = new data;
+		if ($parts) {
+			for ($i = 0; $i < count($parts); $i += 2) {
+				if ($parts[$i]) $param[$parts[$i]] = @(string)$parts[$i + 1];
 			}
-			return true;
 		}
-		return false;
+		if (isset($this->param)) {
+			foreach ($this->param as $k => $v) {
+				if ($v != @$param[$k]) return false;
+			}
+		}
+		$request->controller = $controller;
+		$request->action = $action;
+		$request->param = $param;
+		$request->type = 'path';
+		return true;
 	}
 
 	public function match($data, $request) {
-		$data_controller = @$data['controller'] ? $data['controller'] : 'index';
+		$request_param = array(
+			'controller' => $request->controller,
+			'action' => $request->action
+		);
+		if ($request->param && count($request->param)) $request_param = array_merge($request_param, $request->param->to_array());
+		$assemble_request = $this->assemble($request_param, $request);
+		$assemble_data = $this->assemble($data, $request);
+		return $assemble_data == '/' ? $assemble_request == $assemble_data : stripos($assemble_request, $assemble_data) === 0;// $assemble_request === $assemble_data;
+		/*$data_controller = @$data['controller'] ? $data['controller'] : 'index';
 		unset($data['controller']);
 		$data_action = @$data['action'] ? $data['action'] : 'index';
 		unset($data['action']);
@@ -32,12 +48,14 @@ class k_route_path extends route {
 				return true;
 			}
 		}
-		return false;
+		return false;*/
 	}
 
 	public function assemble($data, $request) {
-		if (!isset($data['controller'])) $data['controller'] = $request->controller;
-		if (!isset($data['action'])) $data['action'] = $request->action;
+		if ($request->type === 'path') {
+			if (!isset($data['controller'])) $data['controller'] = 'index';
+			if (!isset($data['action'])) $data['action'] = 'index';
+		}
 		$controller = $data['controller'];
 		unset($data['controller']);
 		$action = $data['action'];

@@ -17,6 +17,7 @@ class k_preview_image {
 		if (!is_array($bg_color)) $bg_color = $m->f_hex2rgb($bg_color);
 		$fit = isset($param['fit']) ? $param['fit'] : false;
 		$mark = @$param['mark'];
+		$mask = @$param['mask'];
 		$corner = @$param['corner'];
 		$align = isset($param['align']) ? $param['align'] : 'cc';
 		$align = array(strtolower(substr($align, 0, 1)), strtolower(substr($align, 1, 1)));
@@ -28,17 +29,25 @@ class k_preview_image {
 		$prefix = @$param['prefix'];
 		$min_width = @(int)$param['min_width'];
 		$min_height = @(int)$param['min_height'];
+		$filter = array();
 		if ($min_width && $width && $width < $min_width) return false;
 		if ($min_height && $height && $height < $min_height) return false;
 		if (($min_width || $min_height) && $fit) return false;
 
-		$thumb = lib_phpthumb_class::create($this->image_path.'/'.$name, array(
+		$thumb = new lib_phpthumb_class();
+		$thumb->setParameter('src',  $this->image_path.'/'.$name);
+		$thumb->setParameter('aoe',  1);
+		$thumb->setParameter('q',  $quality);
+		
+		if ($width) $thumb->setParameter('w',  $width);
+		if ($height) $thumb->setParameter('h',  $height);
+		/*::create($this->image_path.'/'.$name, array(
 			'jpegQuality' => $quality,
 			'resizeUp' => $stretch,
 			'correctPermissions' => true
-		));
+		));*/
 
-		if (@$param['crop']) {
+		/*if (@$param['crop']) {
 			$crop_data = explode(',', $param['crop']);
 			$image = $thumb->getOldImage();
 			$crop_width = $crop_data[2] - $crop_data[0];
@@ -47,12 +56,12 @@ class k_preview_image {
 			imagecopyresampled($new_image, $image, 0, 0, $crop_data[0], $crop_data[1], $crop_width, $crop_height, $crop_width, $crop_height);
 			$thumb->setOldImage($new_image);
 			$thumb->setCurrentDimensions(array('width' => $crop_width, 'height' => $crop_height));
-		}
+		}*/
 
-		if ($fit) $thumb->adaptiveResize($width, $height, $align);
-		else $thumb->resize($width, $height);
+		if ($fit) $thumb->setParameter('zc',  1);//$thumb->adaptiveResize($width, $height, $align);
+		//else $thumb->resize($width, $height);
 
-		if ($min_width || $min_height) {
+		/*if ($min_width || $min_height) {
 			$dim = $thumb->getCurrentDimensions();
 			$n_w = $dim['width'];
 			$n_h = $dim['height'];
@@ -137,25 +146,36 @@ class k_preview_image {
 
 				$thumb->setOldImage($new_image);
 			}
-		}
+		}*/
 
-		if ($mark) {
+		/*if ($mark) {
 			$image = $thumb->getOldImage();
 			$this->mark($image, $mark);
 			$thumb->setOldImage($image);
-		}
+		}*/
 
+		if ($mask) {
+			$filter[] = 'mask|'.$mask;
+			$thumb->setParameter('f',  'png');
+		}
+		
+		if ($filter) $thumb->setParameter('fltr',  $filter);
+/*
 		if($corner) {
 			$format = 'PNG';
 			$name = (@$param['new_name'])?$param['new_name']:$name;
 			$image = $thumb->getOldImage();
 			$this->corner($image, $param['corner']);
 			$thumb->setOldImage($image);
-		}
-
-		$thumb->save($this->path.'/'.$prefix.@$param['crop'].$name, $format);
+		}*/
+		$thumb->GenerateThumbnail();
+		$thumb->RenderToFile($this->path.'/'.$prefix.@$param['crop'].$name/*, $format*/);
 
 		return true;
+	}
+
+	private function mask($image, $param) {
+		
 	}
 
 	private function mark($image, $param) {

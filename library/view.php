@@ -13,7 +13,9 @@ class k_view extends data {
 		if ($name) {
 			// Захватываем буфер
 			ob_start();
-			$fn = 'view/'.$name.'.php';
+			
+			$name_valid = substr($name, 0, 2) == 'k_' ? substr($name, 2) : $name;
+			$fn = 'view/'.$name_valid.'.php';
 
 			/*$old = array();
 			if (count($this)) foreach ($this as $k => $v) {
@@ -28,7 +30,7 @@ class k_view extends data {
 			}
 
 			// Сначала подключаем вьюшку из каталога приложения, затем - из ядра
-			if (file_exists(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn)) include(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn);
+			if ($name_valid == $name && file_exists(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn)) include(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn);
 			else if (file_exists(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn)) include(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn);
 
 			if ($param) foreach ($param as $k => $v) unset($this->$k);

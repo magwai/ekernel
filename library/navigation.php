@@ -53,14 +53,14 @@ class k_navigation extends data {
 		}
 		return $was_active;
 	}
-	
+
 	function get_param() {
 		$p = array(
 			'controller' => $this->controller,
 			'action' => $this->action
 		);
 		$param = is_string($this->param) ? explode(',', $this->param) : array();
-		$map = is_string($this->map) ? explode(',', $this->map) : array();;
+		$map = is_string($this->map) ? explode(',', $this->map) : array();
 		if ($map) {
 			foreach ($map as $n => $el) {
 				$el = trim($el);
@@ -69,9 +69,10 @@ class k_navigation extends data {
 		}
 		return $p;
 	}
-	
+
 	function __get($k) {
 		if ($k == 'href') {
+			if ($this->url) return $this->url;
 			$view = application::get_instance()->controller->view;
 			$route = $this->route ? $this->route : 'default';
 			$href = $view->url($this->get_param(), $route);

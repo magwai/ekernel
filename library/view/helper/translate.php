@@ -14,6 +14,11 @@ class k_view_helper_translate extends view_helper  {
 			$data = include(PATH_ROOT.'/'.DIR_APPLICATION.'/translate/'.$lang.'.php');
 			if ($data) $this->data = array_merge($this->data, $data);
 		}
+		if (class_exists('model_translate')) {
+			$m = new model_translate;
+			$data_db = $m->fetch_pairs('key', 'value');
+			if ($data_db) $this->data = array_merge($this->data, $data_db->to_array());
+		}
 	}
 
 	public function translate($text) {

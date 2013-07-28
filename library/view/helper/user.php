@@ -25,7 +25,7 @@ class k_view_helper_user extends view_helper  {
 	public function init() {
 		if ($this->_inited) return;
 		$this->_inited = true;
-		
+
 		$config = application::get_instance()->config->user;
 		$config->model = array();
 		$config->model->user = isset($config->model->user) ? $config->model->user : $this->default_model_user;
@@ -54,6 +54,12 @@ class k_view_helper_user extends view_helper  {
 		$this->login_auto();
 	}
 
+	public function is_allowed_by_key($resource_key) {
+		$resource = (int)$this->model_resource->fetch_one('id', array(
+			'key' => $resource_key
+		));
+		return $this->is_allowed($resource);
+	}
 	public function is_allowed($resource) {
 		$role = (int)$this->user('role');
 		if ($role && $this->_acl->is_allowed($role, $resource)) return true;
@@ -101,7 +107,7 @@ class k_view_helper_user extends view_helper  {
 		foreach ($resources as $el) {
 			$this->_acl->add_resource($el->id, $el->parentid);
 		}
-		
+
 		// Добавляем правила
 		$rules = $this->model_rule->fetch_all(null, 'orderid');
 		if (!$rules) return false;
@@ -118,7 +124,7 @@ class k_view_helper_user extends view_helper  {
 					->group('i.id')
 					->where('r.parentid = ?', $el->id);
 			$roles_refer = $this->model_role->adapter->fetch_col($select_1);
-			
+
 			$select_2 = new database_select();
 			$select_2	->from(array(
 						'i' => $this->model_resource->name

@@ -138,6 +138,7 @@ class k_database_model {
 		if ($where) $select->where($where);
 		if ($order) $select->order($order);
 		if ($count) $select->limit($count, $offset);
+
 		return $select;
 	}
 

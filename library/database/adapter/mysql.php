@@ -122,8 +122,9 @@ class k_database_adapter_mysql extends database_adapter {
 		if ($data) {
 			$n = 0;
 			foreach ($data as $k => $v) {
-				if (!is_scalar($v)) continue;
-				$sql .= ($n ? ', ' : '').$this->quote($k, false).' = '.(is_numeric($v) ? $v : $this->quote($v));
+				$is_expr = $v instanceof database_expr;
+				if (!is_scalar($v) && !$is_expr) continue;
+				$sql .= ($n ? ', ' : '').$this->quote($k, false).' = '.(is_numeric($v) ? $v : ($is_expr ? $v : $this->quote($v)));
 				$n++;
 			}
 		}

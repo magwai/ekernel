@@ -46,11 +46,24 @@ c.init = function(d) {
 		$('.table tbody .c-table-cb input').prop('checked', $(this).prop('checked'));
 		c.table_checkbox_highlight(null);
 	});
+	
+	var drag = $(".c-table-drag");
+	if (drag.length) drag.tableDnD({
+		onDrop: function(table, row) {
+			var current = $(row);
+			var prev = current.prev();
+			current.click();
+			window.location = c.table_gen_url(current.parents('.c-table-drag').data('dragurl') + (prev.length ? "/prev/" + prev.data("id") : ""), "id");
+		},
+		dragSelector: ".c-drag",
+		onDragClass: "info c-drag-dragging"
+	});
 
 	var fancy = $('.c-fancy');
 	if (fancy.length) fancy.fancybox();
 
 	c.notify_get();
+
 };
 
 c.table_checkbox = function(o, is_shift) {
@@ -74,7 +87,7 @@ c.table_checkbox = function(o, is_shift) {
 	c.last_index = cur_index;
 	if (!o.prop('checked')) $('.c-table thead .c-table-cb input').prop('checked', false);
 	c.table_checkbox_highlight(o);
-}
+};
 
 c.table_checkbox_highlight = function(o) {
 	if ((o && o.prop('checked')) || !$('.c-table tbody .info').find('.c-table-cb input').prop('checked')) $('.c-table tbody tr').removeClass('info');
@@ -83,7 +96,7 @@ c.table_checkbox_highlight = function(o) {
 		var list = $('.c-table tbody .c-table-cb input:checked');
 		if (list.length) c.table_checkbox_highlight(list.eq(0));
 	}
-}
+};
 
 c.table_gen_url = function(url, key_id) {
 	var ids = [];
@@ -98,10 +111,21 @@ c.table_gen_url = function(url, key_id) {
 };
 
 c.table_do_action = function(o) {
+	console.log(o);
 	var key_id = 'id';
-	if (o == 'tree') key_id = 'oid';
-	else if (o.hasClass('c-confirm') && !window.confirm(o.text() + '?')) return false;
-	window.location = c.table_gen_url(o == 'tree' ? c.url_current : o.attr('href'), key_id);
+	var url;
+	if (o === 'tree') {
+		key_id = 'oid';
+		url = c.url_current;
+	}
+	else {
+		if (o.data('key')) key_id = o.data('key');
+		url = o.attr('href');
+		if (o.data('pid')) url += '/pid/' + o.data('pid');
+		if (o.hasClass('c-confirm') && !window.confirm(o.text() + '?')) return false;
+	}
+
+	window.location = c.table_gen_url(url, key_id);
 	return false;
 };
 

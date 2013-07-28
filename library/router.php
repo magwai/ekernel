@@ -13,14 +13,14 @@ class k_router {
 	public function add_route($key, $name, $param = array()) {
 		// Добавление маршрута - просто инициализация его класса и сохранение его в хранилище
 		$class = 'route_'.$name;
-		$this->route[$key] = new $class($param);
+		$this->route[$key] = class_exists($class) ? new $class($param) : new data($param);
 	}
 
 	public function run($request) {
 		if ($this->route) {
 			// Роутинг состоит в поочередном запуске каждого роута. Первый совпадающий с адресом заполняем request своими данными и роутинг прекращается
 			$route = array_reverse($this->route);
-			foreach ($route as $el) if ($el->route($request)) break;
+			foreach ($route as $el) if ($el instanceof route && $el->route($request)) break;
 		}
 	}
 }

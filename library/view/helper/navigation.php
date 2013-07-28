@@ -40,14 +40,15 @@ class k_view_helper_navigation extends view_helper  {
 		return $ret;
 	}
 
-	public function menu() {
+	public function menu($container = null, $script = null) {
 		$config = application::get_instance()->config->navigation;
-		$script = $config->script
+		$script = $script ? $script : ($config->script
 			? $config->script
-			: ($config->model ? $config->model : 'menu').'/list';
-		return $this->container && @$this->container->pages ? $this->view->xlist(array(
+			: ($config->model ? $config->model : 'menu').'/list');
+		$container = $container ? $container : $this->container;
+		return $container && @$container->pages ? $this->view->xlist(array(
 			'fetch' => array(
-				'data' => $this->container->pages
+				'data' => $container->pages
 			),
 			'view' => array(
 				'script' => $script,
@@ -58,7 +59,7 @@ class k_view_helper_navigation extends view_helper  {
 		)) : '';
 	}
 
-	public function bread() {
+	public function bread($param = array()) {
 		$ret = '';
 		$active = $this->find_active();
 		if ($active) {
@@ -68,10 +69,17 @@ class k_view_helper_navigation extends view_helper  {
 				if ($active !== null && $active->title) $data[] = $active;
 				
 			}
+			$data = array_reverse($data);
+			if ($param['start']) {
+				$data = array_merge($param['start'], $data);
+			}
+			if ($param['finish']) {
+				$data = array_merge($data, $param['finish']);
+			}
 			$config = application::get_instance()->config->navigation;
 			$ret = $this->view->xlist(array(
 				'fetch' => array(
-					'data' => array_reverse($data)
+					'data' => $data
 				),
 				'view' => array(
 					'script' => $config->script_bread

@@ -30,6 +30,7 @@ class k_view_helper_control extends view_helper  {
 		// Производим постобработку настроек
 		$this->config_finish();
 
+		$active = $this->view->navigation()->find_active();
 		// Если у пользователя есть права для доступа в раздел - рендерим основную функцию генерации раздела
 		// Иначе - на авторизацию
 		if (
@@ -39,7 +40,7 @@ class k_view_helper_control extends view_helper  {
 				||
 			($this->config->controller == 'cuser' && ($this->config->action == 'login' || $this->config->action == 'logout'))
 				||
-			$this->view->navigation()->find_active()
+			$active
 		) {
 			$method = 'route_'.$this->config->type;
 			if (method_exists($this, $method)) $this->$method();
@@ -63,6 +64,7 @@ class k_view_helper_control extends view_helper  {
 		if ($this->config->action == 'add') $d['type'] = 'add';
 		if ($this->config->action == 'edit') $d['type'] = 'edit';
 		if ($this->config->action == 'delete') $d['type'] = 'delete';
+		if ($this->config->action == 'drag') $d['type'] = 'drag';
 
 		// Сохраняем
 		$this->config->set($d);
@@ -80,7 +82,7 @@ class k_view_helper_control extends view_helper  {
 
 				// Тайтл по-умолчанию равен названию поля
 				$d->title = $el['Field'];
-	
+
 				// Скрываем сервисные поля
 				if ($el['Field'] == 'id' || $el['Field'] == 'parentid' || $el['Field'] == 'orderid') $d->active = false;
 
@@ -127,13 +129,18 @@ class k_view_helper_control extends view_helper  {
 
 		// Если заполнены поля
 		if ($this->config->field) {
+			// Если есть поле orderid, то включаем сортировку
+			if (!isset($this->config->drag) && array_key_exists($this->config->field_map->orderid, $this->config->field->to_array())) $this->config->drag = true;
+
+			if ($this->config->drag && !$this->config->param_default->orderby) $this->config->param_default->orderby = $this->config->field_map->orderid;
+
 			// Сортируем поля по order
 			$fields_order = array();
 			$fields = $this->config->field->to_array();
 			$config = application::get_instance()->config->control_field;
 			foreach ($fields as $k => $v) {
 				$fields_order[$k] = $v->order;
-				
+
 				// Для textarea ставим по-умолчанию 10 рядов
 				if ($v->type == 'textarea' && !isset($v->rows)) $v->rows = 10;
 
@@ -145,7 +152,7 @@ class k_view_helper_control extends view_helper  {
 
 				// Для даты подключаем jquery ui
 				if ($v->type == 'date') {
-					if (!isset($v->ui)) $v->ui = array();
+					if (!isset($v->ui) || !($v->ui instanceof data)) $v->ui = array();
 					if (!isset($v->ui->opt)) $v->ui->opt = array();
 					if (!isset($v->ui->opt->dateFormat)) $v->ui->opt->dateFormat = 'dd.mm.yy';
 					if (!isset($v->ui->opt->constrainInput)) $v->ui->opt->constrainInput = true;
@@ -157,12 +164,18 @@ class k_view_helper_control extends view_helper  {
 
 				// Для файла включаем плагин uploadifive и устанавливаем пути по-умолчанию
 				if ($v->type == 'file') {
-					if (!isset($v->uploadifive)) $v->uploadifive = array();
+					if (!isset($v->uploadifive) || !($v->uploadifive instanceof data)) $v->uploadifive = array();
 					if (!isset($v->uploadifive->opt)) $v->uploadifive->opt = array();
 					if (!isset($v->uploadifive->opt->buttonClass)) $v->uploadifive->opt->buttonClass = 'btn btn-primary';
 					if (!isset($v->path)) $v->path = PATH_ROOT.'/'.DIR_UPLOAD.'/'.$this->config->controller.'_'.$k;
 					if (!isset($v->url)) $v->url = '/'.DIR_UPLOAD.'/'.$this->config->controller.'_'.$k;;
 					if (!isset($v->id)) $v->id = $k;
+				}
+
+				if ($v->type == 'textarea' && $v->ckeditor) {
+					if (!($v->ckeditor instanceof data)) $v->ckeditor = array(
+						'class' => 'span8 c-ckeditor'
+					);
 				}
 
 				// Дополнительно еще раз сливаем настройки поля по-умолчанию с данными поля
@@ -193,7 +206,7 @@ class k_view_helper_control extends view_helper  {
 			if (!$this->config->cell_title) $this->config->cell_title = $this->config->field->title ? 'title' : $first;
 
 			// Если для заглавного поля не выставлен скрипт - выставляем скрипт по-умолчанию
-			if (!@$this->config->field->{$this->config->cell_title}->script) $this->config->field->{$this->config->cell_title}->script = 'control/cell/title';
+			if ($this->config->field->{$this->config->cell_title} && !$this->config->field->{$this->config->cell_title}->script) $this->config->field->{$this->config->cell_title}->script = 'control/cell/title';
 		}
 
 		// Если не задано поле сортировки, то ставим поле по-умолчанию из реквеста. Это нужно, чтобы мы могли во вьюшке выставить свое поле сортировки по-умолчанию
@@ -207,7 +220,16 @@ class k_view_helper_control extends view_helper  {
 			$this->config->where->parentid = $this->config->param->oid;
 
 			// Добавляем в расширенные поля значение parentid равное oid из параметров
-			$this->config->post_field_extend->parentid = $this->config->param->id ? $this->config->param->id : $this->config->param->oid;
+			if ($this->config->type == 'add') $this->config->post_field_extend->parentid = $this->config->param->id ? $this->config->param->id : $this->config->param->oid;
+		}
+		
+		if ($this->config->type == 'add' && $this->config->drag) {
+			$this->config->post_field_extend->{$this->config->field_map->orderid} = $this->config->model->fetch_max($this->config->field_map->orderid) + 1;
+		}
+
+		if ($this->config->param->cid) {
+			$this->config->where->parentid = $this->config->param->cid;
+			$this->config->post_field_extend->parentid = $this->config->param->cid;
 		}
 
 		// Выставляем возвратный контроллер для всех типов завершения равным текущему
@@ -271,6 +293,28 @@ class k_view_helper_control extends view_helper  {
 						else $this->config->where->{$k.' LIKE ?'} = $this->config->model->adapter->quote('%'.$this->config->param->{'search_'.$k}.'%');
 					}
 				}
+			}
+		}
+		
+		if ($this->config->static_field) {
+			if (!($this->config->static_field instanceof data)) $this->config->static_field = new data;
+			if (!isset($this->config->static_field->field_dst)) $this->config->static_field->field_dst = $this->config->field_map->stitle;
+			if (!isset($this->config->static_field->field_src)) $this->config->static_field->field_src = $this->config->field_map->title;
+			if (!isset($this->config->static_field->length)) $this->config->static_field->length = 50;
+			if (!isset($this->config->static_field->unique)) $this->config->static_field->unique = true;
+		}
+
+		// Получаем кнопки из меню
+		$active = $this->view->navigation()->find_active();
+		if ($active && count($active->pages)) {
+			foreach ($active->pages as $el) {
+				if ($el->is_inner) $this->config->button_top[] = array(
+					'title' => $el->title,
+					'controller' => $el->controller,
+					'action' => $el->action,
+					'key' => 'cid',
+					'pid' => $this->config->param->cid
+				);
 			}
 		}
 
@@ -347,7 +391,7 @@ class k_view_helper_control extends view_helper  {
 			$f($this);
 		}
 	}
-	
+
 	public function button_build($button) {
 		$data = array();
 		if (!$button) return $data;
@@ -411,7 +455,8 @@ class k_view_helper_control extends view_helper  {
 			$p = clone $this->config->param;
 			unset($p['id']);
 			unset($p['ids']);
-			unset($p['oid']);
+			//unset($p['oid']);
+			unset($p['prev']);
 			$p->set($this->config->request->current->param);
 			$p['ccontroller'] = $this->config->request->current->controller;
 			$p['caction'] = $this->config->request->current->action;
@@ -467,7 +512,7 @@ class k_view_helper_control extends view_helper  {
 			$this->config->request->current = $this->config->request->cancel;
 			return;
 		}
-		
+
 		$this->config->id = $this->config->data->id;
 		if ($this->config->type == 'add' && !$this->config->id && $this->config->model && $this->config->use_db) {
 			$this->config->id = method_exists($this->config->model, 'fetch_next_id') ? $this->config->model->fetch_next_id() : null;
@@ -479,6 +524,23 @@ class k_view_helper_control extends view_helper  {
 				unset($this->config->data);
 				$this->config->data = $this->config->form->get();
 				if (count($this->config->post_field_extend)) $this->config->data = $this->config->post_field_extend;
+				
+				if ($this->config->static_field && !@$this->config->data->{$this->config->static_field->field_dst} && $this->config->type == 'add') {
+					$stitle = common::stitle($this->config->data[$this->config->static_field->field_src], $this->config->static_field->length);
+					$stitle = $stitle ? $stitle : '_';
+					$stitle_n = $stitle;
+					if ($this->config->static_field->unique && $this->config->use_db) {
+						$stitle_p = -1;
+						do {
+							$stitle_p++;
+							$stitle_n = $stitle.($stitle_p == 0 ? '' : $stitle_p);
+							$w = array('`'.$this->config->static_field->field_dst.'` = ?' => $stitle_n);
+							$stitle_c = (int)$this->config->model->fetch_count($w);
+						}
+						while ($stitle_c > 0);
+					}
+					$this->config->data[$this->config->static_field->field_dst] = $stitle_n;
+				}
 
 				$this->config->ok = true;
 
@@ -486,7 +548,7 @@ class k_view_helper_control extends view_helper  {
 					$f = $this->config->callback->before;
 					$f($this);
 				}
-				
+
 				if ($this->config->ok) {
 					$this->config->m2m_changed = false;
 					foreach ($this->config->data as $k => $v) {
@@ -536,11 +598,18 @@ class k_view_helper_control extends view_helper  {
 						}
 					}
 					if ($this->config->model && $this->config->use_db) {
+						$data = $this->config->data->to_array();
+						if ($data) {
+							$meta = $this->config->model->metadata();
+							foreach ($data as $k => $v) {
+								if (!array_key_exists($k, $meta)) unset($data[$k]);
+							}
+						}
 						if ($this->config->type == 'add') {
-							$this->config->ok = $this->config->model->insert_control($this->config->data->to_array());
+							$this->config->ok = $this->config->model->insert_control($data);
 						}
 						else {
-							$this->config->ok = $this->config->model->update_control($this->config->data->to_array(), $this->config->where->to_array());
+							$this->config->ok = $this->config->model->update_control($data, $this->config->where->to_array());
 						}
 					}
 				}
@@ -652,7 +721,7 @@ class k_view_helper_control extends view_helper  {
 			$this->config->request->current = $this->config->request->cancel;
 			return;
 		}
-	
+
 		if ($this->config->callback->after) {
 			$f = $this->config->callback->after;
 			$f($this);
@@ -677,8 +746,59 @@ class k_view_helper_control extends view_helper  {
 		}
 		return;
 	}
+	public function route_drag() {
+		$cur = $this->config->model->fetch_control_card(array('id' => (int)$this->config->param->id));
+    	$prev = $this->config->model->fetch_control_card(array('id' => (int)$this->config->param->prev));
+    	$ok = false;
+    	if ($cur) {
+			$ok = $this->config->model->update_control(array(
+				$this->config->field_map->orderid => @(int)$prev->{$this->config->field_map->orderid} + 1
+			), array(
+				'id' => $cur->id
+			));
+			if ($ok) {
+	    		$w = array('`id` != ?' => $cur->id);
+	    		if ($this->config->tree) $w[$this->config->field_map->parentid] = $cur->{$this->config->field_map->parentid};
+		    	if ($prev) $w['`'.$this->config->field_map->orderid.'` > ?'] = $prev->{$this->config->field_map->orderid};
+	    		$next = $this->config->model->fetch_col('id', $w);
+	    		if ($next) $ok = $this->config->model->update_control(array($this->config->field_map->orderid => new database_expr('`'.$this->config->field_map->orderid.'` + 1')), '`id` IN ('.implode(',', $next).')');
+	    	}
+    	}
+    	if ($ok) {
+			$this->config->notify[] = array(
+				'title' => $this->view->translate('control_notify_drag_moved'),
+				'style' => 'success'
+			);
+    		if ($this->config->callback->success) {
+				$f = $this->config->callback->success;
+				$f($this);
+			}
+    	}
+    	else $this->config->notify[] = array(
+			'title' => $this->view->translate('control_notify_drag_not_moved'),
+			'style' => 'warning'
+		);
+		$this->config->request->current = $this->config->request->success;
+	}
 
 	public function route_list() {
+		$active = $this->view->navigation()->find_active();
+		if ($active && $active->is_inner && !$this->config->param->cid) {
+			$this->config->notify[] = array(
+				'title' => $this->view->translate('control_notify_link_noel'),
+				'style' => 'warning'
+			);
+			$this->config->request->current = array(
+				'controller' => $active->parent->controller,
+				'action' => $active->parent->action
+			);
+			if ($this->config->param->pid) {
+				if (!$this->config->request->current->param) $this->config->request->current->param = new data;
+				$this->config->request->current->param->cid = $this->config->param->pid;
+			}
+			unset($this->config->param->pid);
+			return;
+		}
 		$is_model = $this->config->model && !count($this->config->data);
 		$this->config->content = $this->view->xlist(array(
 			'fetch' => array(

@@ -102,7 +102,18 @@ class k_form_element_file extends form_element_input {
 					else {
 						file.queueItem.find(".image img").attr("src", "'.$this->url.'/" + file.name + "?" + Math.random() * 10000);
 					}
+					var filename = file.queueItem.find(".filename").html();
+					file.queueItem.find(".fileinfo").html(filename.length ? " / <a target=\"_blank\" href=\"'.$this->url.'/" + filename + "\">'.$this->view->translate('control_download').'</a>" : "");
 					window.uploadifive_update(t.parent().parent());
+				}'),
+				'onSelect' => $this->multiple ? null : new Zend\Json\Expr('function(file) {
+					var data = this.data("uploadifive");
+					if (data.queue.count <= 1) return;
+					var first = data.queueEl.find(".uploadifive-queue-item:first");
+					if (first.length) {
+						var file = first.data("file");
+						if (file) data.removeQueueItem(file, true);
+					}
 				}'),
 				'onCancel' => new Zend\Json\Expr('function() {
 					var parent = $(this).parent().parent();
@@ -122,6 +133,7 @@ class k_form_element_file extends form_element_input {
 								var data = this.data("uploadifive");
 								var file = window.uploadifive_data(files[k]);
 								data.addQueueItem(file);
+								file.queueItem.find(".progress").hide();
 								data.uploadComplete(null, file, false);
 							}
 						}

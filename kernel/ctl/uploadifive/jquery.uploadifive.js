@@ -234,6 +234,7 @@ Released under the UploadiFive Standard License <http://www.uploadify.com/upload
                         for (var n = 0; n < limit; n++) {
                             existingFile = input.files[n];
                             // Check if the filename matches
+							console.log(existingFile);
                             if (existingFile.name == file.name && !existingFile.complete) {
                                 $data.queue.replaced++;
                                 methods.cancel.call($this, existingFile, true);

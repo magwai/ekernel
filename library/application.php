@@ -59,6 +59,7 @@ class k_application {
 	public function run_controller() {
 		// Инициализируем класс контроллера
 		$class = 'controller_'.$this->request->controller;
+
 		if (!class_exists($class)) error::call('Not Found', 404);
 		$this->controller = new $class($this->request, $this->response);
 

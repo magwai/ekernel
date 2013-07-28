@@ -16,8 +16,8 @@ class k_model_cmenu extends model_menu {
 				))
 				->group('i.id')
 				->order('i.orderid')
-				->where('i.parentid = ?', $pid)
-				->where('i.is_inner = ?', 0);
+				->where('i.parentid = ?', $pid);
+
 		return $this->entity_all($this->adapter->fetch_all($select));
 	}
 }

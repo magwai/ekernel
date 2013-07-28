@@ -37,6 +37,14 @@ $this->title('CP');
 
 $active = $this->navigation()->find_active();
 
+$p['controller'] = $active ? $active->controller : '';
+$p['action'] = $active ? $active->action : '';
+unset($p['replace']);
+unset($p['perpage']);
+unset($p['orderby']);
+unset($p['orderdir']);
+unset($p['oid']);
+
 $menu = trim($this->navigation());
 
 $button_top = count($this->control()->config->button_top) ? '<li class="c-button-top">'.$this->xlist(array(
@@ -49,7 +57,7 @@ $button_top = count($this->control()->config->button_top) ? '<li class="c-button
 )).'</li>' : '';
 
 $top_left =	$menu.
-			($active ? '<li class="c-place"><a href="'.$active->href.'">'.$active->title.'</a></li>' : '').
+			($active ? '<li class="c-place"><a href="'.$this->url($p, 'control').'">'.$active->title.'</a></li>' : '').
 			$button_top;
 
 $top_right = $this->user('id')
@@ -81,6 +89,7 @@ $top_right = $this->user('id')
 		</div>
 		<div class="container-fluid c-middle"><?php echo $this->control()->config->content ?></div>
 		<?php echo $this->control()->config->content_bottom ?>
+		<script type="text/javascript">window.CKEDITOR_BASEPATH = '/kernel/ctl/ckeditor/';</script>
 		<?php echo (string)$this->js() ?>
 	</body>
 </html>

@@ -23,6 +23,7 @@ return array(
 	'control_notify_delete_success' => 'Удалено элементов: %s',
 	'control_notify_edit_noel' => 'Элементы не выбраны',
 	'control_notify_delete_noel' => 'Элементы не выбраны',
+	'control_notify_link_noel' => 'Элементы не выбраны',
 	'control_logout' => 'Выйти',
 	'control_login' => 'Войти',
 	'control_goindex' => 'На сайт',
@@ -43,5 +44,7 @@ return array(
 	'control_button_edit' => 'Изменить',
 	'control_button_delete' => 'Удалить',
 	'control_field_title_title' => 'Название',
-	
+	'control_download' => 'скачать',
+	'control_notify_drag_moved' => 'Элемент перемещен',
+	'control_notify_drag_not_moved' => 'Элемент не перемещен'
 );

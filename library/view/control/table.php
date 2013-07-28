@@ -33,6 +33,12 @@ while ($total > 100 || $total < 98) {
 		$total += $field[$k]->width_percent;
 	}
 }
+$dragurl = '';
+if ($this->control()->config->drag) {
+	$p = clone $this->control()->config->param;
+	$p['action'] = 'drag';
+	$dragurl = $this->url($p, 'control');
+}
 
 foreach ($field as $k => $v) $field[$k]->width_percent = stripos($v->width_percent, 'px') === false
 	? floor($v->width_percent).'%'
@@ -41,10 +47,10 @@ foreach ($field as $k => $v) $field[$k]->width_percent = stripos($v->width_perce
 $data = $this->data ? clone $this->data : array();
 
 ?>
-		<table class="table table-striped table-bordered table-hover c-table<?php echo $this->control()->config->tree ? ' c-table-tree' : '' ?>">
+		<table class="table table-striped table-bordered table-hover c-table<?php echo $this->control()->config->tree ? ' c-table-tree' : '' ?><?php echo count($data) && $this->control()->config->drag ? ' c-table-drag' : '' ?>"<?php echo count($data) && $this->control()->config->drag ? ' data-dragurl="'.$dragurl.'"' : '' ?>>
 			<thead>
 				<tr>
-					<?php echo $this->control()->config->table->checkbox ? '<th class="c-table-cb">'.(count($data) ? '<input type="checkbox" />' : '&nbsp;').'</th>' : '' ?>
+					<?php echo $this->control()->config->table->checkbox && count($data) ? '<th class="c-table-cb">'.(count($data) ? '<input type="checkbox" />' : '&nbsp;').'</th>' : '' ?>
 <?php
 
 $p = clone $this->control()->config->param;
@@ -81,6 +87,7 @@ foreach ($field as $k => $v) {
 }
 
 ?>
+					<?php echo $this->control()->config->drag ? '<th>&nbsp;</th>' : '' ?>
 				</tr>
 <?php
 
@@ -104,6 +111,7 @@ if (count($p)) foreach ($p as $k => $v) if (stripos($k, 'search_') !== false) un
 		else echo '&nbsp;';
 
 ?>
+
 					</td>
 <?php
 
@@ -120,6 +128,7 @@ if (count($p)) foreach ($p as $k => $v) if (stripos($k, 'search_') !== false) un
 <?php
 
 if (count($data)) {
+	if ($this->control()->config->drag) $this->js->append('/kernel/js/jquery/jquery.tablednd.js');
 
 ?>
 			<tbody>
@@ -143,6 +152,7 @@ if (count($data)) {
 		}
 
 ?>
+					<?php echo $this->control()->config->drag ? '<td><div class="c-drag"><span class="icon-resize-vertical"></span></div></td>' : '' ?>
 				</tr>
 <?php
 

@@ -18,6 +18,8 @@
 .c-table th a{color:#333333;display:block;}
 .c-table .c-table-sortable a{margin-right:15px;}
 .c-table .c-table-cb input{margin:-2px 0 0 0;}
+.c-table .c-drag{width:20px;height:20px;cursor:move;}
+.c-table .c-drag span{margin:1px 0 0 3px;}
 
 .c-perpager,.c-pager{margin-top:0px;}
 
@@ -49,6 +51,8 @@
 .e-form-checkbox-frame .e-form-checkbox-el{overflow:hidden;}
 .e-form-checkbox-frame .e-form-checkbox-el .checker{float:left;margin-top:0px;}
 
+.e-form-element-file label{display:none;}
+
 .c-table-filter span{float:none!important;display:inline-block!important;margin:0!important;text-align:center;}
 .c-table-filter .row-fluid{width:100%;margin:0;text-align:center;}
 .c-table-filter select,.c-table-filter input{margin-bottom:0px;}
@@ -58,6 +62,8 @@
 
 .c-place{background:#0088cc;margin:0 9px;}
 .c-place a{background:0!important;color:#fff!important;}
+
+.c-ckeditor{float:none!important;}
 
 .navbar-fixed-top a.dropdown-submenu{cursor:default;}
 

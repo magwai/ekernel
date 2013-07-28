@@ -45,7 +45,7 @@ return array(
 		'control' => array(
 			'navigation' => array(
 				'model' => 'cmenu',
-				'script' => 'control/menu',
+				'script' => 'control/menulist',
 				'script_bread' => 'control/bread'
 			),
 			'user' => array(
@@ -65,6 +65,12 @@ return array(
 					'theme' => 'smoothness',
 					'lang' => 'ru'
 				),
+				'field_map' => array(
+					'parentid' => 'parentid',
+					'orderid' => 'orderid',
+					'title' => 'title',
+					'stitle' => 'stitle'
+				),
 				'post_field_extend' => array(),
 				'type' => '',
 				'text' => '',
@@ -72,6 +78,7 @@ return array(
 				'controller' => 'cindex',
 				'action' => 'index',
 				'tree' => false,
+				'static_field' => false,
 				'param' => array(
 					'orderby' => '',
 					'orderdir' => '',
