@@ -27,23 +27,20 @@ class k_form_element_date extends form_element_input {
 
 	public function render() {
 		if ($this->ui) {
-			if (!class_exists('Zend\Json\Encoder')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Encoder.php';
-			if (!class_exists('Zend\Json\Json')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Json.php';
-			if (!class_exists('Zend\Json\Expr')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Expr.php';
 			$opt = array();
 			if ($this->ui->opt) {
 				$opt = array_merge($opt, $this->ui->opt->to_array());
 			}
-			$this->view->js		->append('/kernel/ctl/ui/ui/jquery.ui.core.js')
-								->append('/kernel/ctl/ui/ui/jquery.ui.datepicker.js')
-								->append('/kernel/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->ui->lang.'.js')
+			$this->view->js		->append('/library/ctl/ui/ui/jquery.ui.core.js')
+								->append('/library/ctl/ui/ui/jquery.ui.datepicker.js')
+								->append('/library/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->ui->lang.'.js')
 								->append_inline('$("input[name=\''.$this->name.'\']").datepicker('.Zend\Json\Json::encode($opt, false, array(
 									'enableJsonExprFinder' => true
 								)).');');
 			
-			$this->view->css	->append('/kernel/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
-								->append('/kernel/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
-								->append('/kernel/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.datepicker.css');
+			$this->view->css	->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
+								->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
+								->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.datepicker.css');
 		}
 		return parent::render();
 	}

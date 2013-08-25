@@ -9,6 +9,7 @@ class k_application {
 	public $response;
 	public $controller;
 	public $config = array();
+	public static $zend_icluded = false;
 
 	public function __construct() {
 		// Читаем конфиги. Сначала из ядра, затем из приложения
@@ -87,12 +88,24 @@ class k_application {
 		if (self::$instance == null) {
 			// Инициализируем автолоадер. Он ищет сначала в каталоге приложения, если класса нет и есть такой же с префиксом k_ в ядре, содает класс обертку с запрашиваемым именем и наследует ее от найденного в ядре класса
 			spl_autoload_register(function($class) {
-				$is_kernel = substr($class, 0, 2) == 'k_';
-				$fn = str_replace('_', '/', $is_kernel ? preg_replace('/^k\_/', '', $class) : $class).'.php';
-				if (!$is_kernel && file_exists(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn)) require_once PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn;
-				else if (file_exists(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn)) {
-					require_once PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn;
-					if (!$is_kernel && class_exists('k_'.$class)) eval('class '.$class.' extends k_'.$class.' {};');
+				$is_zend = substr($class, 0, 5) == 'Zend\\';
+				if ($is_zend) {
+					if (self::$zend_icluded) return;
+					include_once  PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Loader/StandardAutoloader.php';
+					$loader = new Zend\Loader\StandardAutoloader();
+					$loader->registerNamespace('Zend', PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend');
+					$loader->register();
+					$loader->autoload($class);
+					self::$zend_icluded = true;
+				}
+				else {
+					$is_kernel = substr($class, 0, 2) == 'k_';
+					$fn = str_replace('_', '/', $is_kernel ? preg_replace('/^k\_/', '', $class) : $class).'.php';
+					if (!$is_kernel && file_exists(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn)) require_once PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn;
+					else if (file_exists(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn)) {
+						require_once PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn;
+						if (!$is_kernel && class_exists('k_'.$class)) eval('class '.$class.' extends k_'.$class.' {};');
+					}
 				}
 			});
 			// Экземпляр приложения создается не из текущего класса, а из класса, который находится в папке приложения

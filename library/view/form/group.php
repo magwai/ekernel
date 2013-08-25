@@ -1,4 +1,5 @@
 <fieldset<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?>>
+	<?php echo $this->legend ? '<legend>'.$this->legend.'</legend>' : '' ?>
 <?php
 
 if ($this->element) {

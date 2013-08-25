@@ -31,6 +31,7 @@ class k_view_helper_control extends view_helper  {
 		$this->config_finish();
 
 		$active = $this->view->navigation()->find_active();
+		if ($active) session::set('IsAuthorized', true);
 		// Если у пользователя есть права для доступа в раздел - рендерим основную функцию генерации раздела
 		// Иначе - на авторизацию
 		if (
@@ -45,10 +46,13 @@ class k_view_helper_control extends view_helper  {
 			$method = 'route_'.$this->config->type;
 			if (method_exists($this, $method)) $this->$method();
 		}
-		else $this->config->request->current = array(
-			'controller' => 'cuser',
-			'action' => 'login'
-		);
+		else {
+			session::remove('IsAuthorized');
+			$this->config->request->current = array(
+				'controller' => 'cuser',
+				'action' => 'login'
+			);
+		}
 
 		// "Рендер" раздела. На деле - это заполнение контентных переменных в настройках админки из тех же самых настроек
 		$this->render();
@@ -98,13 +102,34 @@ class k_view_helper_control extends view_helper  {
 			}
 		}
 	}
+	
+	public function config_include($name, $param = array()) {
+		$ret = null;
+		$old_param = array();
+		if ($param) foreach ($param as $k => $v) {
+			if (isset($this->$k)) {
+				$old_param[$k] = $this->$k;
+				unset($this->$k);
+			}
+			$this->$k = $v;
+		}
+		$name_valid = substr($name, 0, 2) == 'k_' ? substr($name, 2) : $name;
+		$fn = 'control/'.$name_valid.'.php';
+		if ($name_valid == $name && file_exists(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn)) $ret = include(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn);
+		else if (file_exists(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn)) $ret = include(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn);
+		if ($param) foreach ($param as $k => $v) {
+			unset($this->$k);
+			if (isset($old_param[$k])) $this->$k = $old_param[$k];
+		}
+		return $ret;
+	}
 
 	public function config_view() {
 		// Пробуем настройки из главной вьюшки
-		echo $this->view->render('control/'.$this->config->controller);
+		$this->config_include($this->config->controller);
 
 		// Пробуем настройки из вьюшки экшена
-		echo $this->view->render('control/'.$this->config->controller.'/'.$this->config->action);
+		$this->config_include($this->config->controller.'/'.$this->config->action);
 	}
 
 	public function config_finish() {
@@ -174,7 +199,7 @@ class k_view_helper_control extends view_helper  {
 
 				if ($v->type == 'textarea' && $v->ckeditor) {
 					if (!($v->ckeditor instanceof data)) $v->ckeditor = array(
-						'class' => 'span8 c-ckeditor'
+						'class' => 'c-ckeditor'
 					);
 				}
 
@@ -222,7 +247,7 @@ class k_view_helper_control extends view_helper  {
 			// Добавляем в расширенные поля значение parentid равное oid из параметров
 			if ($this->config->type == 'add') $this->config->post_field_extend->parentid = $this->config->param->id ? $this->config->param->id : $this->config->param->oid;
 		}
-		
+
 		if ($this->config->type == 'add' && $this->config->drag) {
 			$this->config->post_field_extend->{$this->config->field_map->orderid} = $this->config->model->fetch_max($this->config->field_map->orderid) + 1;
 		}
@@ -295,7 +320,7 @@ class k_view_helper_control extends view_helper  {
 				}
 			}
 		}
-		
+
 		if ($this->config->static_field) {
 			if (!($this->config->static_field instanceof data)) $this->config->static_field = new data;
 			if (!isset($this->config->static_field->field_dst)) $this->config->static_field->field_dst = $this->config->field_map->stitle;
@@ -305,16 +330,22 @@ class k_view_helper_control extends view_helper  {
 		}
 
 		// Получаем кнопки из меню
-		$active = $this->view->navigation()->find_active();
-		if ($active && count($active->pages)) {
-			foreach ($active->pages as $el) {
-				if ($el->is_inner) $this->config->button_top[] = array(
-					'title' => $el->title,
-					'controller' => $el->controller,
-					'action' => $el->action,
-					'key' => 'cid',
-					'pid' => $this->config->param->cid
-				);
+		if ($this->config->action == 'index') {
+			$active = $this->view->navigation()->find_active();
+			if ($active && count($active->pages)) {
+				$button_top = $this->config->button_top;
+				foreach ($active->pages as $el) {
+					if ($el->is_inner) {
+						$button_top[] = array(
+							'title' => $el->title,
+							'controller' => $el->controller,
+							'action' => $el->action,
+							'key' => 'cid',
+							'pid' => $this->config->param->cid
+						);
+					}
+				}
+				$this->config->button_top = $button_top;
 			}
 		}
 
@@ -348,7 +379,7 @@ class k_view_helper_control extends view_helper  {
 				if (!($v instanceof data)) $this->config->oac->$k = new data();
 				if (!isset($this->config->oac->$k->type)) $this->config->oac->$k->type = $k == 'ok' ? 'submit' : 'button';
 				if (!isset($this->config->oac->$k->value)) $this->config->oac->$k->value = $this->view->translate('form_element_oac_'.$k.'_value');
-				if (!isset($this->config->oac->$k->class)) $this->config->oac->$k->class = 'btn'.($k == 'ok' ? ' btn-success' : '');
+				if (!isset($this->config->oac->$k->class)) $this->config->oac->$k->class = 'btn'.($k == 'ok' ? ' btn-success' : '').($k == 'cancel' ? ' btn-warning' : '').($k == 'apply' ? ' btn-default' : '');
 				if (!isset($this->config->oac->$k->frame_view_script)) $this->config->oac->$k->frame_view_script = false;
 			}
 
@@ -474,9 +505,10 @@ class k_view_helper_control extends view_helper  {
 	public function route_form() {
 		$this->config->form = new form(array(
 			'class' => 'row-fluid c-form',
-			'class_element_text' => 'span8 c-input',
-			'class_element_select' => 'span8 c-select',
-			'class_element_textarea' => 'span8 c-textarea',
+			'class_element_frame' => 'form-group col-8',
+			'class_element_text' => 'form-control c-input',
+			'class_element_select' => 'form-control c-select',
+			'class_element_textarea' => 'form-control c-textarea',
 			'error_view_script' => 'control/error'
 		));
 		if ($this->config->field) {
@@ -487,6 +519,30 @@ class k_view_helper_control extends view_helper  {
 				$p->label = $p->title;
 				$this->config->form->add($p->type, $k, $p);
 				$n++;
+			}
+		}
+
+		if ($this->config->meta) {
+			$meta = $this->config_include('meta', array(
+				'return_only' => true
+			));
+			if ($meta) {
+				$meta = new data($meta);
+				$field = $meta->field;
+				unset($field->url);
+				unset($field->controller);
+				unset($field->data);
+				$meta_array = array();
+				foreach ($field as $k => $v) {
+					if (!isset($v->type)) $v->type = 'text';
+					$v->label = $v->title;
+					$this->config->form->add($v->type, 'meta_'.$k, $v->to_array());
+					$meta_array[] = 'meta_'.$k;
+				}
+				$this->config->form->add_display_group($meta_array, 'meta', array(
+					'legend' => 'Дополнительно',
+					'class' => 'c-meta c-invisible'
+				));
 			}
 		}
 
@@ -523,8 +579,9 @@ class k_view_helper_control extends view_helper  {
 				$this->config->data_old = clone $this->config->data;
 				unset($this->config->data);
 				$this->config->data = $this->config->form->get();
+
 				if (count($this->config->post_field_extend)) $this->config->data = $this->config->post_field_extend;
-				
+
 				if ($this->config->static_field && !@$this->config->data->{$this->config->static_field->field_dst} && $this->config->type == 'add') {
 					$stitle = common::stitle($this->config->data[$this->config->static_field->field_src], $this->config->static_field->length);
 					$stitle = $stitle ? $stitle : '_';
@@ -551,6 +608,7 @@ class k_view_helper_control extends view_helper  {
 
 				if ($this->config->ok) {
 					$this->config->m2m_changed = false;
+					$this->config->meta_changed = false;
 					foreach ($this->config->data as $k => $v) {
 						if (@$this->config->field->$k->m2m) {
 							$m2m_new = $this->config->data->$k ? $this->config->data->$k->to_array() : array();
@@ -598,7 +656,42 @@ class k_view_helper_control extends view_helper  {
 						}
 					}
 					if ($this->config->model && $this->config->use_db) {
+						if ($this->config->meta) {
+							$model_meta = new model_meta;
+							$meta_data = array();
+							$this->config->form->group->meta->validate($this->config->post);
+							$meta_post = $this->config->form->group->meta->get();
+							if (count($meta_post)) foreach ($meta_post as $k => $v) {
+								if (substr($k, 0, 5) != 'meta_') continue;
+								$v = trim($v);
+								if ($v) $meta_data[substr($k, 5)] = $v;
+							}
+							$use_meta = $ex = $model_meta->fetch_row(array(
+								'controller' => $this->config->controller,
+								'parentid' => $this->config->id
+							));
+							if (!$ex && $meta_data) $use_meta = true;
+							if ($use_meta) {
+								$meta_d = json_encode($meta_data);
+								if ($ex) {
+									if (!$meta_data) $this->config->meta_changed = $model_meta->delete(array(
+										'id' => $ex->id
+									));
+									else $this->config->meta_changed = $model_meta->update(array(
+										'data' => $meta_d
+									), array(
+										'id' => $ex->id
+									));
+								}
+								else $this->config->meta_changed = $model_meta->insert(array(
+									'data' => $meta_d,
+									'controller' => $this->config->controller,
+									'parentid' => $this->config->id
+								));
+							}
+						}
 						$data = $this->config->data->to_array();
+
 						if ($data) {
 							$meta = $this->config->model->metadata();
 							foreach ($data as $k => $v) {
@@ -614,7 +707,7 @@ class k_view_helper_control extends view_helper  {
 					}
 				}
 
-				if (!$this->config->ok && $this->config->m2m_changed) $this->config->ok = $this->config->m2m_changed;
+				if (!$this->config->ok) $this->config->ok = $this->config->m2m_changed || $this->config->meta_changed;
 				if ($this->config->callback->after) {
 					$f = $this->config->callback->after;
 					$f($this);
@@ -652,6 +745,15 @@ class k_view_helper_control extends view_helper  {
 							$m2m_self => $this->config->id
 						));
 					}
+				}
+			}
+			if ($this->config->meta) {
+				$model_meta = new model_meta;
+				$meta_data_raw = $model_meta->fetch_by_controller($this->config->controller, $this->config->id);
+				if ($meta_data_raw) {
+					$meta_data = array();
+					foreach ($meta_data_raw as $k => $v) $meta_data['meta_'.$k] = $v;
+					$this->config->form->group->meta->populate($meta_data);
 				}
 			}
 		}
@@ -746,6 +848,7 @@ class k_view_helper_control extends view_helper  {
 		}
 		return;
 	}
+
 	public function route_drag() {
 		$cur = $this->config->model->fetch_control_card(array('id' => (int)$this->config->param->id));
     	$prev = $this->config->model->fetch_control_card(array('id' => (int)$this->config->param->prev));

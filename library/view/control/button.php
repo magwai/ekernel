@@ -3,7 +3,7 @@
 if (count($this->data)) {
 	
 ?>
-<div class="btn-group c-buttons">
+<div class="navbar-btn btn-group c-buttons">
 <?php
 
 	foreach ($this->data as $el) {

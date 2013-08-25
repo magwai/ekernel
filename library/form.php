@@ -4,6 +4,7 @@ class k_form {
 	public $group = array();
 	public $view = null;
 	public $class = '';
+	public $legend = '';
 	public $class_element_control = '';
 	public $class_element_frame = '';
 	public $class_element_error = '';
@@ -23,6 +24,7 @@ class k_form {
 		if (isset($param['error_view_script'])) $this->error_view_script = $param['error_view_script'];
 		if (isset($param['view_script'])) $this->view_script = $param['view_script'];
 		if (isset($param['class'])) $this->class = $param['class'];
+		if (isset($param['legend'])) $this->legend = $param['legend'];
 		if (isset($param['class_element_frame'])) $this->class_element_frame = $param['class_element_frame'];
 		if (isset($param['class_element_control'])) $this->class_element_control = $param['class_element_control'];
 		if (isset($param['class_element_error'])) $this->class_element_error = $param['class_element_error'];
@@ -38,6 +40,7 @@ class k_form {
 
 	public function render() {
 		return $this->view->render($this->view_script, array(
+			'legend' => $this->legend,
 			'class' => $this->class,
 			'action' => $this->action,
 			'method' => $this->method,
@@ -104,6 +107,7 @@ class k_form {
 			$form->element->$el = clone $this->element->$el;
 			unset($this->element->$el);
 		}
-		$this->group[$name] = $form;
+		if (!$this->group) $this->group = new data;
+		$this->group->$name = $form;
 	}
 }

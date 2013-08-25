@@ -1,32 +1,32 @@
 <?php
 
 if (stripos($this->control()->config->content, 'c-fancy') !== false) {
-	$this->js->prepend('/kernel/ctl/fancybox2/jquery.fancybox.js');
-	$this->css->prepend('/kernel/ctl/fancybox2/jquery.fancybox.css');
+	$this->js->prepend('/library/ctl/fancybox2/jquery.fancybox.js');
+	$this->css->prepend('/library/ctl/fancybox2/jquery.fancybox.css');
 }
 
 $p = clone $this->control()->config->param;
 unset($p['page']);
 $p['replace'] = 'replace';
 
-$this->js	->prepend('/kernel/ctl/noty/themes/default.js')
-			->prepend('/kernel/ctl/noty/layouts/top.js')
-			->prepend('/kernel/ctl/noty/jquery.noty.js')
-			->prepend('/kernel/ctl/bootstrap/js/bootstrap.js')
-			->prepend('/kernel/js/jquery/jquery-migrate.js')
-			->prepend('/kernel/js/jquery/jquery.js')
-			->set(1000, '/kernel/ctl/control/main.js')->set_inline(1000, '$(function() { c.init('.json_encode(array(
+$this->js	->prepend('/library/ctl/noty/themes/default.js')
+			->prepend('/library/ctl/noty/layouts/top.js')
+			->prepend('/library/ctl/noty/jquery.noty.js')
+			->prepend('/library/ctl/bootstrap/bootstrap.js')
+			->prepend('/library/js/jquery/jquery-migrate.js')
+			->prepend('/library/js/jquery/jquery.js')
+			->set(1000, '/library/ctl/control/main.js')->set_inline(1000, '$(function() { c.init('.json_encode(array(
 				'url' => $this->url(array('ccontroller' => 'cindex', 'caction' => 'index'), 'control'),
 				'url_current' => str_replace('/replace/replace', '', $this->url($p, 'control'))
 			)).') });');
 
-$this->css	->prepend('/kernel/ctl/bootstrap/css/bootstrap-responsive.css')
-			->prepend('/kernel/ctl/bootstrap/css/bootstrap.css')
-			->set(1000, '/kernel/ctl/control/main.css');
+$this->css	->prepend('/library/ctl/bootstrap/bootstrap.css')
+			->prepend('/library/ctl/bootstrap/bootstrap-glyphicons.css')
+			->set(1000, '/library/ctl/control/main.css');
 
 
 if (stripos($this->control()->config->content_bottom, 'navbar-fixed-bottom') !== false) {
-	$this->css->append('/kernel/ctl/control/bottom.css');
+	$this->css->append('/library/ctl/control/bottom.css');
 }
 
 $this->meta	->set('name', 'viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
@@ -71,25 +71,36 @@ $top_right = $this->user('id')
 		<?php echo (string)$this->meta() ?>
 		<?php echo (string)$this->title() ?>
 		<?php echo (string)$this->css() ?>
-		<link href="/kernel/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
+		<link href="/library/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
 	</head>
 	<body>
 		<?php echo $top_left || $top_right ? '' : '' ?>
-		<div class="navbar navbar-inverse navbar-fixed-top">
-			<div class="navbar-inner">
-				<div class="container-fluid">
-					<div class="nav-collapse collapse">
-						<div class="row-fluid">
-							<div class="span10"><ul class="nav"><?php echo $top_left ? $top_left : '<li class="brand">Панель управления</li>' ?></ul></div>
-							<?php echo $top_right ? '<div class="span2"><ul class="nav pull-right c-auth">'.$top_right.'</ul></div>' : '' ?>
-						</div>
-					</div>
-				</div>
+		<div class="navbar navbar-inverse navbar-fixed-top c-navbar">
+			<div class="row-fluid">
+				<div class="col-12 col-lg-9 col-md-9 col-sm-9"><ul class="nav navbar-nav">
+					<li class="navbar-brand"><a href="<?php echo $this->url(array('controller' => 'cindex'), 'control') ?>" class="glyphicon glyphicon-home"></a></li>
+					<li class="c-inner-menu c-invisible" id="d_inner_menu"></li>
+					<li class="c-button-top" id="d_button_top"><?php echo $this->xlist(array(
+						'fetch' => array(
+							'data' => $this->control()->config->button_top
+						),
+						'view' => array(
+							'script' => 'control/button'
+						)
+					)) ?></li>
+				</ul></div>
+				<?php echo $this->user('login') ? '<div class="col-12 col-lg-3 col-md-3 col-sm-3"><ul class="nav navbar-nav pull-right c-auth" id="d_auth">
+					<li class="h navbar-brand">'.$this->user('login').'</li>
+					<li><a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'logout'), 'control').'">'.$this->translate('control_logout').'</a></li>
+				</ul></div>' : '' ?>
 			</div>
 		</div>
-		<div class="container-fluid c-middle"><?php echo $this->control()->config->content ?></div>
+		<div class="container-fluid c-middle clearfix">
+			<div class="sidebar pull-left c-menu" id="d_menu"><?php echo $menu ?></div>
+			<div class="row-fluid"><div class="col-12" id="d_content"><?php echo $this->control()->config->content ?></div></div>
+		</div>
 		<?php echo $this->control()->config->content_bottom ?>
-		<script type="text/javascript">window.CKEDITOR_BASEPATH = '/kernel/ctl/ckeditor/';</script>
+		<script type="text/javascript">window.CKEDITOR_BASEPATH = '/library/ctl/ckeditor/';</script>
 		<?php echo (string)$this->js() ?>
 	</body>
 </html>

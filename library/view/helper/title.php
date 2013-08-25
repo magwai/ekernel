@@ -3,6 +3,8 @@
 class k_view_helper_title extends view_helper {
 	public $item = array();
 	public $separator = ' / ';
+	public $reverse = true;
+	public $append_site_title = true;
 
 	public function title($title = null) {
 		if ($title != null) $this->append($title);
@@ -29,7 +31,14 @@ class k_view_helper_title extends view_helper {
 		return $this;
 	}
 
+	public function clear() {
+		$this->item = array();
+		return $this;
+	}
+
 	function render() {
+		if ($this->append_site_title) $this->prepend($this->view->translate('site_title'));
+		if ($this->item) $this->item = array_reverse($this->item);
 		return '<title>'.implode($this->separator, $this->item).'</title>';
 	}
 

@@ -59,7 +59,7 @@ foreach ($field as $k => $v) {
 	if ($v->align != 'left') $class[] = 'text-'.$v->align;
 	if ($v->sortable) $class[] = 'c-table-sortable';
 ?>
-					<th<?php echo $class ? ' class="'.implode(' ', $class).'"' : '' ?> style="width:<?php echo $v->width_percent ?>;">
+					<th<?php echo !count($data) && $is_search ? ' colspan="'.($is_search + 1).'"' : '' ?><?php echo $class ? ' class="'.implode(' ', $class).'"' : '' ?> style="width:<?php echo $v->width_percent ?>;">
 <?php
 
 	if ($v->sortable) {
@@ -92,32 +92,33 @@ foreach ($field as $k => $v) {
 <?php
 
 if ($is_search) {
-$p = clone $this->control()->config->param;
-unset($p['page']);
-if (count($p)) foreach ($p as $k => $v) if (stripos($k, 'search_') !== false) unset($p[$k]);
+	$p = clone $this->control()->config->param;
+	unset($p['page']);
+	if (count($p)) foreach ($p as $k => $v) if (stripos($k, 'search_') !== false) unset($p[$k]);
 
 ?>
 				<tr class="c-table-filter">
-					<?php echo $this->control()->config->table->checkbox ? '<td><a href="'.$this->url($p, 'control').'" class="btn btn-mini c-table-filter-clear">X</a></td>' : '' ?>
+					<?php echo $this->control()->config->table->checkbox ? '<td><a href="'.$this->url($p, 'control').'" class="glyphicon glyphicon-remove c-table-filter-clear"></a></td>' : '' ?>
 <?php
 
-	foreach ($field as $k => $v) {
+		foreach ($field as $k => $v) {
 
 ?>
 					<td>
 <?php
 
-		if ($v->search) echo '<div class="row-fluid">'.$this->render($v->search->script, $v->search).'</div>';
-		else echo '&nbsp;';
+			if ($v->search) echo '<div class="row-fluid">'.$this->render($v->search->script, $v->search).'</div>';
+			else echo '&nbsp;';
 
 ?>
 
 					</td>
 <?php
 
-	}
+		}
 
 ?>
+					<?php echo $this->control()->config->drag ? '<th>&nbsp;</th>' : '' ?>
 				</tr>
 <?php
 
@@ -128,7 +129,7 @@ if (count($p)) foreach ($p as $k => $v) if (stripos($k, 'search_') !== false) un
 <?php
 
 if (count($data)) {
-	if ($this->control()->config->drag) $this->js->append('/kernel/js/jquery/jquery.tablednd.js');
+	if ($this->control()->config->drag) $this->js->append('/library/js/jquery/jquery.tablednd.js');
 
 ?>
 			<tbody>
@@ -152,7 +153,7 @@ if (count($data)) {
 		}
 
 ?>
-					<?php echo $this->control()->config->drag ? '<td><div class="c-drag"><span class="icon-resize-vertical"></span></div></td>' : '' ?>
+					<?php echo $this->control()->config->drag ? '<td><div class="c-drag"><span class="glyphicon glyphicon-resize-vertical"></span></div></td>' : '' ?>
 				</tr>
 <?php
 
@@ -167,7 +168,7 @@ else {
 
 ?>
 			<tbody>
-				<tr><td colspan="<?php echo count($field) ?>"><?php echo $this->translate('control_list_empty') ?></td></tr>
+				<tr><td colspan="<?php echo count($field) + $is_search ?>"><?php echo $this->translate('control_list_empty') ?></td></tr>
 			</tbody>
 <?php
 
@@ -189,10 +190,10 @@ if (count($data)) {
 	if ($perpage || $this->pager) {
 
 ?>
-		<div class="row-fluid c-pager-perpage">
-			<div class="span6"><?php echo $perpage ?></div>
-			<div class="span6"><?php echo $this->pager ?></div>
-		</div>
+		<div class="container-fluid"><div class="row c-pager-perpage">
+			<div class="col-6"><?php echo $perpage ?></div>
+			<div class="col-6"><?php echo $this->pager ?></div>
+		</div></div>
 <?php
 
 	}

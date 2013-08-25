@@ -2,20 +2,17 @@
 
 $val = explode(',', $this->control()->config->param->{'search_'.$this->name});
 if ($this->range_type == 'date') {
-	if (!class_exists('Zend\Json\Encoder')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Encoder.php';
-	if (!class_exists('Zend\Json\Json')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Json.php';
-	if (!class_exists('Zend\Json\Expr')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Expr.php';
-	$this->js	->append('/kernel/ctl/ui/ui/jquery.ui.core.js')
-				->append('/kernel/ctl/ui/ui/jquery.ui.datepicker.js')
-				->append('/kernel/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->control()->config->ui->lang.'.js')
+	$this->js	->append('/library/ctl/ui/ui/jquery.ui.core.js')
+				->append('/library/ctl/ui/ui/jquery.ui.datepicker.js')
+				->append('/library/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->control()->config->ui->lang.'.js')
 				->append_inline('$(function() { $("#c-table-filter-'.$this->name.'-1").datepicker('.Zend\Json\Json::encode($this->range_ui_param->to_array(), false, array(
 					'enableJsonExprFinder' => true
 				)).');$("#c-table-filter-'.$this->name.'-2").datepicker('.Zend\Json\Json::encode($this->range_ui_param->to_array(), false, array(
 					'enableJsonExprFinder' => true
 				)).'); });');
-	$this->css	->append('/kernel/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.core.css')
-				->append('/kernel/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.theme.css')
-				->append('/kernel/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.datepicker.css');
+	$this->css	->append('/library/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.core.css')
+				->append('/library/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.theme.css')
+				->append('/library/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.datepicker.css');
 }
 
 ?>

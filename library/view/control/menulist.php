@@ -22,7 +22,6 @@ if (count($this->data)) {
 		$active = $el->is_active(true);
 		$class = array();
 		if ($active) $class[] = 'active';
-		if ($sub) $class[] = 'dropdown-submenu';
 		$res .=
 '	<li'.($class ? ' class="'.implode(' ', $class).'"' : '').'>
 		<a'.($active ? ' id="current"' : '').' href="'.($sub ? 'javascript:;' : $el->href).'"'.($class ? ' class="'.implode(' ', $class).'"' : '').'>'.($level ? $el->title : $el->title).'</a>
@@ -30,7 +29,7 @@ if (count($this->data)) {
 	</li>';
 
 	}
-	if ($res) echo	($level ? '<ul class="dropdown-menu">' : '<li class="dropdown c-menu"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span> Меню</a><ul class="dropdown-menu">').
+	if ($res) echo	($level ? '<ul>' : '<ul class="nav nav-pills nav-stacked">').
 					$res.
-					($level ? '</ul>' : '</ul></li>');
+					($level ? '</ul>' : '</ul>');
 }

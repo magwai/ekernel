@@ -67,9 +67,6 @@ class k_form_element_file extends form_element_input {
 
 	public function render() {
 		if ($this->uploadifive) {
-			if (!class_exists('Zend\Json\Encoder')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Encoder.php';
-			if (!class_exists('Zend\Json\Json')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Json.php';
-			if (!class_exists('Zend\Json\Expr')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Expr.php';
 			session::set('uploadifive_'.$this->name, array(
 				'path' => $this->path,
 				'validator' => $this->validator,
@@ -145,13 +142,13 @@ class k_form_element_file extends form_element_input {
 			if ($this->uploadifive->opt) {
 				$opt = array_merge($opt, $this->uploadifive->opt->to_array());
 			}
-			$this->view->js->append('/kernel/ctl/uploadifive/jquery.uploadifive.js');
+			$this->view->js->append('/library/ctl/uploadifive/jquery.uploadifive.js');
 			$this->view->js->append_inline(
 'if (typeof window.uploadifive_update == "undefined") window.uploadifive_update = function(o) {
 	var val = [];
 	o.find(".uploadifive-queue-item").each(function() {
 		var file = $(this).data("file");
-		if (typeof file.skip == "undefined" || !file.skip) val.push(file.name);
+		if (file && (typeof file.skip == "undefined" || !file.skip)) val.push(file.name);
 	});
 	o.find("input[type=hidden]").val(val.join(","));
 
@@ -167,7 +164,7 @@ if (typeof window.uploadifive_data == "undefined") window.uploadifive_data = fun
 $("input[type=file][name=\''.$this->name.'\']").uploadifive('.Zend\Json\Json::encode($opt, false, array(
 	'enableJsonExprFinder' => true
 )).');');
-			if ($this->uploadifive->css) $this->view->css->append('/kernel/ctl/uploadifive/uploadifive.css');
+			if ($this->uploadifive->css) $this->view->css->append('/library/ctl/uploadifive/uploadifive.css');
 		}
 		return parent::render();
 	}

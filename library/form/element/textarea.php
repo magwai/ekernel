@@ -56,13 +56,11 @@ class k_form_element_textarea extends form_element {
 			$opt = clone $this->ckeditor->opt;
 			to_array($opt);
 
-			$this->view->js->append('/kernel/ctl/ckeditor/ckeditor.js');
-			if (!class_exists('Zend\Json\Encoder')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Encoder.php';
-			if (!class_exists('Zend\Json\Json')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Json.php';
-			if (!class_exists('Zend\Json\Expr')) require_once PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Json/Expr.php';
-			$this->view->js->append_inline('CKEDITOR.replace("'.$this->name.'", '.Zend\Json\Json::encode($opt, false, array(
+			$this->view->js->append('/library/ctl/ckeditor/ckeditor.js');
+			$this->view->js->append('/library/ctl/ckfinder/ckfinder.js');
+			$this->view->js->append_inline('var editor_'.$this->name.' = CKEDITOR.replace("'.$this->name.'", '.Zend\Json\Json::encode($opt, false, array(
 				'enableJsonExprFinder' => true
-			)).');');
+			)).');CKFinder.setupCKEditor(editor_'.$this->name.', "/library/ctl/ckfinder/");');
 			if ($this->ckeditor->class) $res = '<div class="'.$this->ckeditor->class.'">'.$res.'</div>';
 		}
 		return $res;
