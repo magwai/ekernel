@@ -63,6 +63,8 @@ class k_application {
 
 		if (!class_exists($class)) error::call('Not Found', 404);
 		$this->controller = new $class($this->request, $this->response);
+		
+		ob_start();
 
 		$this->plugin_action('controller_before');
 
@@ -90,13 +92,12 @@ class k_application {
 			spl_autoload_register(function($class) {
 				$is_zend = substr($class, 0, 5) == 'Zend\\';
 				if ($is_zend) {
-					if (self::$zend_icluded) return;
+					if (application::$zend_icluded) return;
 					include_once  PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend/Loader/StandardAutoloader.php';
 					$loader = new Zend\Loader\StandardAutoloader();
 					$loader->registerNamespace('Zend', PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zend');
 					$loader->register();
-					$loader->autoload($class);
-					self::$zend_icluded = true;
+					if ($class !== 'Zend\Loader\StandardAutoloader') $loader->autoload($class);
 				}
 				else {
 					$is_kernel = substr($class, 0, 2) == 'k_';

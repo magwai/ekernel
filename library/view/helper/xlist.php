@@ -44,6 +44,7 @@ class k_view_helper_xlist extends view_helper {
 		if (@$data['pager']) {
 			$data['pager'] = is_array($data['pager']) ? $data['pager'] : array();
 			if (!isset($data['pager']['style'])) $data['pager']['style'] = 'all';
+			if (!isset($data['pager']['style_param'])) $data['pager']['style_param'] = array();
 			if (!isset($data['pager']['active'])) $data['pager']['active'] = true;
 			if (!isset($data['pager']['url'])) $data['pager']['url'] = '';
 			if (!isset($data['pager']['page'])) $data['pager']['page'] = @$this->view->page ? $this->view->page : 1;
@@ -75,6 +76,7 @@ class k_view_helper_xlist extends view_helper {
 			$paginator->perpage = $data['pager']['perpage'];
 			$paginator->page = $data['pager']['page'];
 			$paginator->style = $data['pager']['style'];
+			$paginator->style_param = $data['pager']['style_param'];
 			$paginator->query();
 			$list = $paginator->data;
 			$param = array_merge($data['pager']['param'], array('url' => $data['pager']['url']), array(
@@ -98,7 +100,7 @@ class k_view_helper_xlist extends view_helper {
 		else if ($list instanceOf database_select) $list = $class->entity_all($class->adapter->fetch_all($list));
 
 		if (count($list)) {
-			if ($data['fetch']['entity'] != 'none') foreach ($list as &$el) { 
+			if ($data['fetch']['entity'] != 'none') foreach ($list as &$el) {
 				$entity = class_exists($data['fetch']['entity']) ? $data['fetch']['entity'] : 'entity';
 				$el = new $entity($el);
 				$el->view = $this->view;

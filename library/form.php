@@ -90,7 +90,12 @@ class k_form {
 			foreach ($this->element as $k => $el) {
 				if (!$k) continue;
 				$data[$k] = $el->get();
-				if ($el instanceof form_element_file && !$data[$k]) unset($data[$k]);
+				if ($el instanceof form_element_file) {
+					if ($data[$k]) {
+						if ($data[$k] == 'DELETED') $data[$k] = '';
+					}
+					else unset($data[$k]);
+				}
 			}
 		}
 		return $data;

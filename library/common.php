@@ -43,19 +43,52 @@ class k_common {
 		return $str;
 	}
 
+	static function stitle_unique($model, $stitle, $field = 'stitle', $where = array()) {
+		$where = is_array($where) ? $where : array();
+		$stitle = $stitle ? $stitle : '_';
+    	$stitle_n = $stitle;
+		$stitle_p = -1;
+		do {
+			$stitle_p++;
+			$stitle_n = $stitle.($stitle_p == 0 ? '' : $stitle_p);
+			$w = $where;
+			$w['`'.$field.'` = ?'] = $stitle_n;
+			$stitle_c = (int)$model->fetch_count($w);
+		}
+		while ($stitle_c > 0);
+		return $stitle_n;
+	}
+
 	static function get_date($date, $template = 'd.m.Y') {
     	if (!$date || $date == '0000-00-00 00:00:00') return '';
 		return @date($template, @strtotime($date));
     }
-	
-	static function del_recursive($dir) { 
-		$files = glob($dir . '*', GLOB_MARK); 
-		foreach ($files as $file) { 
-			if (substr($file, -1) == '/') 
-				self::del_recursive($file); 
-			else 
-				@unlink($file); 
-		} 
-		@rmdir($dir); 
+
+	static function del_recursive($dir) {
+		$files = glob($dir . '*', GLOB_MARK);
+		foreach ($files as $file) {
+			if (substr($file, -1) == '/')
+				self::del_recursive($file);
+			else
+				@unlink($file);
+		}
+		@rmdir($dir);
+	}
+
+	static function truncate_text($text, $length = 100, $dots = false) {
+		global $m;
+		$text = $ftext = str_ireplace(array('&nbsp;'), array(' '), trim(strip_tags($text)));
+		$pos_dot = $pos_com = $pos_sp = 0;
+		for ($i = $length + 10; $i > $length - 11; $i--) {
+			if (@($text[$i] == '.') && !$pos_dot) $pos_dot = $i;
+			else if (@($text[$i] == ',' || $text[$i] == ';') && !$pos_com) $pos_com = $i;
+			else if (@($text[$i] == ' ' || $text[$i] == '-' || $text[$i] == '_') && !$pos_sp) $pos_sp = $i;
+		}
+		if ($pos_dot) $pos = $pos_dot;
+		else if ($pos_com) $pos = $pos_com;
+		else if ($pos_sp) $pos = $pos_sp;
+		else $pos = $length;
+		$text = mb_substr($text, 0, $pos);
+		return $text.($dots ? ($text == $ftext ? '' : '&nbsp;...') : '');
 	}
 }

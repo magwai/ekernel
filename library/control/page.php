@@ -12,7 +12,6 @@ $this->control(array(
 		),
 		'stitle' => array(
 			'title' => 'Псевдоним',
-			'active' => false,
 			'order' => 2,
 			'required' => true
 		),
@@ -23,7 +22,7 @@ $this->control(array(
 			'ckeditor' => true
 		),
 		'show_it' => array(
-			'active' => $this->user()->is_allowed_by_key('admin'),
+			'active' => $this->view->user()->is_allowed_by_key('admin'),
 			'title' => 'Отображать',
 			'order' => 7,
 			'align' => 'center',
@@ -39,15 +38,11 @@ $this->control(array(
 				'message' => array(
 					'active' => false
 				),
+				'stitle' => array(
+					'active' => false
+				),
 				'url_valid' => array(
 					'order' => 2
-				)
-			)
-		),
-		'edit' => array(
-			'field' => array(
-				'stitle' => array(
-					'active' => true
 				)
 			)
 		)

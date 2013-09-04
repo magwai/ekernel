@@ -102,7 +102,7 @@ class k_view_helper_control extends view_helper  {
 			}
 		}
 	}
-	
+
 	public function config_include($name, $param = array()) {
 		$ret = null;
 		$old_param = array();
@@ -265,7 +265,9 @@ class k_view_helper_control extends view_helper  {
 		// Если у нас присутствует кнопка Apply, то возвратный экшн для типов завершения success и fail равно текущему
 		if ($this->config->post->is_apply) {
 			$this->config->request->success->action = $this->config->action;
+			$this->config->request->success->param = $this->config->param;
 			$this->config->request->fail->action = $this->config->action;
+			$this->config->request->fail->param = $this->config->param;
 		}
 
 		// При работе раздела типа edit добавляем в where условие выборки по id текущего объекта
@@ -522,6 +524,11 @@ class k_view_helper_control extends view_helper  {
 			}
 		}
 
+		if ($this->config->callback->after_form) {
+			$f = $this->config->callback->after_form;
+			$f($this);
+		}
+
 		if ($this->config->meta) {
 			$meta = $this->config_include('meta', array(
 				'return_only' => true
@@ -584,19 +591,7 @@ class k_view_helper_control extends view_helper  {
 
 				if ($this->config->static_field && !@$this->config->data->{$this->config->static_field->field_dst} && $this->config->type == 'add') {
 					$stitle = common::stitle($this->config->data[$this->config->static_field->field_src], $this->config->static_field->length);
-					$stitle = $stitle ? $stitle : '_';
-					$stitle_n = $stitle;
-					if ($this->config->static_field->unique && $this->config->use_db) {
-						$stitle_p = -1;
-						do {
-							$stitle_p++;
-							$stitle_n = $stitle.($stitle_p == 0 ? '' : $stitle_p);
-							$w = array('`'.$this->config->static_field->field_dst.'` = ?' => $stitle_n);
-							$stitle_c = (int)$this->config->model->fetch_count($w);
-						}
-						while ($stitle_c > 0);
-					}
-					$this->config->data[$this->config->static_field->field_dst] = $stitle_n;
+					$this->config->data[$this->config->static_field->field_dst] = common::stitle_unique($this->config->model, $stitle ? $stitle : '_', $this->config->static_field->field_dst);
 				}
 
 				$this->config->ok = true;
@@ -768,12 +763,12 @@ class k_view_helper_control extends view_helper  {
 
 	public function route_add() {
 		$this->route_form();
-		$this->config->content = (string)$this->config->form;
+		$this->config->content = $this->config->text.(string)$this->config->form;
 	}
 
 	public function route_edit() {
 		$this->route_form();
-		$this->config->content = (string)$this->config->form;
+		$this->config->content = $this->config->text.(string)$this->config->form;
 	}
 
 	public function route_delete() {

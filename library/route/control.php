@@ -35,7 +35,7 @@ class k_route_control extends route {
 		unset($data['caction']);
 		unset($data['controller']);
 		unset($data['action']);
-		if ((!$data_controller || $data_controller == @$request->ccontroller) && (!$data_action || $data_action == @$request->caction)) {
+		if ($data_controller == @$request->ccontroller && (!$data_action || $data_action == @$request->caction)) {
 			if (@$request->cparam) {
 				foreach ($request->cparam as $k => $v) {
 					if ($v != @$data[$k]) return false;

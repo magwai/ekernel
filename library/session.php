@@ -20,6 +20,10 @@ class k_session {
 			: null;
 	}
 
+	public static function get_id() {
+		return self::init();
+	}
+
 	public static function remove($key) {
 		if (!self::init()) return false;
 		if (isset($_SESSION[$key])) {

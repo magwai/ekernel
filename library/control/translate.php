@@ -7,14 +7,14 @@ $this->control(array(
 			'title' => 'Название',
 			'sortable' => true,
 			'order' => 1,
-			'active' => $this->user()->is_allowed_by_key('admin'),
+			'active' => $this->view->user()->is_allowed_by_key('admin'),
 			'required' => true
 		),
 		'key' => array(
 			'title' => 'Ключ',
 			'sortable' => true,
 			'order' => 2,
-			'active' => $this->user()->is_allowed_by_key('admin'),
+			'active' => $this->view->user()->is_allowed_by_key('admin'),
 			'required' => true
 		),
 		'value' => array(
@@ -25,6 +25,7 @@ $this->control(array(
 	),
 	'config_action' => array(
 		'index' => array(
+			'button_top' => $this->view->user()->is_allowed_by_key('admin') ? array('add', 'edit', 'delete') : array('', 'edit', ''),
 			'field' => array(
 				'value' => array(
 					'active' => false

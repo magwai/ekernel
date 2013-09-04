@@ -11,6 +11,7 @@ class k_form_element {
 	public $id = '';
 	public $name = '';
 	public $label = '';
+	public $attr = array();
 	public $description = '';
 	public $required = false;
 	public $attribute = array();
@@ -28,6 +29,7 @@ class k_form_element {
 		if (isset($param['class_frame'])) $this->class_frame = $param['class_frame'];
 		if (isset($param['class_control'])) $this->class_control = $param['class_control'];
 		if (isset($param['label'])) $this->label = $param['label'];
+		if (isset($param['attr'])) $this->attr = $param['attr'];
 		if (isset($param['validator'])) $this->validator = $param['validator'];
 		if (isset($param['description'])) $this->description = $param['description'];
 		if (isset($param['required'])) $this->required = $param['required'];

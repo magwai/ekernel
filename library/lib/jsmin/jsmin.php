@@ -125,7 +125,7 @@ class JSMin {
             }
 
             if (ord($this->a) <= self::ORD_LF) {
-              throw new JSMinException('Unterminated string literal.');
+             // throw new JSMinException('Unterminated string literal.');
             }
 
             if ($this->a === '\\') {
@@ -165,7 +165,7 @@ class JSMin {
                   $this->output .= $this->a;
                   $this->a       = $this->get();
                 } elseif (ord($this->a) <= self::ORD_LF) {
-                  throw new JSMinException('Unterminated regular expression set in regex literal.');
+                  //throw new JSMinException('Unterminated regular expression set in regex literal.');
                 }
               }
             } elseif ($this->a === '/') {
@@ -174,7 +174,7 @@ class JSMin {
               $this->output .= $this->a;
               $this->a       = $this->get();
             } elseif (ord($this->a) <= self::ORD_LF) {
-              throw new JSMinException('Unterminated regular expression literal.');
+              //throw new JSMinException('Unterminated regular expression literal.');
             }
 
             $this->output .= $this->a;
@@ -237,7 +237,7 @@ class JSMin {
         $this->get();
         $this->get();
         $this->get();
-    } 
+    }
 
     $this->a = "\n";
     $this->action(self::ACTION_DELETE_A_B);
@@ -357,7 +357,7 @@ class JSMin {
                 break;
 
               case null:
-                throw new JSMinException('Unterminated comment.');
+                //throw new JSMinException('Unterminated comment.');
             }
           }
 

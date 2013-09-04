@@ -29,6 +29,16 @@ class k_navigation extends data {
 		return $this->is_active() ? $this : false;
 	}
 
+	public function find_by($key, $value) {
+		if ($this->pages) {
+			foreach ($this->pages as $el) {
+				if ($el->$key == $value) return $el;
+				else $el->find_by($key, $value);
+			}
+		}
+		return null;
+	}
+
 	public function is_active($inner = false) {
 		$was_active = false;
 		if ($inner && $this->pages) {
@@ -72,11 +82,8 @@ class k_navigation extends data {
 
 	function __get($k) {
 		if ($k == 'href') {
-			if ($this->url) return $this->url;
-			$view = application::get_instance()->controller->view;
-			$route = $this->route ? $this->route : 'default';
-			$href = $view->url($this->get_param(), $route);
-			return $href;
+			$e = new entity_menu($this);
+			return $e->url_valid;
 		}
 		else return $this->get($k);
 	}

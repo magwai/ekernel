@@ -50,7 +50,7 @@ $data = $this->data ? clone $this->data : array();
 		<table class="table table-striped table-bordered table-hover c-table<?php echo $this->control()->config->tree ? ' c-table-tree' : '' ?><?php echo count($data) && $this->control()->config->drag ? ' c-table-drag' : '' ?>"<?php echo count($data) && $this->control()->config->drag ? ' data-dragurl="'.$dragurl.'"' : '' ?>>
 			<thead>
 				<tr>
-					<?php echo $this->control()->config->table->checkbox && count($data) ? '<th class="c-table-cb">'.(count($data) ? '<input type="checkbox" />' : '&nbsp;').'</th>' : '' ?>
+					<?php echo $this->control()->config->table->checkbox && (count($data) || $is_search) ? '<th class="c-table-cb">'.(count($data) ? '<input type="checkbox" />' : '<div style="width:13px;">&nbsp;</div>').'</th>' : '' ?>
 <?php
 
 $p = clone $this->control()->config->param;
@@ -59,7 +59,7 @@ foreach ($field as $k => $v) {
 	if ($v->align != 'left') $class[] = 'text-'.$v->align;
 	if ($v->sortable) $class[] = 'c-table-sortable';
 ?>
-					<th<?php echo !count($data) && $is_search ? ' colspan="'.($is_search + 1).'"' : '' ?><?php echo $class ? ' class="'.implode(' ', $class).'"' : '' ?> style="width:<?php echo $v->width_percent ?>;">
+					<th<?php /*echo !count($data) && $is_search ? ' colspan="'.($is_search + 1).'"' : ''*/ ?><?php echo $class ? ' class="'.implode(' ', $class).'"' : '' ?> style="width:<?php echo $v->width_percent ?>;">
 <?php
 
 	if ($v->sortable) {
@@ -74,7 +74,7 @@ foreach ($field as $k => $v) {
 ?>
 						<span class="c-table-caret"><?php echo $k == $this->control()->config->param->orderby ? '<span'.($k == $this->control()->config->param->orderby ? (' class="c-table-caret-'.($this->control()->config->param->orderdir == 'asc' ? 'n' : 's').'"') : '').'></span>' : '<span class="c-table-caret-ns-up"></span><span class="c-table-caret-ns-down"></span>' ?></span>
 						<a href="<?php echo $this->url($p, 'control') ?>"><?php echo $v->title ?></a>
-						  
+
 <?php
 
 	}
@@ -87,7 +87,7 @@ foreach ($field as $k => $v) {
 }
 
 ?>
-					<?php echo $this->control()->config->drag ? '<th>&nbsp;</th>' : '' ?>
+					<?php echo $this->control()->config->drag && count($data) ? '<th>&nbsp;</th>' : '' ?>
 				</tr>
 <?php
 
@@ -118,7 +118,7 @@ if ($is_search) {
 		}
 
 ?>
-					<?php echo $this->control()->config->drag ? '<th>&nbsp;</th>' : '' ?>
+					<?php echo $this->control()->config->drag && count($data) ? '<td>&nbsp;</td>' : '' ?>
 				</tr>
 <?php
 

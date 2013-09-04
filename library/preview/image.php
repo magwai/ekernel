@@ -36,9 +36,9 @@ class k_preview_image {
 
 		$thumb = new lib_phpthumb_class();
 		$thumb->setParameter('src',  $this->image_path.'/'.$name);
-		$thumb->setParameter('aoe',  1);
+		if ($stretch) $thumb->setParameter('aoe',  1);
 		$thumb->setParameter('q',  $quality);
-		
+
 		if ($width) $thumb->setParameter('w',  $width);
 		if ($height) $thumb->setParameter('h',  $height);
 		/*::create($this->image_path.'/'.$name, array(
@@ -158,7 +158,7 @@ class k_preview_image {
 			$filter[] = 'mask|'.$mask;
 			$thumb->setParameter('f',  'png');
 		}
-		
+
 		if ($filter) $thumb->setParameter('fltr',  $filter);
 /*
 		if($corner) {
@@ -175,7 +175,7 @@ class k_preview_image {
 	}
 
 	private function mask($image, $param) {
-		
+
 	}
 
 	private function mark($image, $param) {

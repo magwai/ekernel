@@ -43,7 +43,8 @@ class k_controller {
 
 	public function render() {
 		// Рендерим вьюшку
-		$output = $this->view->render();
+		$output = ob_get_clean();
+		$output .= $this->view->render();
 		if ($this->layout) {
 			// Устанавливаем содержимое отренедеренной вьюшки в переменную content лейаута
 			if ($output) $this->view->content = $output;

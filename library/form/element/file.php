@@ -13,7 +13,6 @@ class k_form_element_file extends form_element_input {
 	public function __construct($name, $param = array()) {
 		parent::__construct($name, $param);
 		$this->type = 'file';
-		$this->max = isset($param['max']) ? $param['max'] : 1024 * 1024 * 1024 * 10;
 		if (isset($param['uploadifive'])) {
 			if (!($param['uploadifive'] instanceof data)) $param['uploadifive'] = new data();
 			if (!isset($param['uploadifive']->css)) $param['uploadifive']->css = true;
@@ -28,39 +27,22 @@ class k_form_element_file extends form_element_input {
 	}
 
 	public function validate($value) {
+		if (isset($this->validator['image_size'])) {
+			if (!isset($this->validator['image_size']['path'])) $this->validator['image_size']['path'] = $this->path;
+		}
+
 		if (@$_POST[$this->name.'_delete']) {
-			@unlink($this->path.'/'.$value);
-			$value = '';
+			@unlink($this->path.'/'.$_POST[$this->name.'_delete']);
+			$this->set('DELETED');
 		}
 		else {
-			if (isset($_FILES[$this->name]) && $_FILES[$this->name]['error'] != UPLOAD_ERR_NO_FILE) {
-				if (!file_exists($this->path)) {
-					@mkdir($this->path, 0777, true);
-					@chmod($this->path, 0777);
-				}
-				$old_path = @$_FILES[$this->name]['tmp_name'];
-				$old_name = @$_FILES[$this->name]['name'];
-				$size = @filesize($old_path);
-				if ($size) {
-					if ($size <= $this->max) {
-						$filter = new filter_filename(array(
-							'directory' => $this->path,
-							'prefix' => $this->prefix,
-							'length' => $this->name_filer_length
-						));
-						$name = $filter->filter($old_name);
-						$ok = @move_uploaded_file($old_path, $this->path.'/'.$name);
-						if ($ok) {
-							@chmod($this->path.'/'.$name, 0777);
-							@unlink($this->path.'/'.$value);
-							$value = $name;
-						}
-						else $this->error['fileerror'] = array();
-					}
-					else $this->error['filesize'] = array();
-				}
-				else $this->error['fileerror'] = array();
-			}
+			$upload = new validator_upload(new data(array(
+				'path' => $this->path,
+				'prefix' => $this->prefix,
+				'name_filer_length' => $this->name_filer_length
+			)));
+			$result = $upload->validate($this->name);
+			if (!is_array($result)) $value = $result;
 			parent::validate($value);
 		}
 	}
@@ -95,33 +77,38 @@ class k_form_element_file extends form_element_input {
 						var info = text.replace("|", ", ");
 						file.queueItem.find(".fileinfo").html(" - " + info);
 						file.queueItem.find(".image").remove();
+						var file_1 = file.queueItem.data("file");
+						file_1.name = "";
 					}
 					else {
 						file.queueItem.find(".image img").attr("src", "'.$this->url.'/" + file.name + "?" + Math.random() * 10000);
 					}
 					var filename = file.queueItem.find(".filename").html();
-					file.queueItem.find(".fileinfo").html(filename.length ? " / <a target=\"_blank\" href=\"'.$this->url.'/" + filename + "\">'.$this->view->translate('control_download').'</a>" : "");
+					if (file.queueItem.find(".fileinfo").html().indexOf("Completed") !== -1) file.queueItem.find(".fileinfo").html(filename.length ? " / <a target=\"_blank\" href=\"'.$this->url.'/" + filename + "\">'.$this->view->translate('control_download').'</a>" : "");
 					window.uploadifive_update(t.parent().parent());
 				}'),
 				'onSelect' => $this->multiple ? null : new Zend\Json\Expr('function(file) {
 					var data = this.data("uploadifive");
+					$(this).parent().parent().find("#'.$this->view->escape($this->name).'_delete").remove();
 					if (data.queue.count <= 1) return;
 					var first = data.queueEl.find(".uploadifive-queue-item:first");
 					if (first.length) {
 						var file = first.data("file");
 						if (file) data.removeQueueItem(file, true);
 					}
+
 				}'),
 				'onCancel' => new Zend\Json\Expr('function() {
 					var parent = $(this).parent().parent();
 					window.setTimeout(function() {
+						'.($this->multiple ? '' : 'parent.append("<input type=\"hidden\" value=\"'.$this->view->escape($this->value).'\" name=\"'.$this->view->escape($this->name).'_delete\" id=\"'.$this->view->escape($this->name).'_delete\" />");').'
 						window.uploadifive_update(parent);
 					}, 800);
 				}'),
 				'onInit' => new Zend\Json\Expr('function() {
 					var t = $(this);
 					var parent = t.parent().parent();
-					var old = parent.find("input[type=hidden]").val();
+					var old = parent.find("input[type=hidden]:first").val();
 					parent.find(".e-form-element-file-value").remove();
 					if (old) {
 						var files = old.split(",");
@@ -135,7 +122,7 @@ class k_form_element_file extends form_element_input {
 							}
 						}
 					}
-					if (parent.find("input[type=hidden]").length == 0) t.after("<input type=\"hidden\" name=\"" + t.attr("name") + "\" value=\"\" />");
+					if (parent.find("input[type=hidden]:first").length == 0) t.after("<input type=\"hidden\" name=\"" + t.attr("name") + "\" value=\"\" />");
 					window.uploadifive_update(parent);
 				}')
 			);
@@ -150,7 +137,7 @@ class k_form_element_file extends form_element_input {
 		var file = $(this).data("file");
 		if (file && (typeof file.skip == "undefined" || !file.skip)) val.push(file.name);
 	});
-	o.find("input[type=hidden]").val(val.join(","));
+	o.find("input[type=hidden]:first").val(val.join(","));
 
 };
 if (typeof window.uploadifive_data == "undefined") window.uploadifive_data = function(name, item) {
