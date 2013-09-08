@@ -57,13 +57,16 @@ class k_application {
 		$this->run_controller();
 	}
 
-	public function run_controller() {
+	public function run_controller($in_action = false) {
 		// Инициализируем класс контроллера
 		$class = 'controller_'.$this->request->controller;
 
-		if (!class_exists($class)) error::call('Not Found', 404);
+		if (!class_exists($class)) {
+			if ($in_action) $class = 'controller_error';
+			else error::call('Not Found', 404);
+		}
 		$this->controller = new $class($this->request, $this->response);
-		
+
 		ob_start();
 
 		$this->plugin_action('controller_before');

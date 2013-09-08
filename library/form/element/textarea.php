@@ -49,9 +49,11 @@ class k_form_element_textarea extends form_element {
 	public function render() {
 		$res = parent::render();
 		if (@$this->ckeditor) {
-			function to_array(&$obj) {
-				if ($obj instanceof data) $obj = $obj->to_array();
-				if (is_array($obj)) foreach ($obj as &$el) to_array($el);
+			if (!function_exists('to_array')) {
+				function to_array(&$obj) {
+					if ($obj instanceof data) $obj = $obj->to_array();
+					if (is_array($obj)) foreach ($obj as &$el) to_array($el);
+				}
 			}
 			$opt = clone $this->ckeditor->opt;
 			to_array($opt);
