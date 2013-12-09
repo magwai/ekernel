@@ -1,5 +1,16 @@
 <?php
 
+$meta = $this->config->model->metadata();
+if ($meta) foreach ($meta as $k => $k) {
+	$this->control(array(
+		'field' => array(
+			$k => array(
+				'active' => false
+			)
+		)
+	));
+}
+
 $mr = new model_crole;
 $role = $mr->fetch_pairs('id', 'title', null, 'title');
 
@@ -13,17 +24,20 @@ $this->control(array(
 		'login' => array(
 			'title' => 'Логин',
 			'order' => 1,
+			'active' => true,
 			'required' => true
 		),
 		'password' => array(
 			'title' => 'Пароль',
 			'type' => 'password',
+			'active' => true,
 			'order' => 2
 		),
 		'role' => array(
 			'title' => 'Роль',
 			'type' => 'password',
 			'type' => 'select',
+			'active' => true,
 			'item' => $role,
 			'order' => 2
 		)

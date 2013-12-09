@@ -5,6 +5,7 @@ class k_view_helper_basket extends view_helper {
 	protected $_model_item = null;
 	protected $_model_order = null;
 	protected $_model_order_item = null;
+	protected $_model_delivery = null;
 	protected $_field_order_item_id = 'itemid';
 
 	public function basket() {
@@ -15,6 +16,7 @@ class k_view_helper_basket extends view_helper {
 		if ($this->_model_item === null) $this->_model_item = new model_catalogitem;
 		if ($this->_model_order === null) $this->_model_order = new model_order;
 		if ($this->_model_order_item === null) $this->_model_order_item = new model_orderitem;
+		if ($this->_model_delivery === null && class_exists('model_delivery')) $this->_model_delivery = new model_delivery;
 	}
 
 	function basket_id($create = false) {
@@ -113,16 +115,41 @@ class k_view_helper_basket extends view_helper {
 			$d = array_merge($d, $ext);
 			$ok = $this->_model_order_item->insert($d);
 		}
+		$this->on_change();
 		return $ok;
+	}
+
+	function get_percent($v, $total = 1) {
+		if (strpos($v, '%') !== false) $v = substr($v, 0, -1) * $total / 100;
+		return is_numeric($v)
+			? (is_float($v) ? (float)$v : (int)$v)
+			: (string)$v;
+	}
+
+	function delivery() {
+		$delivery = 0;
+		if ($this->_model_delivery) {
+			$card = $this->card();
+			if ($card) {
+				$delivery_price = (float)$this->_model_delivery->fetch_one('price', array(
+					'id' => $card->delivery
+				));
+				if ($delivery_price) $delivery = $this->get_percent($delivery_price, $this->price_clean());
+			}
+		}
+		$this->on_delivery($delivery);
+		return $delivery;
 	}
 
 	function delete($id) {
 		$oid = $this->basket_id();
 		if (!$oid) return false;
-		return $this->_model_order_item->delete(array(
+		$ok = $this->_model_order_item->delete(array(
 			'parentid' => $oid,
 			$this->_field_order_item_id => $id
 		));
+		$this->on_change();
+		return $ok;
 	}
 
 	function quant($id = null) {
@@ -158,7 +185,7 @@ class k_view_helper_basket extends view_helper {
 		return $ret;
 	}
 
-	function price($id = null) {
+	function price_clean($id = null) {
 		$oid = $this->basket_id();
 		$select = new database_select();
 		$select	->from(array(
@@ -177,7 +204,21 @@ class k_view_helper_basket extends view_helper {
 		return (int)$this->_model_order_item->adapter->fetch_one($select);
 	}
 
+	function price($id = null) {
+		$card = $this->card();
+		$price = $this->price_clean($id);
+		$price += (float)$card->price_delivery;
+		$this->on_price($price);
+		return $price;
+	}
+
 	function save($data) {
+		$ok = $this->save_clean($data);
+		$this->on_change();
+		return $ok;
+	}
+
+	function save_clean($data) {
 		$oid = $this->basket_id();
 		if (!$oid) return false;
 		$ok = $this->_model_order->update($data, array(
@@ -232,7 +273,7 @@ class k_view_helper_basket extends view_helper {
 		return $ret;
 	}
 
-	function finished_price($oid = null, $id = null) {
+	function finished_price_clean($oid = null, $id = null) {
 		$select = new database_select();
 		$select	->from(array(
 					'i' => $this->_model_order_item->name
@@ -248,5 +289,36 @@ class k_view_helper_basket extends view_helper {
 				->group('o.id');
 		if ($id != null) $select->where('i.'.$this->_field_order_item_id.' = ?', $id);
 		return (int)$this->_model_order_item->adapter->fetch_one($select);
+	}
+
+	function finished_price($oid = null, $id = null) {
+		$price = $this->finished_price_clean($oid, $id);
+		return $price;
+	}
+	
+	function finished_quant($oid = null, $id = null) {
+		$select = new database_select();
+		$select	->from(array(
+					'i' => $this->_model_order_item->name
+				), array(
+					'quant' => '(SUM(i.quant))'
+				))
+				->join(array(
+					'o' => $this->_model_order->name
+				), 'o.id = i.parentid', '')
+				->where('o.id = ?', $oid)
+				->group('o.id');
+		if ($id != null) $select->where('i.'.$this->_field_order_item_id.' = ?', $id);
+		return (int)$this->_model_order_item->adapter->fetch_one($select);
+	}
+
+	function on_price(&$price) { }
+
+	function on_delivery(&$delivery) { }
+
+	function on_change() {
+		$this->save_clean(array(
+			'price_delivery' => $this->delivery()
+		));
 	}
 }

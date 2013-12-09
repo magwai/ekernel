@@ -1,4 +1,4 @@
-<form<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?> action="<?php echo $this->action ?>" method="<?php echo $this->method ?>" enctype="<?php echo $this->enctype ?>">
+<form<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?><?php echo $this->autocomplete ? ' autocomplete="'.$this->autocomplete.'"' : '' ?> action="<?php echo $this->action ?>" method="<?php echo $this->method ?>" enctype="<?php echo $this->enctype ?>">
 	<div class="e-form">
 <?php
 

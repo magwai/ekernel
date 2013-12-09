@@ -28,7 +28,7 @@ class k_view_helper_css extends view_helper_minify {
 		return $this;
 	}
 
-	public function render($name = null) {
+	public function render($name = null, $modified = true) {
 		$config = application::get_instance()->config->css;
 		ksort($this->item);
 		if ($config->merge) {
@@ -67,10 +67,13 @@ class k_view_helper_css extends view_helper_minify {
 							if ($files) {
 								foreach ($files as $k_1 => $el_1) {
 									if (stripos($el_1, 'http://') !== false || substr($el_1, 0, 1) == '/') continue;
-									$su = realpath($dir_full.'/'.$el_1);
+									$el_1_r = preg_replace(array('/\?.*$/si', '/\#.*$/si'), '', $el_1);
+									preg_match('/\?(.*)$/si', $el_1, $el_res);
+									if (!$el_res) preg_match('/\#(.*)$/si', $el_1, $el_res);
+									$su = realpath($dir_full.'/'.$el_1_r);
 									if (!$su) continue;
 									$su = str_ireplace(array(
-										PATH_ROOT,
+										realpath(PATH_ROOT),
 										realpath(PATH_ROOT.'/'.DIR_KERNEL),
 										'\\'
 									), array(
@@ -78,7 +81,7 @@ class k_view_helper_css extends view_helper_minify {
 										'/'.DIR_KERNEL,
 										'/'
 									), $su);
-									$str = str_ireplace($matches[$k_1], 'url('.$su.')', $str);
+									$str = str_ireplace($matches[$k_1], 'url("'.$su.($el_res ? $el_res[0] : '').'")', $str);
 								}
 							}
 
@@ -92,18 +95,21 @@ class k_view_helper_css extends view_helper_minify {
 							if ($files) {
 								foreach ($files as $k_1 => $el_1) {
 									if (stripos($el_1, 'http://') !== false || substr($el_1, 0, 1) == '/') continue;
-									$su = realpath($dir_full.'/'.$el_1);
+									$el_1_r = preg_replace(array('/\?.*$/si', '/\#.*$/si'), '', $el_1);
+									preg_match('/\?(.*)$/si', $el_1, $el_res);
+									if (!$el_res) preg_match('/\#(.*)$/si', $el_1, $el_res);
+									$su = realpath($dir_full.'/'.$el_1_r);
 									if (!$su) continue;
 									$su = str_ireplace(array(
-										PATH_ROOT,
-										PATH_ROOT.'/'.DIR_KERNEL,
+										realpath(PATH_ROOT),
+										realpath(PATH_ROOT.'/'.DIR_KERNEL),
 										'\\'
 									), array(
 										'',
 										'/'.DIR_KERNEL,
 										'/'
 									), $su);
-									$str = str_ireplace($matches[$k_1], 'src="'.$su.'?'.filemtime($dir_full.'/'.$el_1).'"', $str);
+									$str = str_ireplace($matches[$k_1], 'src="'.$su.($el_res ? $el_res[0] : '').($modified && !$el_res ? '?'.filemtime($dir_full.'/'.$el_1_r) : '').'"', $str);
 								}
 							}
 

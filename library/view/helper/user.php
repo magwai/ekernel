@@ -60,6 +60,14 @@ class k_view_helper_user extends view_helper  {
 		));
 		return $this->is_allowed($resource);
 	}
+
+	public function is_allowed_by_role_key($role_key) {
+		$role = (int)$this->model_role->fetch_one('id', array(
+			'key' => $role_key
+		));
+		return $role == $this->_data->role;
+	}
+
 	public function is_allowed($resource) {
 		$role = (int)$this->user('role');
 		if ($role && $this->_acl->is_allowed($role, $resource)) return true;
@@ -111,6 +119,7 @@ class k_view_helper_user extends view_helper  {
 		// Добавляем правила
 		$rules = $this->model_rule->fetch_all(null, 'orderid');
 		if (!$rules) return false;
+		
 		foreach ($rules as $el) {
 			$select_1 = new database_select();
 			$select_1	->from(array(
@@ -137,6 +146,7 @@ class k_view_helper_user extends view_helper  {
 					->group('i.id')
 					->where('r.parentid = ?', $el->id);
 			$resources_refer = $this->model_resource->adapter->fetch_col($select_2);
+
 			$this->_acl->{$el->is_allow ? 'allow' : 'deny'}($roles_refer, $resources_refer);
 		}
 	}

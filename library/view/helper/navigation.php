@@ -69,6 +69,31 @@ class k_view_helper_navigation extends view_helper  {
 		)) : '';
 	}
 
+	public function sitemap($container = null, $param = array()) {
+		$container = $container ? $container : $this->container;
+		$data = $container->pages;
+		if (@$param['start']) {
+			$data = array_merge($param['start'], $data);
+		}
+		if (@$param['finish']) {
+			$data = array_merge($data, $param['finish']);
+		}
+		$config = application::get_instance()->config->navigation;
+		$ret = $this->view->xlist(array(
+			'fetch' => array(
+				'data' => $data
+			),
+			'view' => array(
+				'script' => $config->script_sitemap
+					? $config->script_sitemap
+					: ($config->model ? $config->model : 'menu').'/sitemap',
+				'param' => $param
+			)
+		));
+		header('Content-Type: text/xml');
+		return $ret;
+	}
+
 	public function bread($param = array()) {
 		$ret = '';
 		$active = $this->find_active();
@@ -80,10 +105,10 @@ class k_view_helper_navigation extends view_helper  {
 
 			}
 			$data = array_reverse($data);
-			if ($param['start']) {
+			if (@$param['start']) {
 				$data = array_merge($param['start'], $data);
 			}
-			if ($param['finish']) {
+			if (@$param['finish']) {
 				$data = array_merge($data, $param['finish']);
 			}
 			$config = application::get_instance()->config->navigation;
@@ -123,7 +148,7 @@ class k_view_helper_navigation extends view_helper  {
 					foreach ($inner as $el) {
 						$arr[json_encode(array(
 							'route' => $el->route,
-							'param' => $el->param->to_array()
+							'param' => $el->param ? $el->param->to_array() : array()
 						))] = ($route->param ? '- ' : '').$el->title;
 					}
 					if ($route->param) $rubric = array_merge($rubric, $arr);
@@ -150,7 +175,7 @@ class k_view_helper_navigation extends view_helper  {
 			if ($rubric) {
 				$control->config->data->route = $rubric->route;
 				$param = new data;
-				$param->set(application::get_instance()->config->route->{$rubric->route}->param->to_array());
+				if (application::get_instance()->config->route->{$rubric->route}->param) $param->set(application::get_instance()->config->route->{$rubric->route}->param->to_array());
 				$param->set((array)$rubric->param);
 				$control->config->data->controller = @(string)$param->controller;
 				$control->config->data->action = @(string)$param->action;

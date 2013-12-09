@@ -8,16 +8,16 @@ class k_view_helper_meta_collector extends view_helper_meta {
 		$url = application::get_instance()->request->url;
 		$m = new model_meta;
 		$data = $m->fetch_by_url($url);
-		if ($data) $this->auto($data);
+		if ($data) $this->auto($data, false);
 	}
 
 	function controller($name, $id) {
 		$m = new model_meta;
 		$data = $m->fetch_by_controller($name, $id);
-		if ($data) $this->auto($data);
+		if ($data) $this->auto($data, false);
 	}
 
-	function auto($data) {
+	function auto($data, $correct = true) {
 		if (!$data) return;
 		if (!is_array($data)) $data = array(
 			'title' => $data
@@ -31,10 +31,10 @@ class k_view_helper_meta_collector extends view_helper_meta {
 
 		$keywords = @$data['keywords'] ? $data['keywords'] : $data['title'];
 		if ($keywords) {
-			$words = preg_replace('/(\,|\-|\;|\_|\.)/si', '', $keywords);
+			$words = $correct ? preg_replace('/(\,|\-|\;|\_|\.)/si', ' ', $keywords) : $keywords;
 			do $words = str_replace('  ', ' ', $words, $count);
 			while($count);
-			$keywords_a = $this->analize(str_replace(' ', ', ', $words));
+			$keywords_a = $this->analize($correct ? str_replace(' ', ', ', $words) : $words);
 			if ($keywords_a['sign'] == '+') array_push($this->keywords, $keywords_a['value']);
 			else if ($keywords_a['sign'] == '-') array_unshift($this->keywords, $keywords_a['value']);
 			else $this->keywords = array($keywords_a['value']);

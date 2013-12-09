@@ -99,7 +99,7 @@ class k_database_adapter_mysql extends database_adapter {
 			foreach ($parts as &$el) $el = $this->quote($el, false);
 			return implode('.', $parts);
 		}
-		if ($is_mix || strpos($value, '*') !== false) return $value;
+		if ($is_mix || $value == '*') return $value;
         return $q.addcslashes($value, "\000\n\r\\'\"\032").$q;
     }
 
@@ -127,7 +127,12 @@ class k_database_adapter_mysql extends database_adapter {
 				$sql .= ($n ? ', ' : '').$this->quote($k, false).' = '.(is_numeric($v) ? $v : ($is_expr ? $v : $this->quote($v)));
 				$n++;
 			}
+			if ($sql) $sql = 'SET '.$sql;
 		}
 		return $sql;
+	}
+
+	function set_insert($data = array()) {
+		return $this->set($data);
 	}
 }

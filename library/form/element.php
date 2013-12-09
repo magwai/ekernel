@@ -68,8 +68,8 @@ class k_form_element {
 	}
 
 	public function validate($value) {
-		$validators = $this->validator;
-		if ($this->required) $validators[] = 'notempty';
+		$validators = $this->validator instanceof data ? $this->validator->to_array() : $this->validator;;
+		if ($this->required) array_unshift($validators, 'notempty');
 		if ($validators) {
 			foreach ($validators as $k => $v) {
 				if (is_numeric($k)) {
@@ -84,7 +84,10 @@ class k_form_element {
 				$obj = new $class($option);
 				$valid = $obj->validate($value);
 				//if ($this->name=='tag'){print_r($valid);exit();}
-				if ($valid) $this->error = array_merge($this->error, $valid);
+				if ($valid) {
+					$this->error = array_merge($this->error, $valid);
+					if ($validator == 'notempty') break;
+				}
 			}
 		}
 		$this->set($value);

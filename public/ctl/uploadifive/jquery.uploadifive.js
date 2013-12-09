@@ -234,8 +234,7 @@ Released under the UploadiFive Standard License <http://www.uploadify.com/upload
                         for (var n = 0; n < limit; n++) {
                             existingFile = input.files[n];
                             // Check if the filename matches
-							console.log(existingFile);
-                            if (existingFile.name == file.name && !existingFile.complete) {
+							if (existingFile.name == file.name && !existingFile.complete) {
                                 $data.queue.replaced++;
                                 methods.cancel.call($this, existingFile, true);
                             }
@@ -631,7 +630,7 @@ Released under the UploadiFive Standard License <http://www.uploadify.com/upload
                     // Position the browse files button under the cursor
                     $data.button.mousemove(function(e) {
                         var offset = $data.button.offset();
-                        $data.currentInput.css({
+						$data.currentInput.css({
                            'left' : e.pageX - offset.left - $this.width() + 10,
                            'top'  : e.pageY - offset.top - $this.height() + 10
                         });

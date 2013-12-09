@@ -21,14 +21,18 @@ class k_view_helper_minify extends view_helper {
 	}
 
 	public function prepend($url, $inline = false) {
-		if ($inline) array_unshift($this->item_inline, $url);
-		else array_unshift($this->item, $url);
+		if ($inline) {
+			if (array_search($url, $this->item_inline) === false) array_unshift($this->item_inline, $url);
+		}
+		else if (array_search($url, $this->item) === false) array_unshift($this->item, $url);
 		return $this;
 	}
 
 	public function append($url, $inline = false) {
-		if ($inline) /*if (array_search($url, $this->item_inline) === false)*/ array_push($this->item_inline, $url);
-		else /*if (array_search($url, $this->item) === false)*/ array_push($this->item, $url);
+		if ($inline) {
+			if (array_search($url, $this->item_inline) === false) array_push($this->item_inline, $url);
+		}
+		else if (array_search($url, $this->item) === false) array_push($this->item, $url);
 		return $this;
 	}
 

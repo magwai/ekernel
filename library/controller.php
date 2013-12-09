@@ -19,7 +19,8 @@ class k_controller {
 		$this->response = $response;
 
 		// Создаем экземпляр view, чтобы иметь возможность в него добавлять в контроллере
-		$this->view = new view($this->request->controller.'/'.$this->request->action);
+		$this->view_script = $this->request->controller.'/'.$this->request->action;
+		$this->view = new view();
 
 		// Находим и инициализируем модель по названию контроллера
 		$parts = explode('_', get_class($this));
@@ -44,7 +45,7 @@ class k_controller {
 	public function render() {
 		// Рендерим вьюшку
 		$output = ob_get_clean();
-		$output .= $this->view->render();
+		if ($this->view_script) $output .= $this->view->render($this->view_script);
 		if ($this->layout) {
 			// Устанавливаем содержимое отренедеренной вьюшки в переменную content лейаута
 			if ($output) $this->view->content = $output;

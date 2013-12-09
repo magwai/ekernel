@@ -5,7 +5,7 @@ c = {
 
 c.init = function(d) {
 	c = $.extend(c, d);
-
+	if (c.url === '/') c.url = '';
 	$('.c-buttons .c-button').click(function() {
 		return c.table_do_action($(this));
 	});

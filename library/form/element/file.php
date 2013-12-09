@@ -14,7 +14,7 @@ class k_form_element_file extends form_element_input {
 		parent::__construct($name, $param);
 		$this->type = 'file';
 		if (isset($param['uploadifive'])) {
-			if (!($param['uploadifive'] instanceof data)) $param['uploadifive'] = new data();
+			if (!($param['uploadifive'] instanceof data)) $param['uploadifive'] = new data(is_array($param['uploadifive']) ? $param['uploadifive'] : array());
 			if (!isset($param['uploadifive']->css)) $param['uploadifive']->css = true;
 			$this->uploadifive = $param['uploadifive'];
 		}
@@ -54,6 +54,7 @@ class k_form_element_file extends form_element_input {
 				'validator' => $this->validator,
 				'name_filer_length' => $this->name_filer_length
 			));
+			$opt1 = $this->uploadifive->opt->to_array();
 			$opt = array(
 				'width' => '160px',
 				'fileObjName' => $this->name,
@@ -86,6 +87,7 @@ class k_form_element_file extends form_element_input {
 					var filename = file.queueItem.find(".filename").html();
 					if (file.queueItem.find(".fileinfo").html().indexOf("Completed") !== -1) file.queueItem.find(".fileinfo").html(filename.length ? " / <a target=\"_blank\" href=\"'.$this->url.'/" + filename + "\">'.$this->view->translate('control_download').'</a>" : "");
 					window.uploadifive_update(t.parent().parent());
+					'.@$opt1['customUpload'].'
 				}'),
 				'onSelect' => $this->multiple ? null : new Zend\Json\Expr('function(file) {
 					var data = this.data("uploadifive");
@@ -96,7 +98,7 @@ class k_form_element_file extends form_element_input {
 						var file = first.data("file");
 						if (file) data.removeQueueItem(file, true);
 					}
-
+					'.@$opt1['customSelect'].'
 				}'),
 				'onCancel' => new Zend\Json\Expr('function() {
 					var parent = $(this).parent().parent();
@@ -104,6 +106,7 @@ class k_form_element_file extends form_element_input {
 						'.($this->multiple ? '' : 'parent.append("<input type=\"hidden\" value=\"'.$this->view->escape($this->value).'\" name=\"'.$this->view->escape($this->name).'_delete\" id=\"'.$this->view->escape($this->name).'_delete\" />");').'
 						window.uploadifive_update(parent);
 					}, 800);
+					'.@$opt1['customCancel'].'
 				}'),
 				'onInit' => new Zend\Json\Expr('function() {
 					var t = $(this);
@@ -124,10 +127,15 @@ class k_form_element_file extends form_element_input {
 					}
 					if (parent.find("input[type=hidden]:first").length == 0) t.after("<input type=\"hidden\" name=\"" + t.attr("name") + "\" value=\"\" />");
 					window.uploadifive_update(parent);
+					'.@$opt1['customInit'].'
 				}')
 			);
 			if ($this->uploadifive->opt) {
-				$opt = array_merge($opt, $this->uploadifive->opt->to_array());
+				unset($opt1['customSelect']);
+				unset($opt1['customUpload']);
+				unset($opt1['customInit']);
+				unset($opt1['customCancel']);
+				$opt = array_merge($opt, $opt1);
 			}
 			$this->view->js->append('/library/ctl/uploadifive/jquery.uploadifive.js');
 			$this->view->js->append_inline(

@@ -4,6 +4,7 @@ class k_form {
 	public $group = array();
 	public $view = null;
 	public $class = '';
+	public $autocomplete = '';
 	public $legend = '';
 	public $class_element_control = '';
 	public $class_element_frame = '';
@@ -23,6 +24,7 @@ class k_form {
 		if (isset($param['element_view_script'])) $this->element_view_script = $param['element_view_script'];
 		if (isset($param['error_view_script'])) $this->error_view_script = $param['error_view_script'];
 		if (isset($param['view_script'])) $this->view_script = $param['view_script'];
+		if (isset($param['autocomplete'])) $this->autocomplete = $param['autocomplete'];
 		if (isset($param['class'])) $this->class = $param['class'];
 		if (isset($param['legend'])) $this->legend = $param['legend'];
 		if (isset($param['class_element_frame'])) $this->class_element_frame = $param['class_element_frame'];
@@ -41,6 +43,7 @@ class k_form {
 	public function render() {
 		return $this->view->render($this->view_script, array(
 			'legend' => $this->legend,
+			'autocomplete' => $this->autocomplete,
 			'class' => $this->class,
 			'action' => $this->action,
 			'method' => $this->method,
@@ -68,6 +71,11 @@ class k_form {
 			foreach ($this->element as $k => $el) {
 				if (!isset($data[$k])) continue;
 				$el->set($data[$k]);
+			}
+			if ($this->group) {
+				foreach ($this->group as $k => $el) {
+					$this->group->$k->populate($data);
+				}
 			}
 		}
 	}

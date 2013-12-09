@@ -1647,8 +1647,10 @@ if (false) {
 
 						case 'gray':
 							if ($this->ImageMagickSwitchAvailable(array('colorspace', 'modulate'))) {
-								$commandline .= ' -colorspace GRAY';
-								$commandline .= ' -modulate 100,0,100';
+								$commandline .= ' -grayscale Rec709Luma';
+								$commandline .= ' -modulate 150,0,100';
+								//$commandline .= ' -colorspace GRAY';
+								//$commandline .= ' -modulate 100,0,100';
 								$successfullyProcessedFilters[] = $filterkey;
 							}
 							break;

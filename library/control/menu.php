@@ -42,10 +42,10 @@ $this->control(array(
 	),
 	'callback' => array(
 		'before' => function($control) {
-			$this->view->navigation()->control_encode($control);
+			$control->view->navigation()->control_encode($control);
 		},
 		'preset' => function($control) {
-			$this->view->navigation()->control_decode($control);
+			$control->view->navigation()->control_decode($control);
 		}
 	),
 	'config_action' => array(

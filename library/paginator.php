@@ -23,18 +23,16 @@ class k_paginator {
 		if ($this->source instanceOf database_select) {
 			$source_count = clone $this->source;
 			$source_count->reset('limit');
-			$source_count->parts['join'][0]['cols'] = 'COUNT(*)';
 			if (count($source_count->parts['join']) > 1) for ($i = 1; $i < count($source_count->parts['join']); $i++) $source_count->parts['join'][$i]['cols'] = '';
 			unset($source_count->parts['order']);
-			unset($source_count->parts['group']);
-			$this->records = $source_count->adapter->fetch_one($source_count);
+			$this->records = $source_count->adapter->fetch_one('SELECT COUNT(*) FROM ('.$source_count.') AS cnt');
 			$source_list = clone $this->source;
 			$source_list->limit($this->perpage, ($this->page - 1) * $this->perpage);
 			$this->data = $source_list->adapter->fetch_all($source_list);
 		}
 		else {
 			$this->records = count($this->source);
-			$this->data = $this->records > $this->perpage ? array_slice($this->source, $this->page * $this->perpage, $this->perpage) : $this->source;
+			$this->data = $this->records > $this->perpage ? array_slice($this->source, ($this->page - 1) * $this->perpage, $this->perpage) : $this->source;
 		}
 		$this->pages = ceil($this->records / $this->perpage);
 		$this->first = 1;

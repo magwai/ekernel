@@ -16,7 +16,8 @@ class k_form_element_textarea extends form_element {
 			$param['ckeditor']->set = array(
 				'def' => array(
 					'width' => '100%',
-					'allowedContent' => true
+					'allowedContent' => true,
+					'forcePasteAsPlainText' => true
 				),
 				'full' => array(
 					'toolbar' => array(

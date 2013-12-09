@@ -2,19 +2,19 @@
 
 class k_view_helper_mail extends view_helper {
 	public function mail($param) {
+		$mail = new lib_phpmailer_class;
+		$mail->isHTML(true);
+		$mail->CharSet = 'UTF-8';
+
+		//$mail->WordWrap = 50;                                 // Set word wrap to 50 characters
+		//$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+
 		$html = $this->view->render('mail/frame', array(
 			'message' => @$param['body'] ? $param['body'] : $this->view->render('mail/'.$param['view'], $param)
 		));
-		$htmlPart = new Zend\Mime\Part($html);
-		$htmlPart->type = 'text/html';
-		/*$htmlPart->encoding = Zend\Mime\Mime::ENCODING_BASE64;
-		$htmlPart->disposition = Zend\Mime\Mime::DISPOSITION_INLINE;*/
-		$body = new Zend\Mime\Message;
-		$body->setParts(array($htmlPart));
 
-		$message = new Zend\Mail\Message;
-		$message->setEncoding("UTF-8");
-		$message->setBody($body);
+		$mail->Body    = $html;
+		$mail->AltBody = strip_tags($html);
 
 		$fm = $this->view->translate('site_mail');
 		$from = @$param['from'] ? $param['from'] : $this->view->translate('site_mail');
@@ -23,76 +23,61 @@ class k_view_helper_mail extends view_helper {
 
 		$reply_to = @$param['reply_to'];
 		$from_name = @$param['from_name'] ? $param['from_name'] : ($from == $fm ? $this->view->translate('site_title') : $from);
-		if ($reply_to) $message->setReplyTo(
-			$reply_to,
-			$from_name
-		);
-		$message->setFrom(
-			$from,
-			$from_name
-		);
+		if ($reply_to) $mail->addReplyTo($reply_to, $from_name);
+
+		$mail->From = $from;
+		$mail->FromName = $from_name;
+
 		$tn = @$param['to_name'] ? $param['to_name'] : $to;
 		foreach ($to as $n => $el) {
 			$el = trim($el);
 			if (!$el) continue;
 			$tn_el = is_array($tn) ? (isset($tn[$n]) ? $tn[$n] : @$tn[0]) : $tn;
-			$message->addTo(
-				$el,
-				$tn_el
-			);
+			$mail->addAddress($el, $tn_el);
 		}
-		if (@$param['subject_full']) $message->setSubject(
-			$param['subject_full']
-		);
-		else $message->setSubject(
-			$this->view->translate('site_title').($param['subject'] ? ' — '.$param['subject'] : '')
-		);
+		if (@$param['subject_full']) $mail->Subject = $param['subject_full'];
+		else $mail->Subject = $this->view->translate('site_title').($param['subject'] ? ' — '.$param['subject'] : '');
 
 		$ok = true;
 		try {
-			$tr = null;
+			$is_sent = false;
 			$config = application::get_instance()->config;
 			if (@$config['mail']) {
 				if (@$config['mail']['transports'] && @$config['mail']['transports']['transport']) {
 					foreach ($config['mail']['transports']['transport'] as $k => $v) {
-						$class = 'Zend\\Mail\\Transport\\'.ucfirst($v);
-						$tr = new $class($config['mail']['transports'][$v]['host'][$k], array(
-							'host' => $config['mail']['transports'][$v]['host'][$k],
-							'port' => $config['mail']['transports'][$v]['port'][$k],
-							'auth' => $config['mail']['transports'][$v]['auth'][$k],
-							'username' => $config['mail']['transports'][$v]['username'][$k],
-							'password' => $config['mail']['transports'][$v]['password'][$k],
-							'ssl' => $config['mail']['transports'][$v]['ssl'][$k]
-						));
-						try {
-							$ok = true;
-							$tr->send($message);
+						$func = 'is'.ucfirst($v);
+						$mail->$func();
+						$mail->Host = $config['mail']['transports'][$v]['host'][$k];
+						$mail->SMTPAuth = $config['mail']['transports'][$v]['auth'][$k] ? true : false;
+						$mail->Username = $config['mail']['transports'][$v]['username'][$k];
+						$mail->Password = $config['mail']['transports'][$v]['password'][$k];
+						$mail->SMTPSecure = $config['mail']['transports'][$v]['ssl'][$k] ? 'ssl' : 'tls';
+						$ok = $mail->send();
+						if ($ok) {
+							$is_sent = true;
 							break;
 						}
-						catch (Exception $e) {
-							$ok = false;
-						}
 					}
-					$tr = null;
 				}
 				else if (@$config['mail']['transport']) {
 					$k = $config['mail']['transport'];
 					if (@$config['mail'][$k] && @$config['mail'][$k]['host']) {
-						try {
-							$class = 'Zend\\Mail\\Transport\\'.ucfirst($k);
-							$tr = new $class($config['mail']['smtp']['host'], $config['mail'][$k]);
-						}
-						catch (Exception $e) {
-							$tr = null;
-							$ok = false;
-						}
+						$func = 'is'.ucfirst($k);
+						$mail->$func();
+						$mail->Host = $config['mail'][$k]['host'];
+						$mail->SMTPAuth = $config['mail'][$k]['auth'] ? true : false;
+						$mail->Username = $config['mail'][$k]['username'];
+						$mail->Password = $config['mail'][$k]['password'];
+						$mail->SMTPSecure = $config['mail'][$k]['ssl'] ? 'ssl' : 'tls';
+						$ok = $mail->send();
+						if ($ok) $is_sent = true;
 					}
 				}
 			}
-			else $ok = false;
-			if (!$ok) {
-				$tr = new Zend\Mail\Transport\Sendmail;
-				$tr->send($message);
+			if (!$is_sent) {
+				$mail->isMail();
+				$ok = $mail->send();
+				if ($ok) $is_sent = true;
 			}
 		}
 		catch (Exception $e) {

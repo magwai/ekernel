@@ -152,7 +152,7 @@ class k_database_select {
 		// Собираем секцию LIMIT
 		$limit =  @$this->parts['limit'];
 		if ($limit) {
-			$sql .= ' LIMIT '.$limit['count'].($limit['offset'] ? ', '.$limit['offset'] : '');
+			$sql .= ' LIMIT '.$limit['offset'].', '.$limit['count'];
 		}
 
 		return $sql;

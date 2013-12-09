@@ -13,6 +13,7 @@ $this->js	->prepend('/library/ctl/noty/themes/default.js')
 			->prepend('/library/ctl/noty/layouts/top.js')
 			->prepend('/library/ctl/noty/jquery.noty.js')
 			->prepend('/library/ctl/bootstrap/bootstrap.js')
+			->prepend('/library/js/respond.js')
 			->prepend('/library/js/jquery/jquery-migrate.js')
 			->prepend('/library/js/jquery/jquery.js')
 			->set(1000, '/library/ctl/control/main.js')->set_inline(1000, '$(function() { c.init('.json_encode(array(

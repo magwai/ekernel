@@ -32,6 +32,8 @@ class k_view_helper_control extends view_helper  {
 
 		$active = $this->view->navigation()->find_active();
 		if ($active) session::set('IsAuthorized', true);
+		if ($this->view->user()->is_allowed_by_key('admin')) session::set('IsAuthorizedAdmin', true);
+		session::set('PathRoot', PATH_ROOT);
 		// Если у пользователя есть права для доступа в раздел - рендерим основную функцию генерации раздела
 		// Иначе - на авторизацию
 		if (
@@ -48,6 +50,7 @@ class k_view_helper_control extends view_helper  {
 		}
 		else {
 			session::remove('IsAuthorized');
+			session::remove('IsAuthorizedAdmin');
 			$this->config->request->current = array(
 				'controller' => 'cuser',
 				'action' => 'login'
@@ -507,11 +510,12 @@ class k_view_helper_control extends view_helper  {
 	public function route_form() {
 		$this->config->form = new form(array(
 			'class' => 'row-fluid c-form',
-			'class_element_frame' => 'form-group col-8',
+			'class_element_frame' => 'form-group col-md-8',
 			'class_element_text' => 'form-control c-input',
 			'class_element_select' => 'form-control c-select',
 			'class_element_textarea' => 'form-control c-textarea',
-			'error_view_script' => 'control/error'
+			'error_view_script' => 'control/error',
+			'enctype' => 'application/x-www-form-urlencoded'
 		));
 		if ($this->config->field) {
 			$n = 0;
@@ -582,6 +586,10 @@ class k_view_helper_control extends view_helper  {
 		}
 
 		if (count($this->config->post)) {
+			if ($this->config->callback->check) {
+				$f = $this->config->callback->check;
+				$f($this);
+			}
 			if ($this->config->form->validate($this->config->post)) {
 				$this->config->data_old = clone $this->config->data;
 				unset($this->config->data);

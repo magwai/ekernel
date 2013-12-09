@@ -17,6 +17,7 @@ class k_form_element_checkbox extends form_element_input {
 	}
 
 	public function render() {
+		if (is_array($this->value)) $this->value = new data($this->value);
 		if ($this->uniform) {
 			$opt = array();
 			$this->view->js->append('/library/ctl/uniform/jquery.uniform.js');

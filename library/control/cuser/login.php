@@ -1,5 +1,7 @@
 <?php
 
+$this->config_include('cuser');
+
 $this->control(array(
 	'use_db' => false,
 	'type' => 'add',

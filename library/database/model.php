@@ -84,12 +84,12 @@ class k_database_model {
 	}
 
 	function fetch_count($where = null) {
-		return $this->fetch_one('COUNT(*)', $where);
+		return $this->fetch_one('(COUNT(*))', $where);
 	}
 
 	function insert($data) {
 		if ($data && is_array($data)) {
-			$sql = 'INSERT INTO '.$this->adapter->quote($this->name, false).' SET '.$this->adapter->set($data);
+			$sql = 'INSERT INTO '.$this->adapter->quote($this->name, false).' '.$this->adapter->set_insert($data);
 			$result = $this->adapter->query($sql);
 			if ($result && $result->rowCount()) return $this->adapter->connection->lastInsertId();
 		}
@@ -98,7 +98,7 @@ class k_database_model {
 
 	function update($data, $where = null) {
 		if ($data && is_array($data)) {
-			$sql = 'UPDATE '.$this->adapter->quote($this->name, false).' SET '.$this->adapter->set($data);
+			$sql = 'UPDATE '.$this->adapter->quote($this->name, false).' '.$this->adapter->set($data);
 			if ($where) {
 				$w = array();
 				if (is_array($where)) $w = $where;
