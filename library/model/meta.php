@@ -7,7 +7,7 @@ class k_model_meta extends database_model {
 		$list = $this->fetch_pairs('url', 'data', '`url` != ""', '(LENGTH(`url`))');
 		if (count($list)) {
 			foreach ($list as $k => $v) {
-				if (preg_match('/'.str_replace(array(
+				if (preg_match('/^'.str_replace(array(
 					'-',
 					'/',
 					'?',
@@ -17,7 +17,7 @@ class k_model_meta extends database_model {
 					'\/',
 					'_',
 					'%'
-				), $k).'/i', $url)) {
+				), $k).'$/i', $url)) {
 					return (array)@json_decode($v);
 				}
 			}

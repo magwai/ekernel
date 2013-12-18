@@ -25,7 +25,6 @@ $this->css	->prepend('/library/ctl/bootstrap/bootstrap.css')
 			->prepend('/library/ctl/bootstrap/bootstrap-glyphicons.css')
 			->set(1000, '/library/ctl/control/main.css');
 
-
 if (stripos($this->control()->config->content_bottom, 'navbar-fixed-bottom') !== false) {
 	$this->css->append('/library/ctl/control/bottom.css');
 }

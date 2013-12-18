@@ -586,11 +586,12 @@ class k_view_helper_control extends view_helper  {
 		}
 
 		if (count($this->config->post)) {
+			$this->config->form_valid = true;
 			if ($this->config->callback->check) {
 				$f = $this->config->callback->check;
 				$f($this);
 			}
-			if ($this->config->form->validate($this->config->post)) {
+			if ($this->config->form->validate($this->config->post) && $this->config->form_valid) {
 				$this->config->data_old = clone $this->config->data;
 				unset($this->config->data);
 				$this->config->data = $this->config->form->get();
@@ -602,7 +603,7 @@ class k_view_helper_control extends view_helper  {
 					$this->config->data[$this->config->static_field->field_dst] = common::stitle_unique($this->config->model, $stitle ? $stitle : '_', $this->config->static_field->field_dst);
 				}
 
-				$this->config->ok = true;
+				if (!isset($this->config->ok)) $this->config->ok = true;
 
 				if ($this->config->callback->before) {
 					$f = $this->config->callback->before;
@@ -906,7 +907,7 @@ class k_view_helper_control extends view_helper  {
 			return;
 		}
 		$is_model = $this->config->model && !count($this->config->data);
-		$this->config->content = $this->view->xlist(array(
+		$this->config->content = $this->config->text.$this->view->xlist(array(
 			'fetch' => array(
 				'model' => $is_model ? $this->config->model : null,
 				'method' => 'fetch_control_list',

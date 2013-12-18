@@ -8,12 +8,7 @@ class k_database_adapter_sqlite extends database_adapter {
 		// Подключаемся к БД mysql
 		$charset = isset($this->config->charset) ? (string)$this->config->charset : $this->_charset_default;
 		$this->connection = new PDO(
-			'sqlite:'.PATH_ROOT.'/'.DIR_DATA.'/db/'.(string)$this->config->database.'.db',
-			null,
-			null,
-			array(
-				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES '.(string)$charset
-			)
+			'sqlite:'.PATH_ROOT.'/'.DIR_DATA.'/db/'.(string)$this->config->database.'.db'
 		);
 		//$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
@@ -130,7 +125,7 @@ class k_database_adapter_sqlite extends database_adapter {
 			return implode('.', $parts);
 		}
 		if ($is_mix || $value == '*') return $value;
-        return $q.addcslashes($value, "\000\n\r\\'\032").$q;
+        return $q.addcslashes($value, '\''/*, "\000\n\r\\'\032"*/).$q;
     }
 
 	public function where($where = array()) {

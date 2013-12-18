@@ -9,8 +9,27 @@ class k_view_helper_mail extends view_helper {
 		//$mail->WordWrap = 50;                                 // Set word wrap to 50 characters
 		//$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
 
+		if (@$param['body']) $param['message'] = @$param['body'];
+		else {
+			if (@$param['template'] && !@$param['message']) {
+				$mt = new model_mailtemplate;
+				$template = $mt->fetch_row(array(
+					'key' => $param['template']
+				));
+				if ($template) {
+					$p = array_merge(array(
+						'site_title' => $this->view->translate('site_title'),
+						'site_url' => 'http://'.$_SERVER['HTTP_HOST']
+					), $param);
+					$param['message'] = $this->process_template($template->message, $p);
+					if (!@$param['subject']) $param['subject'] = $this->process_template($template->subject, $p);
+				}
+			}
+			if (@$param['view']) $param['message'] = $this->view->render('mail/'.$param['view'], $param);
+		}
+
 		$html = $this->view->render('mail/frame', array(
-			'message' => @$param['body'] ? $param['body'] : $this->view->render('mail/'.$param['view'], $param)
+			'message' => $param['message']
 		));
 
 		$mail->Body    = $html;
@@ -84,5 +103,18 @@ class k_view_helper_mail extends view_helper {
 			$ok = false;
 		}
 		return $ok;
+	}
+	
+	function process_template($str, $data = array()) {
+		if ($data) {
+			$replace_key = array();
+			$replace_data = array();
+			foreach ($data as $k => $v) {
+				$replace_key[] = '{'.$k.'}';
+				$replace_data[] = $v;
+			}
+			$str = str_ireplace($replace_key, $replace_data, $str);
+		}
+		return $str;
 	}
 }

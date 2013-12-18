@@ -33,6 +33,11 @@ class k_response {
 
 	// Отсылает тело ответа
 	public function send() {
-		if ($this->body) foreach ($this->body as $el) echo (string)$el;
+		if ($this->body) {
+			$res = implode('', $this->body);
+			if (ob_start("ob_gzhandler")) ini_set('zlib.output_compression_level', 6);
+			else ob_start();
+			echo $res;
+		}
 	}
 }

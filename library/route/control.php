@@ -14,7 +14,7 @@ class k_route_control extends route {
 			$param = new data;
 			if ($parts) {
 				for ($i = 0; $i < count($parts); $i += 2) {
-					if ($parts[$i]) $param[$parts[$i]] = urldecode((string)$parts[$i + 1]);
+					if (@$parts[$i]) $param[$parts[$i]] = urldecode((string)$parts[$i + 1]);
 				}
 			}
 			$request->controller = 'control';

@@ -127,18 +127,23 @@ class k_view_helper_basket extends view_helper {
 	}
 
 	function delivery() {
-		$delivery = 0;
+		$delivery_ret = 0;
 		if ($this->_model_delivery) {
 			$card = $this->card();
 			if ($card) {
-				$delivery_price = (float)$this->_model_delivery->fetch_one('price', array(
+				$delivery = $this->_model_delivery->fetch_row(array(
 					'id' => $card->delivery
 				));
-				if ($delivery_price) $delivery = $this->get_percent($delivery_price, $this->price_clean());
+				if ($delivery && (float)$delivery->price) {
+					$price_clean = $this->price_clean();
+					$price_from = $this->get_percent((float)$delivery->price_from, $price_clean);
+					$price_to = $this->get_percent((float)$delivery->price_to, $price_clean);
+					if ((!$price_from || $price_from  < $price_clean) && (!$price_to || $price_to > $price_clean)) $delivery_ret = $this->get_percent((float)$delivery->price, $price_clean);
+				}
 			}
 		}
-		$this->on_delivery($delivery);
-		return $delivery;
+		$this->on_delivery($delivery_ret);
+		return $delivery_ret;
 	}
 
 	function delete($id) {
@@ -292,7 +297,9 @@ class k_view_helper_basket extends view_helper {
 	}
 
 	function finished_price($oid = null, $id = null) {
+		$card = $this->finished_card($oid);
 		$price = $this->finished_price_clean($oid, $id);
+		$price += (float)$card->price_delivery;
 		return $price;
 	}
 	

@@ -46,7 +46,9 @@ class k_paginator {
 		if ($this->pages) {
 			if ($this->style == 'sliding') {
 				$sliding_cnt = @$this->style_param['count'] ? $this->style_param['count'] : 3;
-				$cnt_first_orig = $this->page > ($sliding_cnt + 1) ? $this->page - ($sliding_cnt + 1) : 0;
+				$cnt_first_orig = $this->page == ($sliding_cnt + 2)
+					? $this->page - ($sliding_cnt + 2)
+					: ($this->page > ($sliding_cnt + 1) ? $this->page - ($sliding_cnt + 1) : 0);
 				$cnt_first = $cnt_first_orig > $sliding_cnt ? $sliding_cnt : $cnt_first_orig;
 				for ($i = 0; $i < $cnt_first; $i++) $this->list[] = $i + 1;
 				if ($cnt_first_orig == ($sliding_cnt + 1)) $this->list[] = ($sliding_cnt + 1);
@@ -60,7 +62,9 @@ class k_paginator {
 				if ($cnt_next > 3) $cnt_next = $sliding_cnt;
 				for ($i = 0; $i < $cnt_next; $i++) $this->list[] = $this->page + ($i + 1);
 
-				$cnt_last_orig = $this->pages - $this->page - $sliding_cnt;
+				$cnt_last_orig = $this->page == ($this->pages - $sliding_cnt - 1)
+					? $this->pages - $this->page - $sliding_cnt - 1
+					: $this->pages - $this->page - $sliding_cnt;
 				$cnt_last = $cnt_last_orig > $sliding_cnt ? $sliding_cnt : $cnt_last_orig;
 				if ($cnt_last_orig == ($sliding_cnt + 1)) $this->list[] = $this->pages - $sliding_cnt;
 				else if ($cnt_last_orig > ($sliding_cnt + 1)) $this->list[] = '...';

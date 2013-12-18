@@ -10,6 +10,10 @@ class k_form_element_suggest extends form_element_text {
 		$this->model = isset($param['model']) ? $param['model'] : $name;
 		$this->method = isset($param['method']) ? $param['method'] : $name;
 		if (isset($param['quant'])) $this->quant = $param['quant'];
+		if (!isset($param['ui'])) $param['ui'] = new data;
+		if (!isset($param['ui']->theme)) $param['ui']->theme = 'base';
+		if (!isset($param['ui']->opt)) $param['ui']->opt = array();
+		$this->ui = $param['ui'];
 	}
 
 	public function render() {
@@ -20,10 +24,10 @@ class k_form_element_suggest extends form_element_text {
 		$opt = array(
 			'width' => '100%',
 			'height' => '49px',
-			'unique' => common::json_expr(true),
+			'unique' => new Zend\Json\Expr(true),
 			'autocomplete_url' => $url,
 			'autocomplete' => array(
-				'source' => common::json_expr('function(request, response) {
+				'source' => new Zend\Json\Expr('function(request, response) {
 					request["model"] = "'.$this->model.'";
 					request["method"] = "'.$this->method.'";
 					$.ajax({
@@ -48,7 +52,11 @@ class k_form_element_suggest extends form_element_text {
 		$this->view->js->append_inline('var o = $("input[name=\''.$this->name.'\']");o.tagsInput('.Zend\Json\Json::encode($opt, false, array(
 			'enableJsonExprFinder' => true
 		)).');');
-		$this->view->css->append('/library/ctl/tagsinput/jquery.tagsinput.css');
+		
+		$this->view->css	->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
+							->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
+							->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.autocomplete.css')
+							->append('/library/ctl/tagsinput/jquery.tagsinput.css');
 		return parent::render();
 	}
 }
