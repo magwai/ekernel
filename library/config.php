@@ -72,6 +72,7 @@ return array(
 					'stitle' => 'stitle'
 				),
 				'post_field_extend' => array(),
+				'post_field_unset' => array(),
 				'type' => '',
 				'text' => '',
 				'notify' => array(),

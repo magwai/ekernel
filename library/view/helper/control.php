@@ -597,6 +597,9 @@ class k_view_helper_control extends view_helper  {
 				$this->config->data = $this->config->form->get();
 
 				if (count($this->config->post_field_extend)) $this->config->data = $this->config->post_field_extend;
+				if (count($this->config->post_field_unset)) {
+					foreach ($this->config->post_field_unset as $el) unset($this->config->data->$el);
+				}
 
 				if ($this->config->static_field && !@$this->config->data->{$this->config->static_field->field_dst} && $this->config->type == 'add') {
 					$stitle = common::stitle($this->config->data[$this->config->static_field->field_src], $this->config->static_field->length);
