@@ -49,7 +49,6 @@ class k_view_helper_user extends view_helper  {
 			$this->model_rule2resource = class_exists($this->model_rule2resource) ? new $this->model_rule2resource() : null;
 			$this->init_acl();
 		}
-
 		$this->salt = $config->salt;
 		$this->login_auto();
 	}
@@ -214,7 +213,7 @@ class k_view_helper_user extends view_helper  {
 	}
 
 	function register($data) {
-		if (isset($data['password'])) $data['password'] = sha1((string)$data['password'].(string)$this->salt);
+		if (isset($data['password'])) $data['password'] = $this->password_hash((string)$data['password']);
 		$meta = $this->model_user->metadata();
 		if ($data) foreach ($data as $k => $v) if (!array_key_exists($k, $meta)) unset($data[$k]);
 		return $this->model_user->insert($data);
@@ -222,7 +221,7 @@ class k_view_helper_user extends view_helper  {
 
 	function update($data, $id = null) {
 		if ($id === null && isset($this->_data['id'])) $id = $this->_data['id'];
-		if (isset($data['password'])) $data['password'] = sha1((string)$data['password'].(string)$this->salt);
+		if (isset($data['password'])) $data['password'] = $this->password_hash((string)$data['password']);
 		$meta = $this->model_user->metadata();
 		if ($data) foreach ($data as $k => $v) if (!array_key_exists($k, $meta)) unset($data[$k]);
 		return $this->model_user->update($data, array(
@@ -259,4 +258,8 @@ class k_view_helper_user extends view_helper  {
 		else if ($p !== null) return @$this->_data->$p;
     	return $this;
     }
+
+	public function password_hash($password) {
+		return sha1($password.(string)$this->salt);
+	}
 }

@@ -64,6 +64,8 @@ $top_right = $this->user('id')
 	? '<li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;">'.$this->user('login').' <span class="caret"></span></a><ul class="dropdown-menu pull-right"><li><a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'logout'), 'control').'">'.$this->translate('control_logout').'</a></li></ul></li>'
 	: '';
 
+$reg = $this->lang(true);
+
 ?><!DOCTYPE html>
 <html>
 	<head>
@@ -77,7 +79,7 @@ $top_right = $this->user('id')
 		<?php echo $top_left || $top_right ? '' : '' ?>
 		<div class="navbar navbar-inverse navbar-fixed-top c-navbar">
 			<div class="row-fluid">
-				<div class="col-12 col-lg-9 col-md-9 col-sm-9"><ul class="nav navbar-nav">
+				<div class="col-6"><ul class="nav navbar-nav">
 					<li class="navbar-brand"><a href="<?php echo $this->url(array('controller' => 'cindex'), 'control') ?>" class="glyphicon glyphicon-home"></a></li>
 					<li class="c-inner-menu c-invisible" id="d_inner_menu"></li>
 					<li class="c-button-top" id="d_button_top"><?php echo $this->xlist(array(
@@ -89,8 +91,15 @@ $top_right = $this->user('id')
 						)
 					)) ?></li>
 				</ul></div>
-				<?php echo $this->user('login') ? '<div class="col-12 col-lg-3 col-md-3 col-sm-3"><ul class="nav navbar-nav pull-right c-auth" id="d_auth">
-					<li class="h navbar-brand">'.$this->user('login').'</li>
+				<?php echo $this->user('login') ? '<div class="col-3 pull-right"><ul class="nav navbar-nav pull-right c-auth" id="d_auth">'.($reg ? $this->xlist(array(
+						'fetch' => array(
+							'model' => 'lang',
+							'method' => 'list_control'
+						),
+						'view' => array(
+							'script' => 'control/lang'
+						)
+					)) : '').'<li class="h navbar-brand">'.$this->user('login').'</li>
 					<li><a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'logout'), 'control').'">'.$this->translate('control_logout').'</a></li>
 				</ul></div>' : '' ?>
 			</div>

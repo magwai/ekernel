@@ -17,7 +17,6 @@ class k_entity_menu extends entity {
 				if ($el) $p[$el] = trim(@$param[$n]);
 			}
 		}
-
 		$view = application::get_instance()->controller->view;
 		$href = $view->url($p, $route);
 		return $href;

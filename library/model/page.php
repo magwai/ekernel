@@ -2,6 +2,10 @@
 
 class k_model_page extends database_model {
 	public $name = 'page';
+	public $lang_field = array(
+		'title',
+		'message'
+	);
 
 	function fetch_list($w = array()) {
 		$select = new database_select();

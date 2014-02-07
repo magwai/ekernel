@@ -124,7 +124,7 @@ class k_database_adapter_sqlite extends database_adapter {
 			foreach ($parts as &$el) $el = $this->quote($el, false);
 			return implode('.', $parts);
 		}
-		if ($is_mix || $value == '*') return $value;
+		if ($is_mix || ($value == '*' && !$is_value)) return $value;
         return $q.addcslashes($value, '\''/*, "\000\n\r\\'\032"*/).$q;
     }
 

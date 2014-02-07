@@ -16,8 +16,12 @@ class k_view_helper_translate extends view_helper  {
 		}
 		if (class_exists('model_translate')) {
 			$m = new model_translate;
-			$data_db = $m->fetch_pairs('key', 'value');
-			if ($data_db) $this->data = array_merge($this->data, $data_db->to_array());
+			$data_db = $m->fetch_all();
+			if ($data_db) {
+				$data_array = array();
+				foreach ($data_db as $el) $data_array[$el->key] = $el->value_lang;
+				$this->data = array_merge($this->data, $data_array);
+			}
 		}
 	}
 

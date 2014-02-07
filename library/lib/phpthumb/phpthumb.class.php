@@ -326,6 +326,7 @@ class phpthumb {
 	function GenerateThumbnail() {
 
 		$this->setOutputFormat();
+
 			$this->phpThumbDebug('8a');
 		$this->ResolveSource();
 			$this->phpThumbDebug('8b');

@@ -157,17 +157,23 @@ class k_vk {
 	function request($method, $param = array()) {
 		if (time() - $this->last < 4) sleep(4);
 		$config = application::get_instance()->config->vk;
-		$url = $this->api_url.$method.'?uid='.$config->user.'&access_token='.$config->access_token;
-		$url_add = '';
+		$post = array(
+			'uid' => $config->user,
+			'access_token' => $config->access_token
+		);
+		$url = $this->api_url.$method;
 		if ($param) {
 			foreach ($param as $k => $v) {
-				if ($k && $v) $url_add .= '&'.urlencode($k).'='.urlencode($v);
+				if ($k && $v) $post[$k] = $v;
 			}
 		}
-		$url .= $url_add;
-		//echo $url;
-		$this->last_response = @file_get_contents($url);
-		echo $this->last_response.'***';
+		//echo $url;print_r($post);
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$this->last_response = curl_exec($ch);
+		//echo $this->last_response.'***';
 		if ($this->last_response) {
 			$this->last_response = json_decode($this->last_response);
 			if (@$this->last_response->response) return $this->last_response->response;

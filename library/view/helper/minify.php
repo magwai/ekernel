@@ -49,7 +49,7 @@ class k_view_helper_minify extends view_helper {
 	}
 
 	public function name($type, $modified, $prefix = '') {
-		$md5 = substr(md5($modified), 0, 5);
+		$md5 = substr(md5((string)$modified), 0, 5);
 		return '/'.DIR_CACHE.'/'.$type.'/'.$prefix.$md5.'.'.$type;
 	}
 

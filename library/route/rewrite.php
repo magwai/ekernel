@@ -3,7 +3,7 @@
 class k_route_rewrite extends route {
 	public function __construct($param = array()) {
 		parent::__construct($param);
-		if (!$this->param['reverse']) $this->param['reverse'] = preg_replace('/\(.*?\)/i', '%s', $this->param['url']);
+		if (!@$this->param['reverse']) $this->param['reverse'] = preg_replace('/\(.*?\)/i', '%s', $this->param['url']);
 	}
 
 	public function route($request) {
@@ -15,8 +15,11 @@ class k_route_rewrite extends route {
 			$param = new data;
 			if (count($res) > 1) {
 				$map = @$this->param['map'];
+				$def = @$this->param['default'];
+				
 				if (!is_array($map)) $map = explode(',', $map);
-				for ($i = 1; $i < count($res); $i++) if (isset($map[$i - 1])) $param[$map[$i - 1]] = (string)$res[$i];
+				if (!is_array($def)) $def = explode(',', $def);
+				for ($i = 1; $i < count($res); $i++) if (isset($map[$i - 1])) $param[$map[$i - 1]] = @(string)$res[$i] ? $res[$i] : @$def[$i - 1];
 			}
 			$request->controller = $controller;
 			$request->action = $action;
@@ -46,7 +49,7 @@ class k_route_rewrite extends route {
 		$map = @$this->param['map'];
 		if (!is_array($map)) $map = explode(',', $map);
 		$d = array();
-		foreach ($map as $el) $d[] = @(string)$data[$el];
+		foreach ($map as $el) $d[] = @(string)$data[$el] ? $data[$el] : $request->param->$el;
 		return '/'.@vsprintf($this->param['reverse'], $d);
 	}
 }

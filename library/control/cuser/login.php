@@ -36,6 +36,12 @@ $this->control(array(
 		),
 		'date' => array(
 			'active' => false
+		),
+		'active' => array(
+			'active' => false
+		),
+		'pic' => array(
+			'active' => false
 		)
 	),
 	'callback' => array(

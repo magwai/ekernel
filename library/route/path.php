@@ -35,7 +35,10 @@ class k_route_path extends route {
 		if ($request->param && count($request->param)) $request_param = array_merge($request_param, $request->param->to_array());
 		$assemble_request = $this->assemble($request_param, $request);
 		$assemble_data = $this->assemble($data, $request);
-		return $assemble_data == '/' ? $assemble_request == $assemble_data && (@$data['controller'] || @$data['action']) : stripos($assemble_request, $assemble_data) === 0;// $assemble_request === $assemble_data;
+		
+		return $assemble_data == '/'
+			? $assemble_request == $assemble_data && (@$data['controller'] || @$data['action'])
+			: stripos($assemble_request, $assemble_data) === 0;// $assemble_request === $assemble_data;
 		/*$data_controller = @$data['controller'] ? $data['controller'] : 'index';
 		unset($data['controller']);
 		$data_action = @$data['action'] ? $data['action'] : 'index';
@@ -52,7 +55,7 @@ class k_route_path extends route {
 	}
 
 	public function assemble($data, $request) {
-		if ($request->type === 'path') {
+		if (@$request->type === 'path') {
 			if (!isset($data['controller'])) $data['controller'] = 'index';
 			if (!isset($data['action'])) $data['action'] = 'index';
 		}

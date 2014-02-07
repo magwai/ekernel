@@ -54,7 +54,7 @@ class k_form_element_file extends form_element_input {
 				'validator' => $this->validator,
 				'name_filer_length' => $this->name_filer_length
 			));
-			$opt1 = $this->uploadifive->opt->to_array();
+			$opt1 = $this->uploadifive->opt ? $this->uploadifive->opt->to_array() : array();
 			$opt = array(
 				'width' => '160px',
 				'fileObjName' => $this->name,

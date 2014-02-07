@@ -23,7 +23,7 @@ class k_paginator {
 		if ($this->source instanceOf database_select) {
 			$source_count = clone $this->source;
 			$source_count->reset('limit');
-			if (count($source_count->parts['join']) > 1) for ($i = 1; $i < count($source_count->parts['join']); $i++) $source_count->parts['join'][$i]['cols'] = '';
+			if (count(@$source_count->parts['join']) > 1) for ($i = 1; $i < count($source_count->parts['join']); $i++) $source_count->parts['join'][$i]['cols'] = '';
 			unset($source_count->parts['order']);
 			$this->records = $source_count->adapter->fetch_one('SELECT COUNT(*) FROM ('.$source_count.') AS cnt');
 			$source_list = clone $this->source;

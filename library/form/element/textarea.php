@@ -8,7 +8,7 @@ class k_form_element_textarea extends form_element {
 	public function __construct($name, $param = array()) {
 		parent::__construct($name, $param);
 		if (isset($param['ckeditor'])) {
-			if (!$param['ckeditor'] instanceof data) $param['ckeditor'] = new data();
+			if (!$param['ckeditor'] instanceof data) $param['ckeditor'] = new data(is_array($param['ckeditor']) ? $param['ckeditor'] : array());
 			if (!isset($param['ckeditor']->opt)) $param['ckeditor']->opt = new data();
 			if (!isset($param['ckeditor']->set)) $param['ckeditor']->set = new data();
 			if (!isset($param['ckeditor']->style)) $param['ckeditor']->style = 'full';

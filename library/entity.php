@@ -12,19 +12,28 @@ class k_entity extends data {
 		if ($k == 'view') return $this->view;
 		// Смысл класса сущности - в создании виртуальных переменных класса, не связанных с данными сущности. Виртуальная переменная транслируется в метод get_имя_паременной класса сущности, который должен вернуть ее значение
 		$method = 'get_'.$k;
-		if (method_exists($this, $method)) return $this->$method();
+		$k_replaced = preg_replace('/\_(valid|control|lang)$/i', '', $k);
+		if (method_exists($this, $method)) $ret = $this->$method();
 		else {
 			$ret = $this->get($k);
-			if ($ret === null) {
-				$k_replaced = preg_replace('/\_(valid|control)$/i', '', $k);
-				if ($k != $k_replaced) $ret = $this->get($k_replaced);
+			if ($ret === null && $k != $k_replaced) {
+				$ret = $this->get($k_replaced);
 			}
-			return $ret;
 		}
-		
-		return method_exists($this, $method)
-			? $this->$method()
-			: $this->get($k);
+		if ($k != $k_replaced) {
+			$reg = application::get_instance()->controller->view->lang(true);
+			if ($reg && array_key_exists('ml_'.$k_replaced.'_'.$reg->id, $this->_data)) {
+				$ret_lang = $this->get('ml_'.$k_replaced.'_'.$reg->id);
+				if (strlen($ret_lang) == 0) {
+					if (array_key_exists('ml_'.$k_replaced.'_'.application::get_instance()->controller->view->lang()->default->id, $this->_data)) {
+						$ret_lang = $this->get('ml_'.$k_replaced.'_'.application::get_instance()->controller->view->lang()->default->id);
+						if (strlen($ret_lang) > 0) $ret = $ret_lang;
+					}
+				}
+				else $ret = $ret_lang;
+			}
+		}
+		return $ret;
 	}
 
 	// Виртуальная переменная date_valid. Упрощает вывод даты до ДД.ММ.ГГГГ

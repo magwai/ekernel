@@ -61,6 +61,7 @@ class k_application {
 		// Инициализируем класс контроллера
 		$class = 'controller_'.$this->request->controller;
 
+		if (!class_exists($class) && $this->config->fallback_controller) $class = 'controller_'.$this->config->fallback_controller;
 		if (!class_exists($class)) {
 			if ($in_action) $class = 'controller_error';
 			else error::call('Not Found', 404);

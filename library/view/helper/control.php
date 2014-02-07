@@ -91,7 +91,7 @@ class k_view_helper_control extends view_helper  {
 				$d->title = $el['Field'];
 
 				// Скрываем сервисные поля
-				if ($el['Field'] == 'id' || $el['Field'] == 'parentid' || $el['Field'] == 'orderid') $d->active = false;
+				if ($el['Field'] == 'id' || $el['Field'] == 'parentid' || $el['Field'] == 'orderid' || preg_match('/ml\_(.*?)\_\d+/si', $el['Field'])) $d->active = false;
 
 				// Некоторые настройки по-умолчанию для поля title
 				if ($el['Field'] == 'title') {
@@ -190,13 +190,19 @@ class k_view_helper_control extends view_helper  {
 					if (!isset($v->ui->lang)) $v->ui->lang = $this->config->ui->lang;
 				}
 
+				// Для автокомплита подключаем jquery ui
+				if ($v->type == 'autocomplete') {
+					if (!isset($v->ui) || !($v->ui instanceof data)) $v->ui = array();
+					if (!isset($v->ui->theme)) $v->ui->theme = $this->config->ui->theme;
+				}
+
 				// Для файла включаем плагин uploadifive и устанавливаем пути по-умолчанию
 				if ($v->type == 'file') {
 					if (!isset($v->uploadifive) || !($v->uploadifive instanceof data)) $v->uploadifive = array();
 					if (!isset($v->uploadifive->opt)) $v->uploadifive->opt = array();
 					if (!isset($v->uploadifive->opt->buttonClass)) $v->uploadifive->opt->buttonClass = 'btn btn-primary';
 					if (!isset($v->path)) $v->path = PATH_ROOT.'/'.DIR_UPLOAD.'/'.$this->config->controller.'_'.$k;
-					if (!isset($v->url)) $v->url = '/'.DIR_UPLOAD.'/'.$this->config->controller.'_'.$k;;
+					if (!isset($v->url)) $v->url = '/'.DIR_UPLOAD.'/'.$this->config->controller.'_'.$k;
 					if (!isset($v->id)) $v->id = $k;
 				}
 
@@ -279,6 +285,11 @@ class k_view_helper_control extends view_helper  {
 		// Добавляем where из фильтра
 		if ($this->config->type == 'list' && $this->config->field) {
 			foreach ($this->config->field as $k => $v) {
+				if ($v->single) {
+					if (!($v->single instanceof data)) $v->single = array(
+						'required' => false
+					);
+				}
 				if ($v->search) {
 					if (!($v->search instanceof data)) $v->search = array();
 					$v->search->name = $k;
@@ -697,7 +708,8 @@ class k_view_helper_control extends view_helper  {
 								));
 							}
 						}
-						$data = $this->config->data->to_array();
+						$data = $data_db = $this->config->data->to_array();
+						$where = $this->config->where->to_array();
 
 						if ($data) {
 							$meta = $this->config->model->metadata();
@@ -709,8 +721,10 @@ class k_view_helper_control extends view_helper  {
 							$this->config->ok = $this->config->model->insert_control($data);
 						}
 						else {
-							$this->config->ok = $this->config->model->update_control($data, $this->config->where->to_array());
+							$this->config->ok = $this->config->model->update_control($data, $where);
 						}
+
+						if ($this->config->ok) $this->update_single();
 					}
 				}
 
@@ -758,8 +772,9 @@ class k_view_helper_control extends view_helper  {
 				$model_meta = new model_meta;
 				$meta_data_raw = $model_meta->fetch_by_controller($this->config->controller, $this->config->id);
 				if ($meta_data_raw) {
+					$data_entity = new entity($meta_data_raw);
 					$meta_data = array();
-					foreach ($meta_data_raw as $k => $v) $meta_data['meta_'.$k] = $v;
+					if ($data_entity) foreach ($data_entity as $k => $v) $meta_data['meta_'.$k] = $data_entity->{$k.'_lang'};
 					$this->config->form->group->meta->populate($meta_data);
 				}
 			}
@@ -769,7 +784,44 @@ class k_view_helper_control extends view_helper  {
 			$f($this);
 		}
 		if (!count($this->config->post)) {
-			$this->config->form->populate($this->config->data->to_array());
+			$data_entity = new entity($this->config->data);
+			$rd = array();
+			if ($data_entity) foreach ($data_entity as $k => $v) $rd[$k] = $data_entity->{$k.'_lang'};
+			$this->config->form->populate($rd);
+		}
+	}
+	
+	public function update_single() {
+		if ($this->config->field) {
+			foreach ($this->config->field as $k => $v) {
+				if ($v->single) {
+					if ($this->config->data->$k && $this->config->action != 'delete') {
+						$where = $this->config->where->to_array();
+						unset($where['id']);
+						$where['`id` != ?'] = (int)$this->config->id;
+						$this->config->model->update_control(array(
+							$k => 0
+						), $where);
+					}
+					else if ($v->single->required) {
+						$where = $this->config->where->to_array();
+						unset($where['id']);
+						$where[$k] = 1;
+						$old = $this->config->model->fetch_control_card($where);
+						if (!count($old)) {
+							$where[$k] = 0;
+							$old = $this->config->model->fetch_control_card($where);
+							if (count($old)) {
+								unset($where[$k]);
+								$where['id'] = $old->id;
+								$this->config->model->update_control(array(
+									$k => 1
+								), $where);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -797,21 +849,27 @@ class k_view_helper_control extends view_helper  {
 
 		if (count($ids)) {
 			foreach ($ids as $id) {
+				$this->config->ok_el = false;
 				$this->config->id = $id;
 
 				if (!$this->config->model || !$this->config->use_db) $this->config->ok_el = true;
+
+				if ($this->config->model && $this->config->use_db) $this->config->data = $this->config->model->fetch_control_card(array('id' => (int)$this->config->id));
+
+				$this->config->skip_el = false;
 
 				if ($this->config->callback->before_el) {
 					$f = $this->config->callback->before_el;
 					$f($this);
 				}
 
-				if ($this->config->model && $this->config->use_db) {
+				if ($this->config->model && $this->config->use_db && !$this->config->skip_el) {
 					$this->config->where->id = $this->config->id;
 					$this->config->ok_el = $this->config->model->delete_control($this->config->where->to_array());
 				}
 
 				if ($this->config->ok_el) {
+					$this->update_single();
 					$this->config->ok = true;
 					$this->config->count++;
 				}

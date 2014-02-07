@@ -11,6 +11,7 @@ class k_navigation extends data {
 		$this->route = isset($param['route']) ? $param['route'] : 'default';
 		if (@$param['pages']) {
 			foreach ($param['pages'] as $el) {
+				$el->title = $el->title_lang;
 				$page = new navigation($el);
 				$page->parent = $this;
 				unset($this->_data['pages']);
@@ -32,8 +33,13 @@ class k_navigation extends data {
 	public function find_by($key, $value) {
 		if ($this->pages) {
 			foreach ($this->pages as $el) {
-				if ($el->$key == $value) return $el;
-				else $el->find_by($key, $value);
+				if ($el->$key == $value) {
+					return $el;
+				}
+				else {
+					$ret = $el->find_by($key, $value);
+					if ($ret) return $ret;
+				}
 			}
 		}
 		return null;

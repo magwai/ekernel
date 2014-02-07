@@ -1,10 +1,11 @@
 <?php
 
 class k_view_helper_page extends view_helper {
-	public function page($stitle, $field = 'message') {
+	public function page($stitle, $field = 'message_valid') {
 		$m = new model_page;
-		return (string)$m->fetch_one($field, array(
+		$card = $m->fetch_row(array(
 			'stitle' => $stitle
 		));
+		return (string)$card->$field;
 	}
 }

@@ -13,8 +13,8 @@ class k_controller_page extends controller {
 		$ret = array();
 		if ($list) {
 			foreach ($list as $el) {
-				$ret[] = new data(array(
-					'title' => $el->title,
+				$ret[] = new entity_page(array(
+					'title' => $el->title_valid,
 					'route' => 'page_card',
 					'param' => array(
 						'id' => $el->stitle

@@ -3,9 +3,11 @@
 class k_database_select {
 	public $adapter = null;
 	public $parts = array();
+	public $sql = '';
 
-	function __construct() {
+	function __construct($sql = '') {
 		$this->adapter = application::get_instance()->bootstrap->resource->database->adapter;
+		$this->sql = $sql;
 	}
 
 	// Выражение FROM
@@ -85,74 +87,79 @@ class k_database_select {
 
 	// Сборка запроса в строку
 	public function assemble() {
-		$sql = 'SELECT ';
+		if ($this->sql) {
+			$sql = $this->sql;
+		}
+		else {
+			$sql = 'SELECT ';
 
-		// Собираем секцию FROM/JOIN
-		$joins = @$this->parts['join'];
-		if ($joins) {
-			$sql_col = '';
-			foreach ($joins as $join) {
-				$cols = $join['cols'];
-				if (is_array($cols)) {
-					$n = 0;
-					foreach ($cols as $k => $v) {
-						$sql_col .= ($sql_col ? ', ' : '').(is_numeric($k)
-							? $this->adapter->quote($v, false)
-							: $this->adapter->quote($v, false).' AS '.$this->adapter->quote($k, false)
-						);
-						$n++;
+			// Собираем секцию FROM/JOIN
+			$joins = @$this->parts['join'];
+			if ($joins) {
+				$sql_col = '';
+				foreach ($joins as $join) {
+					$cols = $join['cols'];
+					if (is_array($cols)) {
+						$n = 0;
+						foreach ($cols as $k => $v) {
+							$sql_col .= ($sql_col ? ', ' : '').(is_numeric($k)
+								? $this->adapter->quote($v, false)
+								: $this->adapter->quote($v, false).' AS '.$this->adapter->quote($k, false)
+							);
+							$n++;
+						}
 					}
+					else if ($cols == '*') $sql_col .= ($sql_col ? ', ' : '').($join['alias'] ? $join['alias'].'.' : '').$cols;
+					else if ($cols) $sql_col .= ($sql_col ? ', ' : '').$this->adapter->quote($cols, false);
 				}
-				else if ($cols == '*') $sql_col .= ($sql_col ? ', ' : '').($join['alias'] ? $join['alias'].'.' : '').$cols;
-				else if ($cols) $sql_col .= ($sql_col ? ', ' : '').$this->adapter->quote($cols, false);
+				if ($sql_col) $sql .= $sql_col;
+				foreach ($joins as $join) {
+					$sql .= ' '.strtoupper($join['type']).($join['type'] == 'from' ? '' : ' JOIN').' '.$this->adapter->quote($join['table'], false);
+					if ($join['alias']) $sql .= ' AS '.$this->adapter->quote($join['alias'], false);
+					if ($join['on']) $sql .= ' ON '.$join['on'];
+				}
 			}
-			if ($sql_col) $sql .= $sql_col;
-			foreach ($joins as $join) {
-				$sql .= ' '.strtoupper($join['type']).($join['type'] == 'from' ? '' : ' JOIN').' '.$this->adapter->quote($join['table'], false);
-				if ($join['alias']) $sql .= ' AS '.$this->adapter->quote($join['alias'], false);
-				if ($join['on']) $sql .= ' ON '.$join['on'];
+
+			// Собираем секцию WHERE
+			if (@$this->parts['where']) $sql .= ' WHERE'.$this->adapter->where($this->parts['where']);
+
+			// Собираем секцию GROUP
+			$group =  @$this->parts['group'];
+			if ($group) {
+				$sql .= ' GROUP BY ';
+				foreach ($group as $n => $el) $sql .= ($n ? ', ' : '').$this->adapter->quote($el, false);
 			}
-		}
 
-		// Собираем секцию WHERE
-		if (@$this->parts['where']) $sql .= ' WHERE'.$this->adapter->where($this->parts['where']);
-
-		// Собираем секцию GROUP
-		$group =  @$this->parts['group'];
-		if ($group) {
-			$sql .= ' GROUP BY ';
-			foreach ($group as $n => $el) $sql .= ($n ? ', ' : '').$this->adapter->quote($el, false);
-		}
-
-		// Собираем секцию ORDER
-		$order =  @$this->parts['order'];
-		if ($order) {
-			$sql_order = '';
-			foreach ($order as $k => $v) {
-				if (is_numeric($k)) {
-					$res = null;
-					if (preg_match('/^(.*?)\ (asc|desc)$/', $v, $res)) {
-						$cnd = $this->adapter->quote($res[1], false);
-						$dir = strtoupper($res[2]);
+			// Собираем секцию ORDER
+			$order =  @$this->parts['order'];
+			if ($order) {
+				$sql_order = '';
+				foreach ($order as $k => $v) {
+					if (is_numeric($k)) {
+						$res = null;
+						if (preg_match('/^(.*?)\ (asc|desc)$/', $v, $res)) {
+							$cnd = $this->adapter->quote($res[1], false);
+							$dir = strtoupper($res[2]);
+						}
+						else {
+							$cnd = $this->adapter->quote($v, false);
+							$dir = 'ASC';
+						}
 					}
 					else {
-						$cnd = $this->adapter->quote($v, false);
-						$dir = 'ASC';
+						$cnd = $this->adapter->quote($k, false);
+						$dir = strtoupper($v) == 'DESC' ? 'DESC' : 'ASC';
 					}
+					$sql_order .= ($sql_order ? ', ' : '').$cnd.($dir == 'DESC' ? ' DESC' : '');
 				}
-				else {
-					$cnd = $this->adapter->quote($k, false);
-					$dir = strtoupper($v) == 'DESC' ? 'DESC' : 'ASC';
-				}
-				$sql_order .= ($sql_order ? ', ' : '').$cnd.($dir == 'DESC' ? ' DESC' : '');
+				if ($sql_order) $sql .= ' ORDER BY '.$sql_order;
 			}
-			if ($sql_order) $sql .= ' ORDER BY '.$sql_order;
 		}
 
 		// Собираем секцию LIMIT
 		$limit =  @$this->parts['limit'];
 		if ($limit) {
-			$sql .= ' LIMIT '.$limit['offset'].', '.$limit['count'];
+			$sql .= ' LIMIT '.($limit['offset'] ? $limit['offset'] : 0).', '.$limit['count'];
 		}
 
 		return $sql;
@@ -160,6 +167,7 @@ class k_database_select {
 
 	public function reset($part) {
 		unset($this->parts[$part]);
+		return $this;
 	}
 
 	// Если приводим select к строке - сразу собираем его

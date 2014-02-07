@@ -138,6 +138,11 @@ class k_view_helper_navigation extends view_helper  {
 				$c = new $c;
 				if ($c && method_exists($c, 'get_routes')) $inner = $c->get_routes();
 			}
+			unset($route->param->controller);
+			unset($route->param->action);
+			unset($route->param->map);
+			unset($route->param->url);
+			unset($route->param->reverse);
 			if (is_array($inner)) {
 				if ($route->param) $rubric[json_encode(array(
 					'route' => $k,
@@ -146,6 +151,11 @@ class k_view_helper_navigation extends view_helper  {
 				if ($inner) {
 					$arr = array();
 					foreach ($inner as $el) {
+						unset($el->param->controller);
+						unset($el->param->action);
+						unset($el->param->map);
+						unset($el->param->url);
+						unset($el->param->reverse);
 						$arr[json_encode(array(
 							'route' => $el->route,
 							'param' => $el->param ? $el->param->to_array() : array()

@@ -3,9 +3,33 @@
 class k_database_model {
 	public $adapter = null;
 	public $name = null;
+	public $lang_field = array();
+	public $lang_type = null;
 
 	function __construct() {
 		$this->adapter = application::get_instance()->bootstrap->resource->database->adapter;
+
+		if (($this->lang_field || $this->lang_type) && application::get_instance()->controller) {
+			$reg = application::get_instance()->controller->view->lang(true);
+			if ($reg) {
+				$cols = $this->metadata();
+				switch($this->lang_type){
+					case 'column':
+						if (!array_key_exists('lang', $cols)) {
+							$this->adapter->query('ALTER TABLE `'.$this->name.'` ADD `lang` int(11)');
+							$this->adapter->query('ALTER TABLE `'.$this->name.'` ADD INDEX `i_lang` (`lang`)');
+						}
+						break;
+					default:
+						foreach ($this->lang_field as $el) {
+							if (!array_key_exists('ml_'.$el.'_'.$reg->id, $cols)) {
+								$this->adapter->query('ALTER TABLE `'.$this->name.'` ADD `ml_'.$el.'_'.$reg->id.'` '.$cols[$el]['Type'].($cols[$el]['Default'] ? ' DEFAULT '.$cols[$el]['Default'] : ''));
+							}
+						}
+						break;
+				}
+			}
+		}
 	}
 
 	// Упрощенный запрос на выборку одной колонки
@@ -50,13 +74,13 @@ class k_database_model {
 		return $this->entity_all($this->adapter->fetch_all($select));
 	}
 
-	function entity_all($ret) {
-		if ($ret) foreach ($ret as $k => $v) $ret[$k] = $this->entity($v);
+	function entity_all($ret, $entity = null) {
+		if ($ret) foreach ($ret as $k => $v) $ret[$k] = $this->entity($v, $entity);
 		return $ret;
 	}
 
-	function entity($el) {
-		$class = 'entity_'.$this->name;
+	function entity($el, $entity = null) {
+		$class = 'entity_'.($entity ? $entity : $this->name);
 		return class_exists($class)
 			? new $class($el)
 			: new entity($el);
@@ -89,6 +113,7 @@ class k_database_model {
 
 	function insert($data) {
 		if ($data && is_array($data)) {
+			$this->override_lang($data);
 			$sql = 'INSERT INTO '.$this->adapter->quote($this->name, false).' '.$this->adapter->set_insert($data);
 			$result = $this->adapter->query($sql);
 			if ($result && $result->rowCount()) return $this->adapter->connection->lastInsertId();
@@ -98,6 +123,7 @@ class k_database_model {
 
 	function update($data, $where = null) {
 		if ($data && is_array($data)) {
+			$this->override_lang($data);
 			$sql = 'UPDATE '.$this->adapter->quote($this->name, false).' '.$this->adapter->set($data);
 			if ($where) {
 				$w = array();
@@ -158,4 +184,25 @@ class k_database_model {
 	function delete_control($where) {
 		return $this->delete($where);
 	}
+
+    public function override_lang(&$data) {
+    	if ($this->lang_field || $this->lang_type) {
+			$reg = application::get_instance()->controller->view->lang(true);
+			if ($reg) {
+				switch($this->lang_type) {
+					case 'column':
+						$data['lang'] = $reg->id;
+						break;
+					default:
+						foreach ($data as $k => $v) {
+							if (in_array($k, $this->lang_field)) {
+								$data['ml_'.$k.'_'.$reg->id] = $v;
+								unset($data[$k]);
+							}
+						}
+						break;
+				}
+			}
+		}
+    }
 }

@@ -38,6 +38,7 @@ class k_preview_image {
 		if (($min_width || $min_height) && $fit) return false;
 
 		$thumb = new lib_phpthumb_class();
+		$thumb->config_output_format = null;
 		$thumb->setParameter('src',  $this->image_path.'/'.$name);
 		if ($stretch) $thumb->setParameter('aoe',  1);
 		$thumb->setParameter('q',  $quality);
@@ -98,6 +99,8 @@ class k_preview_image {
 			$this->corner($image, $param['corner']);
 			$thumb->setOldImage($image);
 		}*/
+		//$thumb->setParameter('f',  'png');
+		//print_r($thumb);exit();
 		$thumb->GenerateThumbnail();
 		
 		if ($min_width || $min_height) {

@@ -9,7 +9,7 @@ if (count($this->data)) {
 
 ?>
 <h1><?php echo $el->title ?></h1>
-<?php echo $el->message ?>
+<?php echo $el->message_valid ?>
 <?php
 
 }
