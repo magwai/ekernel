@@ -14,7 +14,7 @@ class k_view_helper_js extends view_helper_minify {
 					if (stripos($item, '//') === false) {
 						$js[$offset] = $item;
 						$this->remove($offset);
-						$m .= filemtime(PATH_ROOT.$item);
+						$m .= @filemtime(PATH_ROOT.$item).filesize(PATH_ROOT.$item);
 					}
 				}
 				if ($js) {
@@ -33,7 +33,7 @@ class k_view_helper_js extends view_helper_minify {
 			else {
 				foreach ($this->item as $offset => $item) {
 					if (stripos($item, '//') === false) {
-						$m = @filemtime(PATH_ROOT.$item);
+						$m = @filemtime(PATH_ROOT.$item).filesize(PATH_ROOT.$item);
 						if ($m) {
 							$nm = $this->name('js', $m);
 							$this->save('js', PATH_ROOT.$nm, trim(file_get_contents(PATH_ROOT.$item)));

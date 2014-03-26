@@ -48,7 +48,7 @@ class k_view_helper_css extends view_helper_minify {
 					foreach ($els as $item) {
 						$i = PATH_ROOT.$item['url'];
 						$items[] = $i;
-						$m .= filemtime($i);
+						$m .= filemtime($i).filesize($i);
 					}
 					$nm = $name
 						? '/'.DIR_CACHE.'/css/'.$name.'.css'
@@ -126,7 +126,7 @@ class k_view_helper_css extends view_helper_minify {
 		else {
 			foreach ($this->item as $offset => $item) {
 				if (stripos($item['url'], 'http://') === false) {
-					$m = @filemtime(PATH_ROOT.$item['url']);
+					$m = @filemtime(PATH_ROOT.$item['url']).filesize(PATH_ROOT.$item['url']);
 					if ($m) {
 						$nm = $this->name('css', $m);
 						$this->save('css', PATH_ROOT.$nm, trim(file_get_contents(PATH_ROOT.$item['url'])));

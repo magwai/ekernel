@@ -5,7 +5,14 @@ class k_view_helper_meta_collector extends view_helper_meta {
 	public $keywords = array();
 
 	function url($url = '') {
-		$url = application::get_instance()->request->url;
+		$url = $url ? $url : application::get_instance()->request->url;
+		if (application::get_instance()->config->resource->lang) {
+			$m = new model_lang;
+			$langs = $m->fetch_col('stitle', array(
+				'show_it' => 1
+			));
+			$url = preg_replace('/^\/('.implode('|', $langs).')\//si', '/', $url);
+		}
 		$m = new model_meta;
 		$data = $m->fetch_by_url($url);
 		if ($data) $this->auto($data, false);

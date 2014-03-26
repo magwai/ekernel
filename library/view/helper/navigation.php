@@ -138,8 +138,10 @@ class k_view_helper_navigation extends view_helper  {
 				$c = new $c;
 				if ($c && method_exists($c, 'get_routes')) $inner = $c->get_routes();
 			}
-			unset($route->param->controller);
-			unset($route->param->action);
+			if ($route->type != 'path') {
+				unset($route->param->controller);
+				unset($route->param->action);
+			}
 			unset($route->param->map);
 			unset($route->param->url);
 			unset($route->param->reverse);
@@ -151,8 +153,10 @@ class k_view_helper_navigation extends view_helper  {
 				if ($inner) {
 					$arr = array();
 					foreach ($inner as $el) {
-						unset($el->param->controller);
-						unset($el->param->action);
+						if ($el->type != 'path') {
+							unset($el->param->controller);
+							unset($el->param->action);
+						}
 						unset($el->param->map);
 						unset($el->param->url);
 						unset($el->param->reverse);
@@ -211,7 +215,7 @@ class k_view_helper_navigation extends view_helper  {
 	function control_decode(&$control) {
 		if (!$control->config->data->url) {
 			$param = array();
-			if (application::get_instance()->config->route->{$control->config->data->route}->type == 'path') {
+			if (@application::get_instance()->config->route->{$control->config->data->route}->type == 'path') {
 				$param['controller'] = $control->config->data->controller;
 				if ($control->config->data->action == 'index') $control->config->data->action = '';
 				$param['action'] = $control->config->data->action ? $control->config->data->action : 'index';

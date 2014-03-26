@@ -352,10 +352,20 @@ class k_view_helper_control extends view_helper  {
 				$button_top = $this->config->button_top;
 				foreach ($active->pages as $el) {
 					if ($el->is_inner) {
+						$p = array();
+						$param = is_string($el->param) ? explode(',', $el->param) : array();
+						$map = is_string($el->map) ? explode(',', $el->map) : array();
+						if ($map) {
+							foreach ($map as $n => $el1) {
+								$el1 = trim($el1);
+								if ($el1) $p[$el1] = trim(@$param[$n]);
+							}
+						}
 						$button_top[] = array(
 							'title' => $el->title,
 							'controller' => $el->controller,
 							'action' => $el->action,
+							'default' => @$p['default'],
 							'key' => 'cid',
 							'pid' => $this->config->param->cid
 						);
