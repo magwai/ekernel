@@ -244,7 +244,7 @@ class k_view_helper_basket extends view_helper {
 		$res = $this->_model_order->fetch_row(array(
 			'id' => (int)$oid
 		));
-		return $res ? new data($res) : null;
+		return $res ? $res : null;
 	}
 
 	function finished_card($oid) {
@@ -252,7 +252,7 @@ class k_view_helper_basket extends view_helper {
 			'id' => (int)$oid,
 			'finished' => 1
 		));
-		return $res ? new data($res) : null;
+		return $res ? $res : null;
 	}
 
 	function finished_save($oid, $data) {
@@ -272,6 +272,7 @@ class k_view_helper_basket extends view_helper {
 			foreach ($list as $el) {
 				$item = $this->_model_item->fetch_order_card($el->{$this->_field_order_item_id});
 				$d = new data(array_merge($el->to_array(), $item->to_array()));
+				if (isset($el->price)) $d->price = $el->price;
 				$ret[] = $d;
 			}
 		}
@@ -302,7 +303,7 @@ class k_view_helper_basket extends view_helper {
 		$price += (float)$card->price_delivery;
 		return $price;
 	}
-	
+
 	function finished_quant($oid = null, $id = null) {
 		$select = new database_select();
 		$select	->from(array(
@@ -327,5 +328,13 @@ class k_view_helper_basket extends view_helper {
 		$this->save_clean(array(
 			'price_delivery' => $this->delivery()
 		));
+	}
+
+	function pay_card($oid) {
+		$ret = $this->finished_card($oid);
+		if ($ret) {
+			$ret->total = $this->finished_price($ret->id);
+		}
+		return $ret;
 	}
 }

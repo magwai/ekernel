@@ -12,7 +12,7 @@ class k_form_element_suggest extends form_element_text {
 		if (isset($param['quant'])) $this->quant = $param['quant'];
 		if (!isset($param['ui'])) $param['ui'] = new data;
 		if (!isset($param['ui']->theme)) $param['ui']->theme = 'base';
-		if (!isset($param['ui']->opt)) $param['ui']->opt = array();
+		if (!isset($param['ui']->opt)) $param['ui']->opt = new data(array());
 		$this->ui = $param['ui'];
 	}
 
@@ -21,7 +21,7 @@ class k_form_element_suggest extends form_element_text {
 			'controller' => 'x',
 			'action' => 'suggest'
 		));
-		$opt = array(
+		$opt = array_merge(array(
 			'width' => '100%',
 			'height' => '49px',
 			'unique' => new Zend\Json\Expr(true),
@@ -42,7 +42,7 @@ class k_form_element_suggest extends form_element_text {
 					});
 				}')
 			)
-		);
+		), $this->ui->opt->to_array());
 		$this->view->js->append('/library/ctl/ui/ui/jquery.ui.core.js');
 		$this->view->js->append('/library/ctl/ui/ui/jquery.ui.widget.js');
 		$this->view->js->append('/library/ctl/ui/ui/jquery.ui.position.js');
@@ -55,6 +55,7 @@ class k_form_element_suggest extends form_element_text {
 		
 		$this->view->css	->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
 							->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
+							->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.menu.css')
 							->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.autocomplete.css')
 							->append('/library/ctl/tagsinput/jquery.tagsinput.css');
 		return parent::render();

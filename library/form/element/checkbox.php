@@ -8,7 +8,7 @@ class k_form_element_checkbox extends form_element_input {
 	public function __construct($name, $param = array()) {
 		parent::__construct($name, $param);
 		$this->type = 'checkbox';
-		if (isset($param['uniform'])) {
+		if (isset($param['uniform']) && $param['uniform'] != false) {
 			if (!$param['uniform'] instanceof data) $param['uniform'] = new data();
 			if (!isset($param['uniform']->css)) $param['uniform']->css = true;
 			$this->uniform = $param['uniform'];

@@ -537,7 +537,7 @@ class phpthumb {
 
 	// public:
 	function RenderToFile($filename) {
-		
+
 		if (preg_match('#^(f|ht)tps?\://#i', $filename)) {
 			$this->DebugMessage('RenderToFile() failed because $filename ('.$filename.') is a URL', __FILE__, __LINE__);
 			return false;

@@ -12,7 +12,7 @@ $p['replace'] = 'replace';
 $this->js	->prepend('/library/ctl/noty/themes/default.js')
 			->prepend('/library/ctl/noty/layouts/top.js')
 			->prepend('/library/ctl/noty/jquery.noty.js')
-			->prepend('/library/ctl/bootstrap/bootstrap.js')
+			->prepend('/library/ctl/bootstrap/js/bootstrap.js')
 			->prepend('/library/js/respond.js')
 			->prepend('/library/js/jquery/jquery-migrate.js')
 			->prepend('/library/js/jquery/jquery.js')
@@ -21,8 +21,8 @@ $this->js	->prepend('/library/ctl/noty/themes/default.js')
 				'url_current' => str_replace('/replace/replace', '', $this->url($p, 'control'))
 			)).') });');
 
-$this->css	->prepend('/library/ctl/bootstrap/bootstrap.css')
-			->prepend('/library/ctl/bootstrap/bootstrap-glyphicons.css')
+$this->css	->prepend('/library/ctl/bootstrap/css/bootstrap-theme.css')
+			->prepend('/library/ctl/bootstrap/css/bootstrap.css')
 			->set(1000, '/library/ctl/control/main.css');
 
 if (stripos($this->control()->config->content_bottom, 'navbar-fixed-bottom') !== false) {

@@ -37,10 +37,15 @@ class k_vk {
 	}
 
 	function photos_get_albums($param) {
-		if (!@$param['aids']) return false;
 		$config = application::get_instance()->config->vk;
 		if ($config->group) $param['gid'] = $config->group;
 		return $this->request('photos.getAlbums', $param);
+	}
+
+	function video_get_albums($param) {
+		$config = application::get_instance()->config->vk;
+		if ($config->group) $param['owner_id'] = '-'.$config->group;
+		return $this->request('video.getAlbums', $param);
 	}
 
 	function wall_add_like($param) {
@@ -101,10 +106,10 @@ class k_vk {
 		if (!@$param['file']) return false;
 		$param['caption'] = @$param['caption'];
 		$param_upload = array(
-			'aid' => $param['aid']
+			'album_id' => $param['aid']
 		);
 		$config = application::get_instance()->config->vk;
-		if ($config->group) $param_upload['gid'] = $config->group;
+		if ($config->group) $param_upload['group_id'] = $config->group;
 		$res = $this->request('photos.getUploadServer', $param_upload);
 		if ($res) {
 			$ch = curl_init($res->upload_url);
@@ -114,15 +119,36 @@ class k_vk {
 			$res_upload = json_decode(curl_exec($ch));
 			if ($res_upload) {
 				$param_photo = array(
-					'aid' => $param['aid'],
+					'album_id' => $param['aid'],
 					'server' => $res_upload->server,
 					'photos_list' => $res_upload->photos_list,
 					'hash' => $res_upload->hash,
 					'caption' => $param['caption']
 				);
-				if ($config->group) $param_photo['gid'] = $config->group;
+				if ($config->group) $param_photo['group_id'] = $config->group;
 				$res_photo = $this->request('photos.save', $param_photo);
 				return @$res_photo[0] ? $res_photo[0] : false;
+			}
+		}
+		return false;
+	}
+
+	function video_save($param) {
+		if (!@$param['album_id']) return false;
+		if (!@$param['file'] && !@$param['link']) return false;
+		$config = application::get_instance()->config->vk;
+		if ($config->group) $param['group_id'] = $config->group;
+		$res = $this->request('video.save', $param);
+		if ($res) {
+			$ch = curl_init($res->upload_url);
+			if (@$param['file']) {
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, array('video_file' => '@'.$param['file']));
+			}
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			$res_upload = json_decode(curl_exec($ch));
+			if ($res_upload) {
+				return $res;
 			}
 		}
 		return false;
@@ -154,10 +180,18 @@ class k_vk {
 		return $this->request('photos.createAlbum', $param);
 	}
 
+	function video_add_album($param) {
+		if (!@$param['title']) return false;
+		$config = application::get_instance()->config->vk;
+		if ($config->group) $param['group_id'] = $config->group;
+		return $this->request('video.addAlbum', $param);
+	}
+
 	function request($method, $param = array()) {
 		if (time() - $this->last < 4) sleep(4);
 		$config = application::get_instance()->config->vk;
 		$post = array(
+			'v' => 5.17,
 			'uid' => $config->user,
 			'access_token' => $config->access_token
 		);
@@ -173,7 +207,7 @@ class k_vk {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$this->last_response = curl_exec($ch);
-		//echo $this->last_response.'***';
+		echo $this->last_response.'***';
 		if ($this->last_response) {
 			$this->last_response = json_decode($this->last_response);
 			if (@$this->last_response->response) return $this->last_response->response;

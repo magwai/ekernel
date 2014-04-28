@@ -98,13 +98,27 @@ return array(
 					'perpage' => 50,
 					'orderdir' => 'asc'
 				),
+				'config_clink' => array(
+					'param' => array(
+						'perpage' => 999
+					),
+					'param_default' => array(
+						'perpage' => 999
+					),
+					'config_type' => array(
+						'list' => array(
+							'perpage_show' => false
+						)
+					)
+				),
 				'config_type' => array(
 					'list' => array(
 						'table' => array(
 							'checkbox' => true
 						),
 						'button_top' => array('add', 'edit', 'delete'),
-						'perpage_list' => array(10, 30, 50, 100, 200, 500, 999)
+						'perpage_list' => array(10, 30, 50, 100, 200, 500, 999),
+						'perpage_show' => true
 					),
 					'add' => array(
 						'oac' => array(
@@ -124,7 +138,7 @@ return array(
 					)
 				),
 				'config_action' => array(
-					
+
 				),
 				'form' => null,
 				'callback' => array(

@@ -78,6 +78,8 @@ html{overflow-y:scroll;}
 .c-place a{background:0!important;color:#fff!important;}
 
 .c-ckeditor{float:none!important;}
+.c-markitup .markItUp{width:auto;}
+.c-markitup .markItUp textArea{width:100%;background:0;padding-left:5px;}
 
 .navbar-fixed-top a.dropdown-submenu{cursor:default;}
 
@@ -88,3 +90,12 @@ html{overflow-y:scroll;}
 .c-meta .c-meta-legend-wrap{border-bottom:1px dotted #333;cursor:pointer;}
 .c-meta .c-meta-legend-wrap:hover{border-bottom-color:#fff;}
 .c-meta legend{border:0;}
+
+.c-iframe{padding:0;border:0;border-radius:0px;visibility:hidden;}
+.c-iframe.c-inited{visibility:visible;}
+
+.e-form .twitter-typeahead .tt-input,
+.e-form .twitter-typeahead .tt-hint {
+  height: auto;
+  padding: 0;
+}

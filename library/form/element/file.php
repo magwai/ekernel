@@ -56,6 +56,7 @@ class k_form_element_file extends form_element_input {
 			));
 			$opt1 = $this->uploadifive->opt ? $this->uploadifive->opt->to_array() : array();
 			$opt = array(
+				'multi' => new Zend\Json\Expr($this->multiple ? 1 : 0),
 				'width' => '160px',
 				'fileObjName' => $this->name,
 				'dnd' => new Zend\Json\Expr(0),

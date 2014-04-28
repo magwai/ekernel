@@ -179,14 +179,14 @@ else {
 <?php
 
 if (count($data)) {
-	$perpage = trim($this->xlist(array(
+	$perpage = $this->control()->config->perpage_show ? trim($this->xlist(array(
 		'fetch' => array(
 			'data' => $this->control()->config->perpage_list
 		),
 		'view' => array(
 			'script' => 'control/perpage'
 		)
-	)));
+	))) : '';
 	if ($perpage || $this->pager) {
 
 ?>

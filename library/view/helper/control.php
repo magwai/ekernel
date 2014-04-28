@@ -139,6 +139,12 @@ class k_view_helper_control extends view_helper  {
 		// Проверяем тип раздела: если не заполнен, то ставим list при наличии модели и text при ее отсутствии
 		if (!$this->config->type) $this->config->type = $this->config->model ? 'list' : 'text';
 
+		// Подтягиваем конфиг из clink
+		if ($this->config->param->clink) {
+			$config_clink = clone $this->config->config_clink;
+			$this->config->set($config_clink);
+		}
+
 		// Подтягиваем конфиг из конфига типа
 		if ($this->config->config_type->{$this->config->type} && count($this->config->config_type->{$this->config->type})) {
 			$config_type = clone $this->config->config_type->{$this->config->type};
@@ -207,9 +213,13 @@ class k_view_helper_control extends view_helper  {
 				}
 
 				if ($v->type == 'textarea' && $v->ckeditor) {
-					if (!($v->ckeditor instanceof data)) $v->ckeditor = array(
-						'class' => 'c-ckeditor'
-					);
+					if (!($v->ckeditor instanceof data)) $v->ckeditor = new data;
+					$v->ckeditor->class = 'c-ckeditor';
+				}
+
+				if ($v->type == 'textarea' && $v->markitup) {
+					if (!($v->markitup instanceof data)) $v->markitup = new data;
+					$v->markitup->class = 'c-markitup';
 				}
 
 				// Дополнительно еще раз сливаем настройки поля по-умолчанию с данными поля
@@ -440,6 +450,10 @@ class k_view_helper_control extends view_helper  {
 				unset($this->config->oac);
 				$this->config->oac = $fields;
 			}
+		}
+
+		if ($this->config->param->clink) {
+			application::get_instance()->controller->layout = 'control/clink';
 		}
 
 		// Вызываем коллбэк для финальных настроек из вьюшки
@@ -734,7 +748,11 @@ class k_view_helper_control extends view_helper  {
 							$this->config->ok = $this->config->model->update_control($data, $where);
 						}
 
-						if ($this->config->ok) $this->update_single();
+						if ($this->config->ok) {
+							$this->update_single();
+							$this->update_clink();
+
+						}
 					}
 				}
 
@@ -800,7 +818,7 @@ class k_view_helper_control extends view_helper  {
 			$this->config->form->populate($rd);
 		}
 	}
-	
+
 	public function update_single() {
 		if ($this->config->field) {
 			foreach ($this->config->field as $k => $v) {
@@ -835,6 +853,24 @@ class k_view_helper_control extends view_helper  {
 		}
 	}
 
+	public function update_clink() {
+		if ($this->config->field) {
+			foreach ($this->config->field as $k => $v) {
+				if ($v->type != 'clink') continue;
+				$class = 'model_'.$v->controller;
+				$s = (int)session::get($v->controller.'_clink');
+				if (!class_exists($class) || !$s) continue;
+				$m = new $class;
+				$m->update(array(
+					'parentid' => $this->config->ok
+				), array(
+					'parentid' => $s
+				));
+				session::remove($v->controller.'_clink');
+			}
+		}
+	}
+
 	public function route_add() {
 		$this->route_form();
 		$this->config->content = $this->config->text.(string)$this->config->form;
@@ -864,7 +900,7 @@ class k_view_helper_control extends view_helper  {
 
 				if (!$this->config->model || !$this->config->use_db) $this->config->ok_el = true;
 
-				if ($this->config->model && $this->config->use_db) $this->config->data = $this->config->model->fetch_control_card(array('id' => (int)$this->config->id));
+				if ($this->config->model/* && $this->config->use_db*/) $this->config->data = $this->config->model->fetch_control_card(array('id' => (int)$this->config->id));
 
 				$this->config->skip_el = false;
 

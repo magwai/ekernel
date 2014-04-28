@@ -1,7 +1,7 @@
 <?php
 
 class k_entity extends data {
-	private $view = null;
+	public $view = null;
 
 	function __set($k, $v = null) {
 		if ($k == 'view') $this->view = $v;

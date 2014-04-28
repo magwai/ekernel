@@ -16,7 +16,7 @@ class k_route_rewrite extends route {
 			if (count($res) > 1) {
 				$map = @$this->param['map'];
 				$def = @$this->param['default'];
-				
+
 				if (!is_array($map)) $map = explode(',', $map);
 				if (!is_array($def)) $def = explode(',', $def);
 				for ($i = 1; $i < count($res); $i++) if (isset($map[$i - 1])) $param[$map[$i - 1]] = @(string)$res[$i] ? $res[$i] : @$def[$i - 1];

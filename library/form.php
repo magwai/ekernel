@@ -60,7 +60,7 @@ class k_form {
 		if (!isset($param['class_control']) && $this->class_element_control) $param['class_control'] = $this->class_element_control;
 		if (!isset($param['class_error']) && $this->class_element_error) $param['class_error'] = $this->class_element_error;
 		if (!isset($param['frame_view_script']) && $this->element_view_script) $param['frame_view_script'] = $this->element_view_script;
-		if (($type == 'text' || $type == 'date' || $type == 'autocomplete' || $type == 'password') && !isset($param['class']) && $this->class_element_text) $param['class'] = $this->class_element_text;
+		if (($type == 'text' || $type == 'tagsinput' || $type == 'date' || $type == 'autocomplete' || $type == 'password') && !isset($param['class']) && $this->class_element_text) $param['class'] = $this->class_element_text;
 		if ($type == 'textarea' && !isset($param['class']) && $this->class_element_textarea) $param['class'] = $this->class_element_textarea;
 		if ($type == 'select' && !isset($param['class']) && $this->class_element_select) $param['class'] = $this->class_element_select;
 		$this->element->$name = new $class($name, $param);

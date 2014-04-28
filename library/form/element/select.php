@@ -8,7 +8,7 @@ class k_form_element_select extends form_element {
 
 	public function __construct($name, $param = array()) {
 		parent::__construct($name, $param);
-		if (isset($param['chosen'])) {
+		if (isset($param['chosen']) && $param['chosen'] != false) {
 			if (!$param['chosen'] instanceof data) $param['chosen'] = new data();
 			if (!isset($param['chosen']->css)) $param['chosen']->css = true;
 			$this->chosen = $param['chosen'];

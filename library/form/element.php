@@ -24,6 +24,7 @@ class k_form_element {
 		$this->name = $name;
 		if (isset($param['id'])) $this->id = $param['id'];
 		if (isset($param['class'])) $this->class = $param['class'];
+		if (isset($param['view_script'])) $this->view_script = $param['view_script'];
 		if (isset($param['frame_view_script'])) $this->frame_view_script = $param['frame_view_script'];
 		if (isset($param['class_error'])) $this->class_error = $param['class_error'];
 		if (isset($param['class_frame'])) $this->class_frame = $param['class_frame'];

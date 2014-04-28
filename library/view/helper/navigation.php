@@ -97,32 +97,34 @@ class k_view_helper_navigation extends view_helper  {
 	public function bread($param = array()) {
 		$ret = '';
 		$active = $this->find_active();
+		$data = array();
 		if ($active) {
-			$data = array($active);
+			$data[] = $active;
 			while($active->parent !== null) {
 				$active = $active->parent;
 				if ($active !== null && $active->title) $data[] = $active;
-
 			}
 			$data = array_reverse($data);
-			if (@$param['start']) {
-				$data = array_merge($param['start'], $data);
-			}
-			if (@$param['finish']) {
-				$data = array_merge($data, $param['finish']);
-			}
-			$config = application::get_instance()->config->navigation;
-			$ret = $this->view->xlist(array(
-				'fetch' => array(
-					'data' => $data
-				),
-				'view' => array(
-					'script' => $config->script_bread
-						? $config->script_bread
-						: ($config->model ? $config->model : 'menu').'/bread',
-				)
-			));
 		}
+		
+		if (@$param['start']) {
+			$data = array_merge($param['start'], $data);
+		}
+		if (@$param['finish']) {
+			$data = array_merge($data, $param['finish']);
+		}
+		$config = application::get_instance()->config->navigation;
+		$ret = $this->view->xlist(array(
+			'fetch' => array(
+				'data' => $data
+			),
+			'view' => array(
+				'script' => $config->script_bread
+					? $config->script_bread
+					: ($config->model ? $config->model : 'menu').'/bread',
+			)
+		));
+
 		return $ret;
 	}
 
