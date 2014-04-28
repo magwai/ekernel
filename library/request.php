@@ -10,7 +10,12 @@ class k_request {
 
 	public function __construct() {
 		// Заполняем данные request из запроса
-		$this->url = $_SERVER['REQUEST_URI'];
+		if(stripos($_SERVER['REQUEST_URI'], '?') !== FALSE) {
+			$parts = explode('?', $_SERVER['REQUEST_URI']);
+			$this->url = $parts[0];
+		} else {
+			$this->url = $_SERVER['REQUEST_URI'];
+		}
 		$this->get = new data($_GET);
 		$this->post = new data($_POST);
 		$this->files = new data($_FILES);
