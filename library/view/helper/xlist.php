@@ -36,7 +36,7 @@ class k_view_helper_xlist extends view_helper {
 		if (!isset($data['callback']['empty'])) $data['callback']['empty'] = null;
 
 		if (!@$data['view']) $data['view'] = array();
-		if (!isset($data['view']['script'])) $data['view']['script'] = strtolower(str_ireplace('model_', '', $data['fetch']['model'])).'/'.strtolower(str_ireplace('fetch_', '', $data['fetch']['method']));
+		if (!isset($data['view']['script'])) $data['view']['script'] = strtolower(str_ireplace('model_', '', is_object($data['fetch']['model']) ? get_class($data['fetch']['model']) : $data['fetch']['model'])).'/'.strtolower(str_ireplace('fetch_', '', $data['fetch']['method']));
 		if (stripos($data['view']['script'], '/') === false) $data['view']['script'] .= '/index';
 		if (!isset($data['view']['param'])) $data['view']['param'] = array();
 		if (!isset($data['view']['empty'])) $data['view']['empty'] = true;
