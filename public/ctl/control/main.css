@@ -9,9 +9,9 @@ html{overflow-y:scroll;}
 
 .c-auth .dropdown-menu{min-width:0px;}
 
-.c-menu{position:fixed;left:0px;width:170px;height:100%;padding:15px;background:#f1f1f1;}
+.c-menu{position:fixed;left:0px;width:170px;height:100%;padding:15px;background:#f1f1f1;overflow-y:auto;}
 .c-menu li ul{display:none;}
-
+.c-menu .nav > li > a{padding-top:8px;padding-bottom:8px;line-height:110%;}
 
 .c-table{word-break:break-all;}
 .c-table .text-center{text-align:center;}

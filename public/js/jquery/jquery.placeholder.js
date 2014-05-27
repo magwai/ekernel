@@ -1,5 +1,5 @@
 /*! http://mths.be/placeholder v2.0.7 by @mathias */
-;(function(window, document, $) {
+(function(window, document, $) {
 
 	var isInputSupported = 'placeholder' in document.createElement('input');
 	var isTextareaSupported = 'placeholder' in document.createElement('textarea');

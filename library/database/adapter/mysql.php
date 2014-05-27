@@ -94,7 +94,7 @@ class k_database_adapter_mysql extends database_adapter {
 	public function quote($value, $is_value = true) {
 		$q = $is_value ? "'" : '`';
 		$parts = explode('.', $value);
-		$is_mix = preg_match('/^(\(|\"|\').*?(\)|\"|\')$/', $value);
+		$is_mix = preg_match('/^(DISTINCT\(|\(|\"|\').*?(\)|\"|\')$/', $value);
 		if (count($parts) > 1 && !$is_value && !$is_mix) {
 			foreach ($parts as &$el) $el = $this->quote($el, false);
 			return implode('.', $parts);
