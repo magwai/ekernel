@@ -22,8 +22,8 @@ $this->js	->prepend('/library/ctl/noty/themes/default.js')
 				'url_current' => str_replace('/replace/replace', '', $this->url($p, 'control'))
 			)).') });');
 
-$this->css	->prepend('/library/ctl/bootstrap/bootstrap.css')
-			->prepend('/library/ctl/bootstrap/bootstrap-glyphicons.css')
+$this->css	->prepend('/library/ctl/bootstrap/css/bootstrap-theme.css')
+			->prepend('/library/ctl/bootstrap/css/bootstrap.css')
 			->set(1000, '/library/ctl/control/main.css')
 			->set(1010, '/library/ctl/control/clink.css');
 

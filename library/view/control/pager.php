@@ -4,7 +4,7 @@ if (count($this->data) > 1) {
 	$p = clone $this->control()->config->param;
 
 ?>
-<ul class="pagination pull-right c-pager">
+<ul class="pagination c-pager">
 <?php
 
 	$p['page'] = 1;

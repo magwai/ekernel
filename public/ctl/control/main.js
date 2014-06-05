@@ -212,7 +212,7 @@ c.table_do_action = function(o) {
 	var url;
 	if (o === 'tree') {
 		key_id = 'oid';
-		url = c.url_current;
+		url = c.url_current.replace(/\/oid\/[^\/]*/gi, '');
 	}
 	else {
 		if (o.data('key')) key_id = o.data('key');

@@ -1,7 +1,7 @@
 <?php
 
 if (count($this->data)) {
-	
+
 ?>
 <div class="navbar-btn btn-group c-buttons">
 <?php
@@ -13,6 +13,10 @@ if (count($this->data)) {
 		$p['action'] = $el->action;
 		if ($el->key == 'cid') {
 			unset($p['cid']);
+			$p['replace'] = 'replace';
+		}
+		if ($el->key == 'oid') {
+			unset($p['oid']);
 			$p['replace'] = 'replace';
 		}
 		$class = array('btn', 'btn-small', $el->class, 'c-button');

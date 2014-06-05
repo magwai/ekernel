@@ -190,9 +190,9 @@ if (count($data)) {
 	if ($perpage || $this->pager) {
 
 ?>
-		<div class="container-fluid"><div class="row c-pager-perpage">
-			<div class="col-md-6"><?php echo $perpage ?></div>
-			<div class="col-md-6"><?php echo $this->pager ?></div>
+		<div class="container-fluid c-pager-perpage"><div class="row">
+			<div class="col-sm-6"><?php echo $perpage ?></div>
+			<div class="col-sm-6"><?php echo $this->pager ?></div>
 		</div></div>
 <?php
 

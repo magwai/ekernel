@@ -4,6 +4,7 @@ class k_database_adapter_mysql extends database_adapter {
 	private $_charset_default = 'utf8';
 	private $_host_default = 'localhost';
 	public $connection = null;
+	public $last_query = null;
 
 	public function connect() {
 		// Подключаемся к БД mysql
@@ -25,6 +26,7 @@ class k_database_adapter_mysql extends database_adapter {
 
 		// Делаем запрос к БД, передавая числый SQL в PDO
 		$ret = null;
+		$this->last_query = $sql;
 		$result = $this->connection->query($sql);
 
 		// Разбираем ответ в соответствии с типом запроса

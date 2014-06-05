@@ -1,5 +1,5 @@
 <form<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?><?php echo $this->autocomplete ? ' autocomplete="'.$this->autocomplete.'"' : '' ?> action="<?php echo $this->action ?>" method="<?php echo $this->method ?>" enctype="<?php echo $this->enctype ?>">
-	<div class="e-form">
+	<div class="e-form<?php echo $this->class_wrap ? ' '.$this->class_wrap : '' ?>">
 <?php
 
 if ($this->element) {

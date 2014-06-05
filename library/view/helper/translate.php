@@ -25,8 +25,9 @@ class k_view_helper_translate extends view_helper  {
 		}
 	}
 
-	public function translate($text) {
+	public function translate($text = null) {
 		$this->init();
+		if ($text == null) return $this;
 		return isset($this->data[$text]) ? $this->data[$text] : '';
 	}
 }

@@ -9,6 +9,7 @@ class k_navigation extends data {
 		$this->set($param);
 		$this->param = isset($param['param']) ? $param['param'] : array();
 		$this->route = isset($param['route']) ? $param['route'] : 'default';
+		if (isset($param['active'])) $this->active = $param['active'];
 		if (@$param['pages']) {
 			foreach ($param['pages'] as $el) {
 				$el->title = $el->title_lang;

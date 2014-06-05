@@ -1,6 +1,9 @@
 <?php
 
 if (count($this->data)) {
+	$class_li = $this->class_li;
+	$script = $this->script;
+	$data = $this->data;
 	$level = (int)$this->level;
 	$class_ul = $this->class_ul ? $this->class_ul->to_array() : array('navigation');
 
@@ -8,8 +11,8 @@ if (count($this->data)) {
 <ul<?php echo $level ? '' : ' class="'.implode(' ', $class_ul).'"' ?>>
 <?php
 
-	foreach ($this->data as $el) {
-		$class = $this->class_li ? $this->class_li->to_array() : array();
+	foreach ($data as $el) {
+		$class = $class_li ? $class_li->to_array() : array();
 		if ($el->is_active(true)) $class[] = 'active';
 
 ?>
@@ -20,11 +23,11 @@ if (count($this->data)) {
 				'data' => $el->pages
 			),
 			'view' => array(
-				'script' => $this->script,
+				'script' => $script,
 				'param' => array(
 					'level' => $level + 1,
-					'script' => $this->script,
-					'class_li' => $this->class_li
+					'script' => $script,
+					'class_li' => $class_li
 				)
 			)
 		)) ?>

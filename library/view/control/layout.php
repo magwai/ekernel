@@ -77,36 +77,42 @@ $reg = $this->lang(true);
 	</head>
 	<body>
 		<?php echo $top_left || $top_right ? '' : '' ?>
-		<div class="navbar navbar-inverse navbar-fixed-top c-navbar">
-			<div class="row-fluid">
-				<div class="col-6"><ul class="nav navbar-nav">
-					<li class="navbar-brand"><a href="<?php echo $this->url(array('controller' => 'cindex'), 'control') ?>" class="glyphicon glyphicon-home"></a></li>
-					<li class="c-inner-menu c-invisible" id="d_inner_menu"></li>
-					<li class="c-button-top" id="d_button_top"><?php echo $this->xlist(array(
-						'fetch' => array(
-							'data' => $this->control()->config->button_top
-						),
-						'view' => array(
-							'script' => 'control/button'
-						)
-					)) ?></li>
-				</ul></div>
-				<?php echo $this->user('login') ? '<div class="col-3 pull-right"><ul class="nav navbar-nav pull-right c-auth" id="d_auth">'.($reg ? $this->xlist(array(
-						'fetch' => array(
-							'model' => 'lang',
-							'method' => 'list_control'
-						),
-						'view' => array(
-							'script' => 'control/lang'
-						)
-					)) : '').'<li class="h navbar-brand">'.$this->user('login').'</li>
-					<li><a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'logout'), 'control').'">'.$this->translate('control_logout').'</a></li>
-				</ul></div>' : '' ?>
-			</div>
+		<div class="navbar container-fluid navbar-inverse navbar-fixed-top c-navbar">
+			<div class="col-sm-9"><ul class="nav navbar-nav">
+				<li class="navbar-brand hidden-xs"><a href="<?php echo $this->url(array('controller' => 'cindex'), 'control') ?>" class="glyphicon glyphicon-home"></a></li>
+				<li>
+					<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#d_menu">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+				</li>
+				<li class="c-inner-menu c-invisible" id="d_inner_menu"></li>
+				<li class="c-button-top" id="d_button_top"><?php echo $this->xlist(array(
+					'fetch' => array(
+						'data' => $this->control()->config->button_top
+					),
+					'view' => array(
+						'script' => 'control/button'
+					)
+				)) ?></li>
+			</ul></div>
+			<?php echo $this->user('login') ? '<div class="col-sm-3 hidden-xs"><ul class="nav navbar-nav c-auth" id="d_auth">'.($reg ? $this->xlist(array(
+					'fetch' => array(
+						'model' => 'lang',
+						'method' => 'list_control'
+					),
+					'view' => array(
+						'script' => 'control/lang'
+					)
+				)) : '').'<li class="h navbar-brand">'.$this->user('login').'</li>
+				<li><a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'logout'), 'control').'">'.$this->translate('control_logout').'</a></li>
+			</ul></div>' : '' ?>
 		</div>
-		<div class="container-fluid c-middle clearfix">
-			<div class="sidebar pull-left c-menu" id="d_menu"><?php echo $menu ?></div>
-			<div class="row-fluid"><div class="col-12" id="d_content"><?php echo $this->control()->config->content ?></div></div>
+		<div class="c-middle">
+			<div class="sidebar collapse c-menu" id="d_menu"><?php echo $menu ?></div>
+			<div id="d_content"><?php echo $this->control()->config->content ?></div>
 		</div>
 		<?php echo $this->control()->config->content_bottom ?>
 		<script type="text/javascript">window.CKEDITOR_BASEPATH = '/library/ctl/ckeditor/';</script>

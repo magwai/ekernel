@@ -93,11 +93,12 @@ class k_form_element_file extends form_element_input {
 				'onSelect' => $this->multiple ? null : new Zend\Json\Expr('function(file) {
 					var data = this.data("uploadifive");
 					$(this).parent().parent().find("#'.$this->view->escape($this->name).'_delete").remove();
-					if (data.queue.count <= 1) return;
-					var first = data.queueEl.find(".uploadifive-queue-item:first");
-					if (first.length) {
-						var file = first.data("file");
-						if (file) data.removeQueueItem(file, true);
+					if (data.queue.count > 1) {
+						var first = data.queueEl.find(".uploadifive-queue-item:first");
+						if (first.length) {
+							var file = first.data("file");
+							if (file) data.removeQueueItem(file, true);
+						}
 					}
 					'.@$opt1['customSelect'].'
 				}'),

@@ -4,11 +4,14 @@ class k_form {
 	public $group = array();
 	public $view = null;
 	public $class = '';
+	public $class_wrap = '';
 	public $autocomplete = '';
 	public $legend = '';
 	public $class_element_control = '';
+	public $class_element_label = '';
 	public $class_element_frame = '';
 	public $class_element_error = '';
+	public $class_error_frame = '';
 	public $class_element_text = '';
 	public $class_element_textarea = '';
 	public $class_element_select = '';
@@ -26,10 +29,13 @@ class k_form {
 		if (isset($param['view_script'])) $this->view_script = $param['view_script'];
 		if (isset($param['autocomplete'])) $this->autocomplete = $param['autocomplete'];
 		if (isset($param['class'])) $this->class = $param['class'];
+		if (isset($param['class_wrap'])) $this->class_wrap = $param['class_wrap'];
 		if (isset($param['legend'])) $this->legend = $param['legend'];
 		if (isset($param['class_element_frame'])) $this->class_element_frame = $param['class_element_frame'];
 		if (isset($param['class_element_control'])) $this->class_element_control = $param['class_element_control'];
+		if (isset($param['class_element_label'])) $this->class_element_label = $param['class_element_label'];
 		if (isset($param['class_element_error'])) $this->class_element_error = $param['class_element_error'];
+		if (isset($param['class_error_frame'])) $this->class_error_frame = $param['class_error_frame'];
 		if (isset($param['class_element_text'])) $this->class_element_text = $param['class_element_text'];
 		if (isset($param['class_element_textarea'])) $this->class_element_textarea = $param['class_element_textarea'];
 		if (isset($param['class_element_select'])) $this->class_element_select = $param['class_element_select'];
@@ -45,6 +51,8 @@ class k_form {
 			'legend' => $this->legend,
 			'autocomplete' => $this->autocomplete,
 			'class' => $this->class,
+			'class_error_frame' => $this->class_error_frame,
+			'class_wrap' => $this->class_wrap,
 			'action' => $this->action,
 			'method' => $this->method,
 			'enctype' => $this->enctype,
@@ -58,6 +66,7 @@ class k_form {
 		$class = 'form_element_'.$type;
 		if (!isset($param['class_frame']) && $this->class_element_frame) $param['class_frame'] = $this->class_element_frame;
 		if (!isset($param['class_control']) && $this->class_element_control) $param['class_control'] = $this->class_element_control;
+		if (!isset($param['class_label']) && $this->class_element_label) $param['class_label'] = $this->class_element_label;
 		if (!isset($param['class_error']) && $this->class_element_error) $param['class_error'] = $this->class_element_error;
 		if (!isset($param['frame_view_script']) && $this->element_view_script) $param['frame_view_script'] = $this->element_view_script;
 		if (($type == 'text' || $type == 'tagsinput' || $type == 'date' || $type == 'autocomplete' || $type == 'password') && !isset($param['class']) && $this->class_element_text) $param['class'] = $this->class_element_text;

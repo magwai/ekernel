@@ -1,134 +1,154 @@
 /*
 PIE: CSS3 rendering for IE
-Version 2.0beta1
+Version 1.0.0
 http://css3pie.com
 Dual-licensed for use under the Apache License Version 2.0 or the General Public License (GPL) Version 2.
 */
-(function( win, doc ) {
-    var PIE = win[ 'PIE' ] || ( win[ 'PIE' ] = {} );
-/**
- * Simple utility for merging objects
- * @param {Object} obj1 The main object into which all others will be merged
- * @param {...Object} var_args Other objects which will be merged into the first, in order
- */
-PIE.merge = function( obj1 ) {
-    var i, len, p, objN, args = arguments;
-    for( i = 1, len = args.length; i < len; i++ ) {
-        objN = args[i];
-        for( p in objN ) {
-            if( objN.hasOwnProperty( p ) ) {
-                obj1[ p ] = objN[ p ];
-            }
+(function(){
+var doc = document;var PIE = window['PIE'];
+
+if( !PIE ) {
+    PIE = window['PIE'] = {
+        CSS_PREFIX: '-pie-',
+        STYLE_PREFIX: 'Pie',
+        CLASS_PREFIX: 'pie_',
+        tableCellTags: {
+            'TD': 1,
+            'TH': 1
+        },
+
+        /**
+         * Lookup table of elements which cannot take custom children.
+         */
+        childlessElements: {
+            'TABLE':1,
+            'THEAD':1,
+            'TBODY':1,
+            'TFOOT':1,
+            'TR':1,
+            'INPUT':1,
+            'TEXTAREA':1,
+            'SELECT':1,
+            'OPTION':1,
+            'IMG':1,
+            'HR':1
+        },
+
+        /**
+         * Elements that can receive user focus
+         */
+        focusableElements: {
+            'A':1,
+            'INPUT':1,
+            'TEXTAREA':1,
+            'SELECT':1,
+            'BUTTON':1
+        },
+
+        /**
+         * Values of the type attribute for input elements displayed as buttons
+         */
+        inputButtonTypes: {
+            'submit':1,
+            'button':1,
+            'reset':1
+        },
+
+        emptyFn: function() {}
+    };
+
+    // Force the background cache to be used. No reason it shouldn't be.
+    try {
+        doc.execCommand( 'BackgroundImageCache', false, true );
+    } catch(e) {}
+
+    (function() {
+        /*
+         * IE version detection approach by James Padolsey, with modifications -- from
+         * http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
+         */
+        var ieVersion = 4,
+            div = doc.createElement('div'),
+            all = div.getElementsByTagName('i'),
+            shape;
+        while (
+            div.innerHTML = '<!--[if gt IE ' + (++ieVersion) + ']><i></i><![endif]-->',
+            all[0]
+        ) {}
+        PIE.ieVersion = ieVersion;
+
+        // Detect IE6
+        if( ieVersion === 6 ) {
+            // IE6 can't access properties with leading dash, but can without it.
+            PIE.CSS_PREFIX = PIE.CSS_PREFIX.replace( /^-/, '' );
         }
-    }
-    return obj1;
-};
 
+        PIE.ieDocMode = doc.documentMode || PIE.ieVersion;
 
-PIE.merge(PIE, {
-
-    // Constants
-    CSS_PREFIX: '-pie-',
-    STYLE_PREFIX: 'Pie',
-    CLASS_PREFIX: 'pie_',
-
-    tableCellTags: {
-        'TD': 1,
-        'TH': 1
-    },
-
-    /**
-     * Lookup table of elements which cannot take custom children.
-     */
-    childlessElements: {
-        'TABLE':1,
-        'THEAD':1,
-        'TBODY':1,
-        'TFOOT':1,
-        'TR':1,
-        'INPUT':1,
-        'TEXTAREA':1,
-        'SELECT':1,
-        'OPTION':1,
-        'IMG':1,
-        'HR':1
-    },
-
-    /**
-     * Elements that can receive user focus
-     */
-    focusableElements: {
-        'A':1,
-        'INPUT':1,
-        'TEXTAREA':1,
-        'SELECT':1,
-        'BUTTON':1
-    },
-
-    /**
-     * Values of the type attribute for input elements displayed as buttons
-     */
-    inputButtonTypes: {
-        'submit':1,
-        'button':1,
-        'reset':1
-    },
-
-    emptyFn: function() {}
-});
-
-// Force the background cache to be used. No reason it shouldn't be.
-try {
-    doc.execCommand( 'BackgroundImageCache', false, true );
-} catch(e) {}
-
-(function() {
-    /*
-     * IE version detection approach by James Padolsey, with modifications -- from
-     * http://james.padolsey.com/javascript/detect-ie-in-js-using-conditional-comments/
-     */
-    var ieVersion = 4,
-        div = doc.createElement('div'),
-        all = div.getElementsByTagName('i'),
-        shape;
-    while (
-        div.innerHTML = '<!--[if gt IE ' + (++ieVersion) + ']><i></i><![endif]-->',
-        all[0]
-    ) {}
-    PIE.ieVersion = ieVersion;
-
-    // Detect IE6
-    if( ieVersion === 6 ) {
-        // IE6 can't access properties with leading dash, but can without it.
-        PIE.CSS_PREFIX = PIE.CSS_PREFIX.replace( /^-/, '' );
-    }
-
-    PIE.ieDocMode = doc.documentMode || PIE.ieVersion;
-
-    // Detect VML support (a small number of IE installs don't have a working VML engine)
-    div.innerHTML = '<v:shape adj="1"/>';
-    shape = div.firstChild;
-    shape.style['behavior'] = 'url(#default#VML)';
-    PIE.supportsVML = (typeof shape['adj'] === "object");
-})();
+        // Detect VML support (a small number of IE installs don't have a working VML engine)
+        div.innerHTML = '<v:shape adj="1"/>';
+        shape = div.firstChild;
+        shape.style['behavior'] = 'url(#default#VML)';
+        PIE.supportsVML = (typeof shape['adj'] === "object");
+    }());
 /**
  * Utility functions
  */
 (function() {
-    var idNum = 0,
+    var vmlCreatorDoc,
+        idNum = 0,
         imageSizes = {};
 
 
     PIE.Util = {
 
         /**
+         * To create a VML element, it must be created by a Document which has the VML
+         * namespace set. Unfortunately, if you try to add the namespace programatically
+         * into the main document, you will get an "Unspecified error" when trying to
+         * access document.namespaces before the document is finished loading. To get
+         * around this, we create a DocumentFragment, which in IE land is apparently a
+         * full-fledged Document. It allows adding namespaces immediately, so we add the
+         * namespace there and then have it create the VML element.
+         * @param {string} tag The tag name for the VML element
+         * @return {Element} The new VML element
+         */
+        createVmlElement: function( tag ) {
+            var vmlPrefix = 'css3vml';
+            if( !vmlCreatorDoc ) {
+                vmlCreatorDoc = doc.createDocumentFragment();
+                vmlCreatorDoc.namespaces.add( vmlPrefix, 'urn:schemas-microsoft-com:vml' );
+            }
+            return vmlCreatorDoc.createElement( vmlPrefix + ':' + tag );
+        },
+
+
+        /**
          * Generate and return a unique ID for a given object. The generated ID is stored
-         * as a property of the object for future reuse. For DOM Elements, don't use this
-         * but use the IE-native uniqueID property instead.
+         * as a property of the object for future reuse.
          * @param {Object} obj
          */
         getUID: function( obj ) {
-            return obj && obj[ '_pieId' ] || ( obj[ '_pieId' ] = '_' + idNum++ );
+            return obj && obj[ '_pieId' ] || ( obj[ '_pieId' ] = '_' + ++idNum );
+        },
+
+
+        /**
+         * Simple utility for merging objects
+         * @param {Object} obj1 The main object into which all others will be merged
+         * @param {...Object} var_args Other objects which will be merged into the first, in order
+         */
+        merge: function( obj1 ) {
+            var i, len, p, objN, args = arguments;
+            for( i = 1, len = args.length; i < len; i++ ) {
+                objN = args[i];
+                for( p in objN ) {
+                    if( objN.hasOwnProperty( p ) ) {
+                        obj1[ p ] = objN[ p ];
+                    }
+                }
+            }
+            return obj1;
         },
 
 
@@ -169,67 +189,97 @@ try {
  */
 PIE.GradientUtil = {
 
-    toSideAngles: {
-        'top': 0,
-        'right': 90,
-        'bottom': 180,
-        'left': 270
-    },
-
     getGradientMetrics: function( el, width, height, gradientInfo ) {
         var angle = gradientInfo.angle,
-            toPos = gradientInfo.gradientTo,
-            dX, dY,
-            endPoint,
+            startPos = gradientInfo.gradientStart,
             startX, startY,
-            endX, endY;
+            endX, endY,
+            startCornerX, startCornerY,
+            endCornerX, endCornerY,
+            deltaX, deltaY,
+            p, UNDEF;
 
-        // If an angle was specified, just use it
-        if (angle) {
-            angle = angle.degrees();
-        }
-        // If a to-position was specified, find the appropriate angle for it
-        else if (toPos) {
-            // To a corner; find the adjacent corners and use the angle perpendicular to them
-            if (toPos[1]) {
-                dX = ( toPos[0] == 'top' || toPos[1] == 'top' ) ? width : -width;
-                dY = ( toPos[0] == 'left' || toPos[1] == 'left' ) ? -height : height;
-                angle = Math.atan2(dY, dX) * 180 / Math.PI;
-            }
-            // To a side; map to a vertical/horizontal angle
-            else {
-                angle = this.toSideAngles[toPos[0]];
-            }
-        }
-        // Neither specified; default is top to bottom
-        else {
-            angle = 180;
+        // Find the "start" and "end" corners; these are the corners furthest along the gradient line.
+        // This is used below to find the start/end positions of the CSS3 gradient-line, and also in finding
+        // the total length of the VML rendered gradient-line corner to corner.
+        function findCorners() {
+            startCornerX = ( angle >= 90 && angle < 270 ) ? width : 0;
+            startCornerY = angle < 180 ? height : 0;
+            endCornerX = width - startCornerX;
+            endCornerY = height - startCornerY;
         }
 
         // Normalize the angle to a value between [0, 360)
-        while( angle < 0 ) {
-            angle += 360;
+        function normalizeAngle() {
+            while( angle < 0 ) {
+                angle += 360;
+            }
+            angle = angle % 360;
         }
-        angle = angle % 360;
 
-        // Find the end point of the gradient line, extending the angle from the center point
-        // to where it intersects the perpendicular line passing through the nearest corner.
-        endPoint = PIE.GradientUtil.perpendicularIntersect(width / 2, height / 2, angle,
-            ( angle >= 180 ? 0 : width ), ( angle < 90 || angle > 270 ? 0 : height )
-        );
-        endX = endPoint[0];
-        endY = endPoint[1];
-        startX = width - endX;
-        startY = height - endY;
+        // Find the start and end points of the gradient
+        if( startPos ) {
+            startPos = startPos.coords( el, width, height );
+            startX = startPos.x;
+            startY = startPos.y;
+        }
+        if( angle ) {
+            angle = angle.degrees();
+
+            normalizeAngle();
+            findCorners();
+
+            // If no start position was specified, then choose a corner as the starting point.
+            if( !startPos ) {
+                startX = startCornerX;
+                startY = startCornerY;
+            }
+
+            // Find the end position by extending a perpendicular line from the gradient-line which
+            // intersects the corner opposite from the starting corner.
+            p = PIE.GradientUtil.perpendicularIntersect( startX, startY, angle, endCornerX, endCornerY );
+            endX = p[0];
+            endY = p[1];
+        }
+        else if( startPos ) {
+            // Start position but no angle specified: find the end point by rotating 180deg around the center
+            endX = width - startX;
+            endY = height - startY;
+        }
+        else {
+            // Neither position nor angle specified; create vertical gradient from top to bottom
+            startX = startY = endX = 0;
+            endY = height;
+        }
+        deltaX = endX - startX;
+        deltaY = endY - startY;
+
+        if( angle === UNDEF ) {
+            // Get the angle based on the change in x/y from start to end point. Checks first for horizontal
+            // or vertical angles so they get exact whole numbers rather than what atan2 gives.
+            angle = ( !deltaX ? ( deltaY < 0 ? 90 : 270 ) :
+                        ( !deltaY ? ( deltaX < 0 ? 180 : 0 ) :
+                            -Math.atan2( deltaY, deltaX ) / Math.PI * 180
+                        )
+                    );
+            normalizeAngle();
+            findCorners();
+        }
 
         return {
             angle: angle,
-            endX: endX,
-            endY: endY,
             startX: startX,
             startY: startY,
+            endX: endX,
+            endY: endY,
+            startCornerX: startCornerX,
+            startCornerY: startCornerY,
+            endCornerX: endCornerX,
+            endCornerY: endCornerY,
+            deltaX: deltaX,
+            deltaY: deltaY,
             lineLength: PIE.GradientUtil.distance( startX, startY, endX, endY )
-        };
+        }
     },
 
     /**
@@ -246,16 +296,16 @@ PIE.GradientUtil = {
         // Handle straight vertical and horizontal angles, for performance and to avoid
         // divide-by-zero errors.
         if( angle === 0 || angle === 180 ) {
-            return [ x1, y2 ];
+            return [ x2, y1 ];
         }
         else if( angle === 90 || angle === 270 ) {
-            return [ x2, y1 ];
+            return [ x1, y2 ];
         }
         else {
             // General approach: determine the Ax+By=C formula for each line (the slope of the second
             // line is the negative inverse of the first) and then solve for where both formulas have
             // the same x/y values.
-            var a1 = Math.tan( ( angle - 90 ) * Math.PI / 180 ),
+            var a1 = Math.tan( -angle * Math.PI / 180 ),
                 c1 = a1 * x1 - y1,
                 a2 = -1 / a1,
                 c2 = a2 * x2 - y2,
@@ -356,11 +406,11 @@ PIE.Heartbeat.run = function() {
 
     function handleUnload() {
         PIE.OnUnload.fire();
-        win.detachEvent( 'onunload', handleUnload );
-        win[ 'PIE' ] = null;
+        window.detachEvent( 'onunload', handleUnload );
+        window[ 'PIE' ] = null;
     }
 
-    win.attachEvent( 'onunload', handleUnload );
+    window.attachEvent( 'onunload', handleUnload );
 
     /**
      * Attach an event which automatically gets detached onunload
@@ -376,7 +426,7 @@ PIE.Heartbeat.run = function() {
  */
 PIE.OnResize = new PIE.Observable();
 
-PIE.OnUnload.attachManagedEvent( win, 'onresize', function() { PIE.OnResize.fire(); } );
+PIE.OnUnload.attachManagedEvent( window, 'onresize', function() { PIE.OnResize.fire(); } );
 /**
  * Create a single observable listener for scroll events. Used for lazy loading based
  * on the viewport, and for fixed position backgrounds.
@@ -388,11 +438,37 @@ PIE.OnUnload.attachManagedEvent( win, 'onresize', function() { PIE.OnResize.fire
         PIE.OnScroll.fire();
     }
 
-    PIE.OnUnload.attachManagedEvent( win, 'onscroll', scrolled );
+    PIE.OnUnload.attachManagedEvent( window, 'onscroll', scrolled );
 
     PIE.OnResize.observe( scrolled );
 })();
 /**
+ * Listen for printing events, destroy all active PIE instances when printing, and
+ * restore them afterward.
+ */
+(function() {
+
+    var elements;
+
+    function beforePrint() {
+        elements = PIE.Element.destroyAll();
+    }
+
+    function afterPrint() {
+        if( elements ) {
+            for( var i = 0, len = elements.length; i < len; i++ ) {
+                PIE[ 'attach' ]( elements[i] );
+            }
+            elements = 0;
+        }
+    }
+
+    if( PIE.ieDocMode < 9 ) {
+        PIE.OnUnload.attachManagedEvent( window, 'onbeforeprint', beforePrint );
+        PIE.OnUnload.attachManagedEvent( window, 'onafterprint', afterPrint );
+    }
+
+})();/**
  * Create a single observable listener for document mouseup events.
  */
 PIE.OnMouseup = new PIE.Observable();
@@ -530,13 +606,6 @@ PIE.Length = (function() {
                 return px;
             }
         }
-    };
-
-    /**
-     * Convert a pixel length into a point length
-     */
-    Length.pxToPt = function( px ) {
-        return px / conversions[ 'pt' ];
     };
 
 
@@ -749,44 +818,6 @@ PIE.Angle = (function() {
  * @param {string} val The raw CSS string value for the color
  */
 PIE.Color = (function() {
-
-    /*
-     * hsl2rgb from http://codingforums.com/showthread.php?t=11156
-     * code by Jason Karl Davis (http://www.jasonkarldavis.com)
-     * swiped from cssSandpaper by Zoltan Hawryluk (http://www.useragentman.com/blog/csssandpaper-a-css3-javascript-library/)
-     * modified for formatting and size optimizations
-     */
-    function hsl2rgb( h, s, l ) {
-        var m1, m2, r, g, b,
-            round = Math.round;
-        s /= 100;
-        l /= 100;
-        if ( !s ) { r = g = b = l * 255; }
-        else {
-            if ( l <= 0.5 ) { m2 = l * ( s + 1 ); }
-            else { m2 = l + s - l * s; }
-            m1 = l * 2 - m2;
-            h = ( h % 360 ) / 360;
-            r = hueToRgb( m1, m2, h + 1/3 );
-            g = hueToRgb( m1, m2, h );
-            b = hueToRgb( m1, m2, h - 1/3 );
-        }
-        return { r: round( r ), g: round( g ), b: round( b ) };
-    }
-    function hueToRgb( m1, m2, hue ) {
-        var v;
-        if ( hue < 0 ) { hue += 1; }
-        else if ( hue > 1 ) { hue -= 1; }
-        if ( 6 * hue < 1 ) { v = m1 + ( m2 - m1 ) * hue * 6; }
-        else if ( 2 * hue < 1 ) { v = m2; }
-        else if ( 3 * hue < 2 ) { v = m1 + ( m2 - m1 ) * ( 2/3 - hue ) * 6; }
-        else { v = m1; }
-        return 255 * v;
-    }
-
-
-
-
     var instances = {};
 
     function Color( val ) {
@@ -797,22 +828,57 @@ PIE.Color = (function() {
      * Regular expression for matching rgba colors and extracting their components
      * @type {RegExp}
      */
-    Color.rgbOrRgbaRE = /\s*rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(,\s*(\d+|\d*\.\d+))?\s*\)\s*/;
-    Color.hslOrHslaRE = /\s*hsla?\(\s*(\d*\.?\d+)\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%\s*(,\s*(\d+|\d*\.\d+))?\s*\)\s*/;
+    Color.rgbaRE = /\s*rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d+|\d*\.\d+)\s*\)\s*/;
 
-    /**
-     * Hash of color keyword names to their corresponding hex values. Encoded for
-     * small size and expanded into a hash on startup.
-     */
-    Color.names = {};
-
-    var names = 'black|0|navy|3k|darkblue|b|mediumblue|1u|blue|1e|darkgreen|jk1|green|5j4|teal|3k|darkcyan|26j|deepskyblue|ad0|darkturquoise|2xe|mediumspringgreen|8nd|lime|va|springgreen|3j|aqua|3k|cyan|0|midnightblue|xunl|dodgerblue|7ogf|lightseagreen|2zsb|forestgreen|2lbs|seagreen|guut|darkslategray|12pk|limegreen|4wkj|mediumseagreen|dwlb|turquoise|5v8f|royalblue|r2p|steelblue|75qr|darkslateblue|2fh3|mediumturquoise|ta9|indigo|32d2|darkolivegreen|emr1|cadetblue|ebu9|cornflowerblue|6z4d|mediumaquamarine|3459|dimgray|3nwf|slateblue|1bok|olivedrab|1opi|slategray|6y5p|lightslategray|9vk9|mediumslateblue|5g0l|lawngreen|27ma|chartreuse|48ao|aquamarine|5w|maroon|18|purple|3k|olive|p6o|gray|3k|lightslateblue|5j7j|skyblue|4q98|lightskyblue|f|blueviolet|3bhk|darkred|15we|darkmagenta|3v|saddlebrown|djc|darkseagreen|69vg|lightgreen|1og1|mediumpurple|3ivc|darkviolet|sfv|palegreen|6zt1|darkorchid|awk|yellowgreen|292e|sienna|7r3v|brown|6sxp|darkgray|6bgf|lightblue|5vlp|greenyellow|7k9|paleturquoise|2pxb|lightsteelblue|169c|powderblue|5jc|firebrick|1rgc|darkgoldenrod|8z55|mediumorchid|2jm0|rosybrown|34jg|darkkhaki|1mfw|silver|49jp|mediumvioletred|8w5h|indianred|8tef|peru|82r|violetred|3ntd|feldspar|212d|chocolate|16eh|tan|ewe|lightgrey|1kqv|palevioletred|6h8g|metle|fnp|orchid|2dj2|goldenrod|abu|crimson|20ik|gainsboro|13mo|plum|12pt|burlywood|1j8q|lightcyan|3794|lavender|8agr|darksalmon|3rsw|violet|6wz8|palegoldenrod|k3g|lightcoral|28k6|khaki|k5o|aliceblue|3n7|honeydew|1dd|azure|f|sandybrown|5469|wheat|1q37|beige|4kp|whitesmoke|p|mintcream|1z9|ghostwhite|46bp|salmon|25bn|antiquewhite|l7p|linen|zz|lightgoldenrodyellow|1yk|oldlace|46qc|red|1gka|magenta|73|fuchsia|0|deeppink|3v8|orangered|9kd|tomato|5zb|hotpink|19p|coral|49o|darkorange|2i8|lightsalmon|41m|orange|w6|lightpink|3i9|pink|1ze|gold|4dx|peachpuff|qh|navajowhite|s4|moccasin|16w|bisque|f|mistyrose|t|blanchedalmond|1d8|papayawhip|so|lavenderblush|80|seashell|zd|cornsilk|ku|lemonchiffon|dt|floralwhite|z|snow|a|yellow|sm|lightyellow|68|ivory|g|white|f'.split('|'),
-        i = 0, len = names.length, color = 0, hexColor;
-    for(; i < len; i += 2) {
-        color += parseInt(names[i + 1], 36);
-        hexColor = color.toString(16);
-        Color.names[names[i]] = '#000000'.slice(0, -hexColor.length) + hexColor;
-    }
+    Color.names = {
+        "aliceblue":"F0F8FF", "antiquewhite":"FAEBD7", "aqua":"0FF",
+        "aquamarine":"7FFFD4", "azure":"F0FFFF", "beige":"F5F5DC",
+        "bisque":"FFE4C4", "black":"000", "blanchedalmond":"FFEBCD",
+        "blue":"00F", "blueviolet":"8A2BE2", "brown":"A52A2A",
+        "burlywood":"DEB887", "cadetblue":"5F9EA0", "chartreuse":"7FFF00",
+        "chocolate":"D2691E", "coral":"FF7F50", "cornflowerblue":"6495ED",
+        "cornsilk":"FFF8DC", "crimson":"DC143C", "cyan":"0FF",
+        "darkblue":"00008B", "darkcyan":"008B8B", "darkgoldenrod":"B8860B",
+        "darkgray":"A9A9A9", "darkgreen":"006400", "darkkhaki":"BDB76B",
+        "darkmagenta":"8B008B", "darkolivegreen":"556B2F", "darkorange":"FF8C00",
+        "darkorchid":"9932CC", "darkred":"8B0000", "darksalmon":"E9967A",
+        "darkseagreen":"8FBC8F", "darkslateblue":"483D8B", "darkslategray":"2F4F4F",
+        "darkturquoise":"00CED1", "darkviolet":"9400D3", "deeppink":"FF1493",
+        "deepskyblue":"00BFFF", "dimgray":"696969", "dodgerblue":"1E90FF",
+        "firebrick":"B22222", "floralwhite":"FFFAF0", "forestgreen":"228B22",
+        "fuchsia":"F0F", "gainsboro":"DCDCDC", "ghostwhite":"F8F8FF",
+        "gold":"FFD700", "goldenrod":"DAA520", "gray":"808080",
+        "green":"008000", "greenyellow":"ADFF2F", "honeydew":"F0FFF0",
+        "hotpink":"FF69B4", "indianred":"CD5C5C", "indigo":"4B0082",
+        "ivory":"FFFFF0", "khaki":"F0E68C", "lavender":"E6E6FA",
+        "lavenderblush":"FFF0F5", "lawngreen":"7CFC00", "lemonchiffon":"FFFACD",
+        "lightblue":"ADD8E6", "lightcoral":"F08080", "lightcyan":"E0FFFF",
+        "lightgoldenrodyellow":"FAFAD2", "lightgreen":"90EE90", "lightgrey":"D3D3D3",
+        "lightpink":"FFB6C1", "lightsalmon":"FFA07A", "lightseagreen":"20B2AA",
+        "lightskyblue":"87CEFA", "lightslategray":"789", "lightsteelblue":"B0C4DE",
+        "lightyellow":"FFFFE0", "lime":"0F0", "limegreen":"32CD32",
+        "linen":"FAF0E6", "magenta":"F0F", "maroon":"800000",
+        "mediumauqamarine":"66CDAA", "mediumblue":"0000CD", "mediumorchid":"BA55D3",
+        "mediumpurple":"9370D8", "mediumseagreen":"3CB371", "mediumslateblue":"7B68EE",
+        "mediumspringgreen":"00FA9A", "mediumturquoise":"48D1CC", "mediumvioletred":"C71585",
+        "midnightblue":"191970", "mintcream":"F5FFFA", "mistyrose":"FFE4E1",
+        "moccasin":"FFE4B5", "navajowhite":"FFDEAD", "navy":"000080",
+        "oldlace":"FDF5E6", "olive":"808000", "olivedrab":"688E23",
+        "orange":"FFA500", "orangered":"FF4500", "orchid":"DA70D6",
+        "palegoldenrod":"EEE8AA", "palegreen":"98FB98", "paleturquoise":"AFEEEE",
+        "palevioletred":"D87093", "papayawhip":"FFEFD5", "peachpuff":"FFDAB9",
+        "peru":"CD853F", "pink":"FFC0CB", "plum":"DDA0DD",
+        "powderblue":"B0E0E6", "purple":"800080", "red":"F00",
+        "rosybrown":"BC8F8F", "royalblue":"4169E1", "saddlebrown":"8B4513",
+        "salmon":"FA8072", "sandybrown":"F4A460", "seagreen":"2E8B57",
+        "seashell":"FFF5EE", "sienna":"A0522D", "silver":"C0C0C0",
+        "skyblue":"87CEEB", "slateblue":"6A5ACD", "slategray":"708090",
+        "snow":"FFFAFA", "springgreen":"00FF7F", "steelblue":"4682B4",
+        "tan":"D2B48C", "teal":"008080", "thistle":"D8BFD8",
+        "tomato":"FF6347", "turquoise":"40E0D0", "violet":"EE82EE",
+        "wheat":"F5DEB3", "white":"FFF", "whitesmoke":"F5F5F5",
+        "yellow":"FF0", "yellowgreen":"9ACD32"
+    };
 
     Color.prototype = {
         /**
@@ -821,72 +887,32 @@ PIE.Color = (function() {
         parse: function() {
             if( !this._color ) {
                 var me = this,
-                    color = me.val,
-                    alpha, vLower, m, rgb;
-
-                // RGB or RGBA colors
-                if( m = color.match( Color.rgbOrRgbaRE ) ) {
-                    color = me.rgbToHex( +m[1], +m[2], +m[3] );
-                    alpha = m[5] ? +m[5] : 1;
-                }
-                // HSL or HSLA colors
-                else if( m = color.match( Color.hslOrHslaRE ) ) {
-                    rgb = hsl2rgb( m[1], m[2], m[3] );
-                    color = me.rgbToHex( rgb.r, rgb.g, rgb.b );
-                    alpha = m[5] ? +m[5] : 1;
+                    v = me.val,
+                    vLower,
+                    m = v.match( Color.rgbaRE );
+                if( m ) {
+                    me._color = 'rgb(' + m[1] + ',' + m[2] + ',' + m[3] + ')';
+                    me._alpha = parseFloat( m[4] );
                 }
                 else {
-                    if( Color.names.hasOwnProperty( vLower = color.toLowerCase() ) ) {
-                        color = Color.names[vLower];
+                    if( ( vLower = v.toLowerCase() ) in Color.names ) {
+                        v = '#' + Color.names[vLower];
                     }
-                    alpha = ( color === 'transparent' ? 0 : 1 );
+                    me._color = v;
+                    me._alpha = ( v === 'transparent' ? 0 : 1 );
                 }
-                me._color = color;
-                me._alpha = alpha;
             }
         },
 
         /**
-         * Converts RGB color channels to a hex value string
-         */
-        rgbToHex: function( r, g, b ) {
-            return '#' + ( r < 16 ? '0' : '' ) + r.toString( 16 ) +
-                         ( g < 16 ? '0' : '' ) + g.toString( 16 ) +
-                         ( b < 16 ? '0' : '' ) + b.toString( 16 );
-        },
-
-        /**
          * Retrieve the value of the color in a format usable by IE natively. This will be the same as
-         * the raw input value, except for rgb(a) and hsl(a) values which will be converted to a hex value.
+         * the raw input value, except for rgba values which will be converted to an rgb value.
          * @param {Element} el The context element, used to get 'currentColor' keyword value.
          * @return {string} Color value
          */
         colorValue: function( el ) {
             this.parse();
-            return this._color === 'currentColor' ? PIE.getColor( el.currentStyle.color ).colorValue( el ) : this._color;
-        },
-
-        /**
-         * Retrieve the value of the color in a normalized six-digit hex format.
-         * @param el
-         */
-        hexValue: function( el ) {
-            var color = this.colorValue( el );
-            // At this point the color should be either a 3- or 6-digit hex value, or the string "transparent".
-
-            function ch( i ) {
-                return color.charAt( i );
-            }
-
-            // Fudge transparent to black - should be ignored anyway since its alpha will be 0
-            if( color === 'transparent' ) {
-                color = '#000';
-            }
-            // Expand 3-digit to 6-digit hex
-            if( ch(0) === '#' && color.length === 4 ) {
-                color = '#' + ch(1) + ch(1) + ch(2) + ch(2) + ch(3) + ch(3);
-            }
-            return color;
+            return this._color === 'currentColor' ? el.currentStyle.color : this._color;
         },
 
         /**
@@ -1190,17 +1216,6 @@ PIE.BoundsInfo.prototype = {
 
     _locked: 0,
 
-    /**
-     * Determines if the element's position has changed since the last update.
-     * TODO this does a simple getBoundingClientRect comparison for detecting the
-     * changes in position, which may not always be accurate; it's possible that
-     * an element will actually move relative to its positioning parent, but its position
-     * relative to the viewport will stay the same. Need to come up with a better way to
-     * track movement. The most accurate would be the same logic used in RootRenderer.updatePos()
-     * but that is a more expensive operation since it performs DOM walking, and we want this
-     * check to be as fast as possible. Perhaps introduce a -pie-* flag to trigger the slower
-     * but more accurate method?
-     */
     positionChanged: function() {
         var last = this._lastBounds,
             bounds;
@@ -1283,7 +1298,7 @@ PIE.StyleInfoBase = {
             this.targetElement = el;
             this._lastCss = this.getCss();
         }
-        PIE.merge( StyleInfo.prototype, PIE.StyleInfoBase, proto );
+        PIE.Util.merge( StyleInfo.prototype, PIE.StyleInfoBase, proto );
         StyleInfo._propsCache = {};
         return StyleInfo;
     },
@@ -1362,8 +1377,6 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
     originAndClipIdents: { 'padding-box':1, 'border-box':1, 'content-box':1 },
     positionIdents: { 'top':1, 'right':1, 'bottom':1, 'left':1, 'center':1 },
     sizeIdents: { 'contain':1, 'cover':1 },
-    tbIdents: { 'top': 1, 'bottom': 1 },
-    lrIdents: { 'left': 1, 'right': 1 },
     propertyNames: {
         CLIP: 'backgroundClip',
         COLOR: 'backgroundColor',
@@ -1384,7 +1397,6 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
      * Format of return object:
      * {
      *     color: <PIE.Color>,
-     *     colorClip: <'border-box' | 'padding-box'>,
      *     bgImages: [
      *         {
      *             imgType: 'image',
@@ -1399,7 +1411,7 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
      *         },
      *         {
      *             imgType: 'linear-gradient',
-     *             gradientTo: [<'top' | 'bottom'>, <'left' | 'right'>?],
+     *             gradientStart: <PIE.BgPosition>,
      *             angle: <PIE.Angle>,
      *             stops: [
      *                 { color: <PIE.Color>, offset: <PIE.Length> },
@@ -1422,7 +1434,7 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
             tokType, tokVal,
             beginCharIndex = 0,
             positionIdents = this.positionIdents,
-            gradient, stop, width, height, gradientTo, len, tbIdents, lrIdents,
+            gradient, stop, width, height,
             props = { bgImages: [] };
 
         function isBgPosToken( token ) {
@@ -1455,7 +1467,7 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
                                 gradient.stops.push( stop );
                             }
                             if( gradient.stops.length > 1 ) {
-                                PIE.merge( image, gradient );
+                                PIE.Util.merge( image, gradient );
                             }
                             break;
                         }
@@ -1463,7 +1475,7 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
                         // Color stop - must start with color
                         if( tokType & type_color ) {
                             // if we already have an angle/position, make sure that the previous token was a comma
-                            if( gradient.angle || gradient.gradientTo ) {
+                            if( gradient.angle || gradient.gradientStart ) {
                                 token = tokenizer.prev();
                                 if( token.tokenType !== type_operator ) {
                                     break; //fail
@@ -1483,28 +1495,16 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
                             }
                         }
                         // Angle - can only appear in first spot
-                        else if( tokType & tok_type.ANGLE && !gradient.angle && !gradient.gradientTo && !stop.color && !gradient.stops.length ) {
+                        else if( tokType & tok_type.ANGLE && !gradient.angle && !stop.color && !gradient.stops.length ) {
                             gradient.angle = new PIE.Angle( token.tokenValue );
                         }
-                        // "to <side-or-corner>" - can only appear in first spot
-                        else if( tokType & tok_type.IDENT && tokVal === 'to' && !gradient.gradientTo && !gradient.angle && !stop.color && !gradient.stops.length ) {
-                            tbIdents = this.tbIdents;
-                            lrIdents = this.lrIdents;
-
-                            gradientTo = tokenizer.until( function( t ) {
-                                return !(t && t.tokenType & tok_type.IDENT && ( t.tokenValue in tbIdents || t.tokenValue in lrIdents ));
-                            } );
-                            len = gradientTo.length;
-                            gradientTo = [ gradientTo[0] && gradientTo[0].tokenValue, gradientTo[1] && gradientTo[1].tokenValue ];
-
-                            // bail unless there are 1 or 2 values, or if the 2 values are from the same pair of sides
-                            if ( len < 1 || len > 2 || ( len > 1 && (
-                                ( gradientTo[0] in tbIdents && gradientTo[1] in tbIdents ) ||
-                                ( gradientTo[0] in lrIdents && gradientTo[1] in lrIdents )
-                            ) ) ) {
-                                break;
-                            }
-                            gradient.gradientTo = gradientTo;
+                        else if( isBgPosToken( token ) && !gradient.gradientStart && !stop.color && !gradient.stops.length ) {
+                            tokenizer.prev();
+                            gradient.gradientStart = new PIE.BgPosition(
+                                tokenizer.until( function( t ) {
+                                    return !isBgPosToken( t );
+                                }, false )
+                            );
                         }
                         else if( tokType & type_operator && tokVal === ',' ) {
                             if( stop.color ) {
@@ -1590,8 +1590,6 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
                 image.origString = css.substring( beginCharIndex );
                 props.bgImages.push( image );
             }
-
-            props.colorClip = image.bgClip;
         }
 
         // Otherwise, use the standard background properties; let IE give us the values rather than parsing them
@@ -1719,40 +1717,6 @@ PIE.BackgroundStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
         return el.style[ this.styleProperty ] || el.currentStyle.getAttribute( this.cssProperty );
     } ),
 
-
-    /**
-     * For a given background-origin value, return the dimensions of the background area.
-     * @param {String} bgOrigin
-     * @param {PIE.BoundsInfo} boundsInfo
-     * @param {PIE.BorderStyleInfo} borderInfo
-     */
-    getBgAreaSize: function( bgOrigin, boundsInfo, borderInfo, paddingInfo ) {
-        var el = this.targetElement,
-            bounds = boundsInfo.getBounds(),
-            w = bounds.w,
-            h = bounds.h,
-            borders, paddings;
-
-        if( bgOrigin !== 'border-box' ) {
-            borders = borderInfo.getProps();
-            if( borders && ( borders = borders.widths ) ) {
-                w -= borders[ 'l' ].pixels( el ) + borders[ 'l' ].pixels( el );
-                h -= borders[ 't' ].pixels( el ) + borders[ 'b' ].pixels( el );
-            }
-        }
-
-        if ( bgOrigin === 'content-box' ) {
-            paddings = paddingInfo.getProps();
-            if ( paddings ) {
-                w -= paddings[ 'l' ].pixels( el ) + paddings[ 'l' ].pixels( el );
-                h -= paddings[ 't' ].pixels( el ) + paddings[ 'b' ].pixels( el );
-            }
-        }
-
-        return { w: w, h: h };
-    },
-
-
     /**
      * Tests if style.PiePngFix or the -pie-png-fix property is set to true in IE6.
      */
@@ -1877,6 +1841,73 @@ PIE.BorderStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
 
 } );
 /**
+ * Handles parsing, caching, and detecting changes to border-radius CSS
+ * @constructor
+ * @param {Element} el the target element
+ */
+(function() {
+
+PIE.BorderRadiusStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
+
+    cssProperty: 'border-radius',
+    styleProperty: 'borderRadius',
+
+    parseCss: function( css ) {
+        var p = null, x, y,
+            tokenizer, token, length,
+            hasNonZero = false;
+
+        if( css ) {
+            tokenizer = new PIE.Tokenizer( css );
+
+            function collectLengths() {
+                var arr = [], num;
+                while( ( token = tokenizer.next() ) && token.isLengthOrPercent() ) {
+                    length = PIE.getLength( token.tokenValue );
+                    num = length.getNumber();
+                    if( num < 0 ) {
+                        return null;
+                    }
+                    if( num > 0 ) {
+                        hasNonZero = true;
+                    }
+                    arr.push( length );
+                }
+                return arr.length > 0 && arr.length < 5 ? {
+                        'tl': arr[0],
+                        'tr': arr[1] || arr[0],
+                        'br': arr[2] || arr[0],
+                        'bl': arr[3] || arr[1] || arr[0]
+                    } : null;
+            }
+
+            // Grab the initial sequence of lengths
+            if( x = collectLengths() ) {
+                // See if there is a slash followed by more lengths, for the y-axis radii
+                if( token ) {
+                    if( token.tokenType & PIE.Tokenizer.Type.OPERATOR && token.tokenValue === '/' ) {
+                        y = collectLengths();
+                    }
+                } else {
+                    y = x;
+                }
+
+                // Treat all-zero values the same as no value
+                if( hasNonZero && x && y ) {
+                    p = { x: x, y : y };
+                }
+            }
+        }
+
+        return p;
+    }
+} );
+
+var zero = PIE.getLength( '0' ),
+    zeros = { 'tl': zero, 'tr': zero, 'br': zero, 'bl': zero };
+PIE.BorderRadiusStyleInfo.ALL_ZERO = { x: zeros, y: zeros };
+
+})();/**
  * Handles parsing, caching, and detecting changes to border-image CSS
  * @constructor
  * @param {Element} el the target element
@@ -2019,38 +2050,108 @@ PIE.BorderImageStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
     }
 
 } );/**
- * Handles parsing, caching, and detecting changes to padding CSS
+ * Handles parsing, caching, and detecting changes to box-shadow CSS
  * @constructor
  * @param {Element} el the target element
  */
-PIE.PaddingStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
+PIE.BoxShadowStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
+
+    cssProperty: 'box-shadow',
+    styleProperty: 'boxShadow',
 
     parseCss: function( css ) {
-        var tokenizer = new PIE.Tokenizer( css ),
-            arr = [],
-            token;
+        var props,
+            getLength = PIE.getLength,
+            Type = PIE.Tokenizer.Type,
+            tokenizer;
 
-        while( ( token = tokenizer.next() ) && token.isLengthOrPercent() ) {
-            arr.push( PIE.getLength( token.tokenValue ) );
+        if( css ) {
+            tokenizer = new PIE.Tokenizer( css );
+            props = { outset: [], inset: [] };
+
+            function parseItem() {
+                var token, type, value, color, lengths, inset, len;
+
+                while( token = tokenizer.next() ) {
+                    value = token.tokenValue;
+                    type = token.tokenType;
+
+                    if( type & Type.OPERATOR && value === ',' ) {
+                        break;
+                    }
+                    else if( token.isLength() && !lengths ) {
+                        tokenizer.prev();
+                        lengths = tokenizer.until( function( token ) {
+                            return !token.isLength();
+                        } );
+                    }
+                    else if( type & Type.COLOR && !color ) {
+                        color = value;
+                    }
+                    else if( type & Type.IDENT && value === 'inset' && !inset ) {
+                        inset = true;
+                    }
+                    else { //encountered an unrecognized token; fail.
+                        return false;
+                    }
+                }
+
+                len = lengths && lengths.length;
+                if( len > 1 && len < 5 ) {
+                    ( inset ? props.inset : props.outset ).push( {
+                        xOffset: getLength( lengths[0].tokenValue ),
+                        yOffset: getLength( lengths[1].tokenValue ),
+                        blur: getLength( lengths[2] ? lengths[2].tokenValue : '0' ),
+                        spread: getLength( lengths[3] ? lengths[3].tokenValue : '0' ),
+                        color: PIE.getColor( color || 'currentColor' )
+                    } );
+                    return true;
+                }
+                return false;
+            }
+
+            while( parseItem() ) {}
         }
-        return arr.length > 0 && arr.length < 5 ? {
-                't': arr[0],
-                'r': arr[1] || arr[0],
-                'b': arr[2] || arr[0],
-                'l': arr[3] || arr[1] || arr[0]
-            } : null;
-    },
+
+        return props && ( props.inset.length || props.outset.length ) ? props : null;
+    }
+} );
+/**
+ * Retrieves the state of the element's visibility and display
+ * @constructor
+ * @param {Element} el the target element
+ */
+PIE.VisibilityStyleInfo = PIE.StyleInfoBase.newStyleInfo( {
 
     getCss: PIE.StyleInfoBase.cacheWhenLocked( function() {
+        var cs = this.targetElement.currentStyle;
+        return cs.visibility + '|' + cs.display;
+    } ),
+
+    parseCss: function() {
         var el = this.targetElement,
             rs = el.runtimeStyle,
-            rsPadding = rs.padding,
-            padding;
-        if( rsPadding ) rs.padding = '';
-        padding = el.currentStyle.padding;
-        if( rsPadding ) rs.padding = rsPadding;
-        return padding;
-    } )
+            cs = el.currentStyle,
+            rsVis = rs.visibility,
+            csVis;
+
+        rs.visibility = '';
+        csVis = cs.visibility;
+        rs.visibility = rsVis;
+
+        return {
+            visible: csVis !== 'hidden',
+            displayed: cs.display !== 'none'
+        }
+    },
+
+    /**
+     * Always return false for isActive, since this property alone will not trigger
+     * a renderer to do anything.
+     */
+    isActive: function() {
+        return false;
+    }
 
 } );
 PIE.RendererBase = {
@@ -2067,9 +2168,15 @@ PIE.RendererBase = {
             this.styleInfos = styleInfos;
             this.parent = parent;
         }
-        PIE.merge( Renderer.prototype, PIE.RendererBase, proto );
+        PIE.Util.merge( Renderer.prototype, PIE.RendererBase, proto );
         return Renderer;
     },
+
+    /**
+     * Flag indicating the element has already been positioned at least once.
+     * @type {boolean}
+     */
+    isPositioned: false,
 
     /**
      * Determine if the renderer needs to be updated
@@ -2087,9 +2194,26 @@ PIE.RendererBase = {
     prepareUpdate: PIE.emptyFn,
 
     /**
-     * Tell the renderer to update based on modified properties or element dimensions
+     * Tell the renderer to update based on modified properties
      */
-    updateRendering: function() {
+    updateProps: function() {
+        this.destroy();
+        if( this.isActive() ) {
+            this.draw();
+        }
+    },
+
+    /**
+     * Tell the renderer to update based on modified element position
+     */
+    updatePos: function() {
+        this.isPositioned = true;
+    },
+
+    /**
+     * Tell the renderer to update based on modified element dimensions
+     */
+    updateSize: function() {
         if( this.isActive() ) {
             this.draw();
         } else {
@@ -2097,26 +2221,1342 @@ PIE.RendererBase = {
         }
     },
 
+
     /**
-     * Hide the target element's border
+     * Add a layer element, with the given z-order index, to the renderer's main box element. We can't use
+     * z-index because that breaks when the root rendering box's z-index is 'auto' in IE8+ standards mode.
+     * So instead we make sure they are inserted into the DOM in the correct order.
+     * @param {number} index
+     * @param {Element} el
+     */
+    addLayer: function( index, el ) {
+        this.removeLayer( index );
+        for( var layers = this._layers || ( this._layers = [] ), i = index + 1, len = layers.length, layer; i < len; i++ ) {
+            layer = layers[i];
+            if( layer ) {
+                break;
+            }
+        }
+        layers[index] = el;
+        this.getBox().insertBefore( el, layer || null );
+    },
+
+    /**
+     * Retrieve a layer element by its index, or null if not present
+     * @param {number} index
+     * @return {Element}
+     */
+    getLayer: function( index ) {
+        var layers = this._layers;
+        return layers && layers[index] || null;
+    },
+
+    /**
+     * Remove a layer element by its index
+     * @param {number} index
+     */
+    removeLayer: function( index ) {
+        var layer = this.getLayer( index ),
+            box = this._box;
+        if( layer && box ) {
+            box.removeChild( layer );
+            this._layers[index] = null;
+        }
+    },
+
+
+    /**
+     * Get a VML shape by name, creating it if necessary.
+     * @param {string} name A name identifying the element
+     * @param {string=} subElName If specified a subelement of the shape will be created with this tag name
+     * @param {Element} parent The parent element for the shape; will be ignored if 'group' is specified
+     * @param {number=} group If specified, an ordinal group for the shape. 1 or greater. Groups are rendered
+     *                  using container elements in the correct order, to get correct z stacking without z-index.
+     */
+    getShape: function( name, subElName, parent, group ) {
+        var shapes = this._shapes || ( this._shapes = {} ),
+            shape = shapes[ name ],
+            s;
+
+        if( !shape ) {
+            shape = shapes[ name ] = PIE.Util.createVmlElement( 'shape' );
+            if( subElName ) {
+                shape.appendChild( shape[ subElName ] = PIE.Util.createVmlElement( subElName ) );
+            }
+
+            if( group ) {
+                parent = this.getLayer( group );
+                if( !parent ) {
+                    this.addLayer( group, doc.createElement( 'group' + group ) );
+                    parent = this.getLayer( group );
+                }
+            }
+
+            parent.appendChild( shape );
+
+            s = shape.style;
+            s.position = 'absolute';
+            s.left = s.top = 0;
+            s['behavior'] = 'url(#default#VML)';
+        }
+        return shape;
+    },
+
+    /**
+     * Delete a named shape which was created by getShape(). Returns true if a shape with the
+     * given name was found and deleted, or false if there was no shape of that name.
+     * @param {string} name
+     * @return {boolean}
+     */
+    deleteShape: function( name ) {
+        var shapes = this._shapes,
+            shape = shapes && shapes[ name ];
+        if( shape ) {
+            shape.parentNode.removeChild( shape );
+            delete shapes[ name ];
+        }
+        return !!shape;
+    },
+
+
+    /**
+     * For a given set of border radius length/percentage values, convert them to concrete pixel
+     * values based on the current size of the target element.
+     * @param {Object} radii
+     * @return {Object}
+     */
+    getRadiiPixels: function( radii ) {
+        var el = this.targetElement,
+            bounds = this.boundsInfo.getBounds(),
+            w = bounds.w,
+            h = bounds.h,
+            tlX, tlY, trX, trY, brX, brY, blX, blY, f;
+
+        tlX = radii.x['tl'].pixels( el, w );
+        tlY = radii.y['tl'].pixels( el, h );
+        trX = radii.x['tr'].pixels( el, w );
+        trY = radii.y['tr'].pixels( el, h );
+        brX = radii.x['br'].pixels( el, w );
+        brY = radii.y['br'].pixels( el, h );
+        blX = radii.x['bl'].pixels( el, w );
+        blY = radii.y['bl'].pixels( el, h );
+
+        // If any corner ellipses overlap, reduce them all by the appropriate factor. This formula
+        // is taken straight from the CSS3 Backgrounds and Borders spec.
+        f = Math.min(
+            w / ( tlX + trX ),
+            h / ( trY + brY ),
+            w / ( blX + brX ),
+            h / ( tlY + blY )
+        );
+        if( f < 1 ) {
+            tlX *= f;
+            tlY *= f;
+            trX *= f;
+            trY *= f;
+            brX *= f;
+            brY *= f;
+            blX *= f;
+            blY *= f;
+        }
+
+        return {
+            x: {
+                'tl': tlX,
+                'tr': trX,
+                'br': brX,
+                'bl': blX
+            },
+            y: {
+                'tl': tlY,
+                'tr': trY,
+                'br': brY,
+                'bl': blY
+            }
+        }
+    },
+
+    /**
+     * Return the VML path string for the element's background box, with corners rounded.
+     * @param {Object.<{t:number, r:number, b:number, l:number}>} shrink - if present, specifies number of
+     *        pixels to shrink the box path inward from the element's four sides.
+     * @param {number=} mult If specified, all coordinates will be multiplied by this number
+     * @param {Object=} radii If specified, this will be used for the corner radii instead of the properties
+     *        from this renderer's borderRadiusInfo object.
+     * @return {string} the VML path
+     */
+    getBoxPath: function( shrink, mult, radii ) {
+        mult = mult || 1;
+
+        var r, str,
+            bounds = this.boundsInfo.getBounds(),
+            w = bounds.w * mult,
+            h = bounds.h * mult,
+            radInfo = this.styleInfos.borderRadiusInfo,
+            floor = Math.floor, ceil = Math.ceil,
+            shrinkT = shrink ? shrink.t * mult : 0,
+            shrinkR = shrink ? shrink.r * mult : 0,
+            shrinkB = shrink ? shrink.b * mult : 0,
+            shrinkL = shrink ? shrink.l * mult : 0,
+            tlX, tlY, trX, trY, brX, brY, blX, blY;
+
+        if( radii || radInfo.isActive() ) {
+            r = this.getRadiiPixels( radii || radInfo.getProps() );
+
+            tlX = r.x['tl'] * mult;
+            tlY = r.y['tl'] * mult;
+            trX = r.x['tr'] * mult;
+            trY = r.y['tr'] * mult;
+            brX = r.x['br'] * mult;
+            brY = r.y['br'] * mult;
+            blX = r.x['bl'] * mult;
+            blY = r.y['bl'] * mult;
+
+            str = 'm' + floor( shrinkL ) + ',' + floor( tlY ) +
+                'qy' + floor( tlX ) + ',' + floor( shrinkT ) +
+                'l' + ceil( w - trX ) + ',' + floor( shrinkT ) +
+                'qx' + ceil( w - shrinkR ) + ',' + floor( trY ) +
+                'l' + ceil( w - shrinkR ) + ',' + ceil( h - brY ) +
+                'qy' + ceil( w - brX ) + ',' + ceil( h - shrinkB ) +
+                'l' + floor( blX ) + ',' + ceil( h - shrinkB ) +
+                'qx' + floor( shrinkL ) + ',' + ceil( h - blY ) + ' x e';
+        } else {
+            // simplified path for non-rounded box
+            str = 'm' + floor( shrinkL ) + ',' + floor( shrinkT ) +
+                  'l' + ceil( w - shrinkR ) + ',' + floor( shrinkT ) +
+                  'l' + ceil( w - shrinkR ) + ',' + ceil( h - shrinkB ) +
+                  'l' + floor( shrinkL ) + ',' + ceil( h - shrinkB ) +
+                  'xe';
+        }
+        return str;
+    },
+
+
+    /**
+     * Get the container element for the shapes, creating it if necessary.
+     */
+    getBox: function() {
+        var box = this.parent.getLayer( this.boxZIndex ), s;
+
+        if( !box ) {
+            box = doc.createElement( this.boxName );
+            s = box.style;
+            s.position = 'absolute';
+            s.top = s.left = 0;
+            this.parent.addLayer( this.boxZIndex, box );
+        }
+
+        return box;
+    },
+
+
+    /**
+     * Hide the actual border of the element. In IE7 and up we can just set its color to transparent;
+     * however IE6 does not support transparent borders so we have to get tricky with it. Also, some elements
+     * like form buttons require removing the border width altogether, so for those we increase the padding
+     * by the border size.
      */
     hideBorder: function() {
-        this.targetElement.runtimeStyle.borderColor = 'transparent';
+        var el = this.targetElement,
+            cs = el.currentStyle,
+            rs = el.runtimeStyle,
+            tag = el.tagName,
+            isIE6 = PIE.ieVersion === 6,
+            sides, side, i;
+
+        if( ( isIE6 && ( tag in PIE.childlessElements || tag === 'FIELDSET' ) ) ||
+                tag === 'BUTTON' || ( tag === 'INPUT' && el.type in PIE.inputButtonTypes ) ) {
+            rs.borderWidth = '';
+            sides = this.styleInfos.borderInfo.sides;
+            for( i = sides.length; i--; ) {
+                side = sides[ i ];
+                rs[ 'padding' + side ] = '';
+                rs[ 'padding' + side ] = ( PIE.getLength( cs[ 'padding' + side ] ) ).pixels( el ) +
+                                         ( PIE.getLength( cs[ 'border' + side + 'Width' ] ) ).pixels( el ) +
+                                         ( PIE.ieVersion !== 8 && i % 2 ? 1 : 0 ); //needs an extra horizontal pixel to counteract the extra "inner border" going away
+            }
+            rs.borderWidth = 0;
+        }
+        else if( isIE6 ) {
+            // Wrap all the element's children in a custom element, set the element to visiblity:hidden,
+            // and set the wrapper element to visiblity:visible. This hides the outer element's decorations
+            // (background and border) but displays all the contents.
+            // TODO find a better way to do this that doesn't mess up the DOM parent-child relationship,
+            // as this can interfere with other author scripts which add/modify/delete children. Also, this
+            // won't work for elements which cannot take children, e.g. input/button/textarea/img/etc. Look into
+            // using a compositor filter or some other filter which masks the border.
+            if( el.childNodes.length !== 1 || el.firstChild.tagName !== 'ie6-mask' ) {
+                var cont = doc.createElement( 'ie6-mask' ),
+                    s = cont.style, child;
+                s.visibility = 'visible';
+                s.zoom = 1;
+                while( child = el.firstChild ) {
+                    cont.appendChild( child );
+                }
+                el.appendChild( cont );
+                rs.visibility = 'hidden';
+            }
+        }
+        else {
+            rs.borderColor = 'transparent';
+        }
     },
+
+    unhideBorder: function() {
+        
+    },
+
 
     /**
      * Destroy the rendered objects. This is a base implementation which handles common renderer
      * structures, but individual renderers may override as necessary.
      */
     destroy: function() {
+        this.parent.removeLayer( this.boxZIndex );
+        delete this._shapes;
+        delete this._layers;
     }
 };
+/**
+ * Root renderer; creates the outermost container element and handles keeping it aligned
+ * with the target element's size and position.
+ * @param {Element} el The target element
+ * @param {Object} styleInfos The StyleInfo objects
+ */
+PIE.RootRenderer = PIE.RendererBase.newRenderer( {
+
+    isActive: function() {
+        var children = this.childRenderers;
+        for( var i in children ) {
+            if( children.hasOwnProperty( i ) && children[ i ].isActive() ) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    needsUpdate: function() {
+        return this.styleInfos.visibilityInfo.changed();
+    },
+
+    updatePos: function() {
+        if( this.isActive() ) {
+            var el = this.getPositioningElement(),
+                par = el,
+                docEl,
+                parRect,
+                tgtCS = el.currentStyle,
+                tgtPos = tgtCS.position,
+                boxPos,
+                s = this.getBox().style, cs,
+                x = 0, y = 0,
+                elBounds = this.boundsInfo.getBounds(),
+                logicalZoomRatio = elBounds.logicalZoomRatio;
+
+            if( tgtPos === 'fixed' && PIE.ieVersion > 6 ) {
+                x = elBounds.x * logicalZoomRatio;
+                y = elBounds.y * logicalZoomRatio;
+                boxPos = tgtPos;
+            } else {
+                // Get the element's offsets from its nearest positioned ancestor. Uses
+                // getBoundingClientRect for accuracy and speed.
+                do {
+                    par = par.offsetParent;
+                } while( par && ( par.currentStyle.position === 'static' ) );
+                if( par ) {
+                    parRect = par.getBoundingClientRect();
+                    cs = par.currentStyle;
+                    x = ( elBounds.x - parRect.left ) * logicalZoomRatio - ( parseFloat(cs.borderLeftWidth) || 0 );
+                    y = ( elBounds.y - parRect.top ) * logicalZoomRatio - ( parseFloat(cs.borderTopWidth) || 0 );
+                } else {
+                    docEl = doc.documentElement;
+                    x = ( elBounds.x + docEl.scrollLeft - docEl.clientLeft ) * logicalZoomRatio;
+                    y = ( elBounds.y + docEl.scrollTop - docEl.clientTop ) * logicalZoomRatio;
+                }
+                boxPos = 'absolute';
+            }
+
+            s.position = boxPos;
+            s.left = x;
+            s.top = y;
+            s.zIndex = tgtPos === 'static' ? -1 : tgtCS.zIndex;
+            this.isPositioned = true;
+        }
+    },
+
+    updateSize: PIE.emptyFn,
+
+    updateVisibility: function() {
+        var vis = this.styleInfos.visibilityInfo.getProps();
+        this.getBox().style.display = ( vis.visible && vis.displayed ) ? '' : 'none';
+    },
+
+    updateProps: function() {
+        if( this.isActive() ) {
+            this.updateVisibility();
+        } else {
+            this.destroy();
+        }
+    },
+
+    getPositioningElement: function() {
+        var el = this.targetElement;
+        return el.tagName in PIE.tableCellTags ? el.offsetParent : el;
+    },
+
+    getBox: function() {
+        var box = this._box, el;
+        if( !box ) {
+            el = this.getPositioningElement();
+            box = this._box = doc.createElement( 'css3-container' );
+            box.style['direction'] = 'ltr'; //fix positioning bug in rtl environments
+
+            this.updateVisibility();
+
+            el.parentNode.insertBefore( box, el );
+        }
+        return box;
+    },
+
+    finishUpdate: PIE.emptyFn,
+
+    destroy: function() {
+        var box = this._box, par;
+        if( box && ( par = box.parentNode ) ) {
+            par.removeChild( box );
+        }
+        delete this._box;
+        delete this._layers;
+    }
+
+} );
+/**
+ * Renderer for element backgrounds.
+ * @constructor
+ * @param {Element} el The target element
+ * @param {Object} styleInfos The StyleInfo objects
+ * @param {PIE.RootRenderer} parent
+ */
+PIE.BackgroundRenderer = PIE.RendererBase.newRenderer( {
+
+    boxZIndex: 2,
+    boxName: 'background',
+
+    needsUpdate: function() {
+        var si = this.styleInfos;
+        return si.backgroundInfo.changed() || si.borderRadiusInfo.changed();
+    },
+
+    isActive: function() {
+        var si = this.styleInfos;
+        return si.borderImageInfo.isActive() ||
+               si.borderRadiusInfo.isActive() ||
+               si.backgroundInfo.isActive() ||
+               ( si.boxShadowInfo.isActive() && si.boxShadowInfo.getProps().inset );
+    },
+
+    /**
+     * Draw the shapes
+     */
+    draw: function() {
+        var bounds = this.boundsInfo.getBounds();
+        if( bounds.w && bounds.h ) {
+            this.drawBgColor();
+            this.drawBgImages();
+        }
+    },
+
+    /**
+     * Draw the background color shape
+     */
+    drawBgColor: function() {
+        var props = this.styleInfos.backgroundInfo.getProps(),
+            bounds = this.boundsInfo.getBounds(),
+            el = this.targetElement,
+            color = props && props.color,
+            shape, w, h, s, alpha;
+
+        if( color && color.alpha() > 0 ) {
+            this.hideBackground();
+
+            shape = this.getShape( 'bgColor', 'fill', this.getBox(), 1 );
+            w = bounds.w;
+            h = bounds.h;
+            shape.stroked = false;
+            shape.coordsize = w * 2 + ',' + h * 2;
+            shape.coordorigin = '1,1';
+            shape.path = this.getBoxPath( null, 2 );
+            s = shape.style;
+            s.width = w;
+            s.height = h;
+            shape.fill.color = color.colorValue( el );
+
+            alpha = color.alpha();
+            if( alpha < 1 ) {
+                shape.fill.opacity = alpha;
+            }
+        } else {
+            this.deleteShape( 'bgColor' );
+        }
+    },
+
+    /**
+     * Draw all the background image layers
+     */
+    drawBgImages: function() {
+        var props = this.styleInfos.backgroundInfo.getProps(),
+            bounds = this.boundsInfo.getBounds(),
+            images = props && props.bgImages,
+            img, shape, w, h, s, i;
+
+        if( images ) {
+            this.hideBackground();
+
+            w = bounds.w;
+            h = bounds.h;
+
+            i = images.length;
+            while( i-- ) {
+                img = images[i];
+                shape = this.getShape( 'bgImage' + i, 'fill', this.getBox(), 2 );
+
+                shape.stroked = false;
+                shape.fill.type = 'tile';
+                shape.fillcolor = 'none';
+                shape.coordsize = w * 2 + ',' + h * 2;
+                shape.coordorigin = '1,1';
+                shape.path = this.getBoxPath( 0, 2 );
+                s = shape.style;
+                s.width = w;
+                s.height = h;
+
+                if( img.imgType === 'linear-gradient' ) {
+                    this.addLinearGradient( shape, img );
+                }
+                else {
+                    shape.fill.src = img.imgUrl;
+                    this.positionBgImage( shape, i );
+                }
+            }
+        }
+
+        // Delete any bgImage shapes previously created which weren't used above
+        i = images ? images.length : 0;
+        while( this.deleteShape( 'bgImage' + i++ ) ) {}
+    },
+
+
+    /**
+     * Set the position and clipping of the background image for a layer
+     * @param {Element} shape
+     * @param {number} index
+     */
+    positionBgImage: function( shape, index ) {
+        var me = this;
+        PIE.Util.withImageSize( shape.fill.src, function( size ) {
+            var el = me.targetElement,
+                bounds = me.boundsInfo.getBounds(),
+                elW = bounds.w,
+                elH = bounds.h;
+
+            // It's possible that the element dimensions are zero now but weren't when the original
+            // update executed, make sure that's not the case to avoid divide-by-zero error
+            if( elW && elH ) {
+                var fill = shape.fill,
+                    si = me.styleInfos,
+                    border = si.borderInfo.getProps(),
+                    bw = border && border.widths,
+                    bwT = bw ? bw['t'].pixels( el ) : 0,
+                    bwR = bw ? bw['r'].pixels( el ) : 0,
+                    bwB = bw ? bw['b'].pixels( el ) : 0,
+                    bwL = bw ? bw['l'].pixels( el ) : 0,
+                    bg = si.backgroundInfo.getProps().bgImages[ index ],
+                    bgPos = bg.bgPosition ? bg.bgPosition.coords( el, elW - size.w - bwL - bwR, elH - size.h - bwT - bwB ) : { x:0, y:0 },
+                    repeat = bg.imgRepeat,
+                    pxX, pxY,
+                    clipT = 0, clipL = 0,
+                    clipR = elW + 1, clipB = elH + 1, //make sure the default clip region is not inside the box (by a subpixel)
+                    clipAdjust = PIE.ieVersion === 8 ? 0 : 1; //prior to IE8 requires 1 extra pixel in the image clip region
+
+                // Positioning - find the pixel offset from the top/left and convert to a ratio
+                // The position is shifted by half a pixel, to adjust for the half-pixel coordorigin shift which is
+                // needed to fix antialiasing but makes the bg image fuzzy.
+                pxX = Math.round( bgPos.x ) + bwL + 0.5;
+                pxY = Math.round( bgPos.y ) + bwT + 0.5;
+                fill.position = ( pxX / elW ) + ',' + ( pxY / elH );
+
+                // Set the size of the image. We have to actually set it to px values otherwise it will not honor
+                // the user's browser zoom level and always display at its natural screen size.
+                fill['size']['x'] = 1; //Can be any value, just has to be set to "prime" it so the next line works. Weird!
+                fill['size'] = size.w + 'px,' + size.h + 'px';
+
+                // Repeating - clip the image shape
+                if( repeat && repeat !== 'repeat' ) {
+                    if( repeat === 'repeat-x' || repeat === 'no-repeat' ) {
+                        clipT = pxY + 1;
+                        clipB = pxY + size.h + clipAdjust;
+                    }
+                    if( repeat === 'repeat-y' || repeat === 'no-repeat' ) {
+                        clipL = pxX + 1;
+                        clipR = pxX + size.w + clipAdjust;
+                    }
+                    shape.style.clip = 'rect(' + clipT + 'px,' + clipR + 'px,' + clipB + 'px,' + clipL + 'px)';
+                }
+            }
+        } );
+    },
+
+
+    /**
+     * Draw the linear gradient for a gradient layer
+     * @param {Element} shape
+     * @param {Object} info The object holding the information about the gradient
+     */
+    addLinearGradient: function( shape, info ) {
+        var el = this.targetElement,
+            bounds = this.boundsInfo.getBounds(),
+            w = bounds.w,
+            h = bounds.h,
+            fill = shape.fill,
+            stops = info.stops,
+            stopCount = stops.length,
+            PI = Math.PI,
+            GradientUtil = PIE.GradientUtil,
+            perpendicularIntersect = GradientUtil.perpendicularIntersect,
+            distance = GradientUtil.distance,
+            metrics = GradientUtil.getGradientMetrics( el, w, h, info ),
+            angle = metrics.angle,
+            startX = metrics.startX,
+            startY = metrics.startY,
+            startCornerX = metrics.startCornerX,
+            startCornerY = metrics.startCornerY,
+            endCornerX = metrics.endCornerX,
+            endCornerY = metrics.endCornerY,
+            deltaX = metrics.deltaX,
+            deltaY = metrics.deltaY,
+            lineLength = metrics.lineLength,
+            vmlAngle, vmlGradientLength, vmlColors,
+            stopPx, vmlOffsetPct,
+            p, i, j, before, after;
+
+        // In VML land, the angle of the rendered gradient depends on the aspect ratio of the shape's
+        // bounding box; for example specifying a 45 deg angle actually results in a gradient
+        // drawn diagonally from one corner to its opposite corner, which will only appear to the
+        // viewer as 45 degrees if the shape is equilateral.  We adjust for this by taking the x/y deltas
+        // between the start and end points, multiply one of them by the shape's aspect ratio,
+        // and get their arctangent, resulting in an appropriate VML angle. If the angle is perfectly
+        // horizontal or vertical then we don't need to do this conversion.
+        vmlAngle = ( angle % 90 ) ? Math.atan2( deltaX * w / h, deltaY ) / PI * 180 : ( angle + 90 );
+
+        // VML angles are 180 degrees offset from CSS angles
+        vmlAngle += 180;
+        vmlAngle = vmlAngle % 360;
+
+        // Add all the stops to the VML 'colors' list, including the first and last stops.
+        // For each, we find its pixel offset along the gradient-line; if the offset of a stop is less
+        // than that of its predecessor we increase it to be equal. We then map that pixel offset to a
+        // percentage along the VML gradient-line, which runs from shape corner to corner.
+        p = perpendicularIntersect( startCornerX, startCornerY, angle, endCornerX, endCornerY );
+        vmlGradientLength = distance( startCornerX, startCornerY, p[0], p[1] );
+        vmlColors = [];
+        p = perpendicularIntersect( startX, startY, angle, startCornerX, startCornerY );
+        vmlOffsetPct = distance( startX, startY, p[0], p[1] ) / vmlGradientLength * 100;
+
+        // Find the pixel offsets along the CSS3 gradient-line for each stop.
+        stopPx = [];
+        for( i = 0; i < stopCount; i++ ) {
+            stopPx.push( stops[i].offset ? stops[i].offset.pixels( el, lineLength ) :
+                         i === 0 ? 0 : i === stopCount - 1 ? lineLength : null );
+        }
+        // Fill in gaps with evenly-spaced offsets
+        for( i = 1; i < stopCount; i++ ) {
+            if( stopPx[ i ] === null ) {
+                before = stopPx[ i - 1 ];
+                j = i;
+                do {
+                    after = stopPx[ ++j ];
+                } while( after === null );
+                stopPx[ i ] = before + ( after - before ) / ( j - i + 1 );
+            }
+            // Make sure each stop's offset is no less than the one before it
+            stopPx[ i ] = Math.max( stopPx[ i ], stopPx[ i - 1 ] );
+        }
+
+        // Convert to percentage along the VML gradient line and add to the VML 'colors' value
+        for( i = 0; i < stopCount; i++ ) {
+            vmlColors.push(
+                ( vmlOffsetPct + ( stopPx[ i ] / vmlGradientLength * 100 ) ) + '% ' + stops[i].color.colorValue( el )
+            );
+        }
+
+        // Now, finally, we're ready to render the gradient fill. Set the start and end colors to
+        // the first and last stop colors; this just sets outer bounds for the gradient.
+        fill['angle'] = vmlAngle;
+        fill['type'] = 'gradient';
+        fill['method'] = 'sigma';
+        fill['color'] = stops[0].color.colorValue( el );
+        fill['color2'] = stops[stopCount - 1].color.colorValue( el );
+        if( fill['colors'] ) { //sometimes the colors object isn't initialized so we have to assign it directly (?)
+            fill['colors'].value = vmlColors.join( ',' );
+        } else {
+            fill['colors'] = vmlColors.join( ',' );
+        }
+    },
+
+
+    /**
+     * Hide the actual background image and color of the element.
+     */
+    hideBackground: function() {
+        var rs = this.targetElement.runtimeStyle;
+        rs.backgroundImage = 'url(about:blank)'; //ensures the background area reacts to mouse events
+        rs.backgroundColor = 'transparent';
+    },
+
+    destroy: function() {
+        PIE.RendererBase.destroy.call( this );
+        var rs = this.targetElement.runtimeStyle;
+        rs.backgroundImage = rs.backgroundColor = '';
+    }
+
+} );
+/**
+ * Renderer for element borders.
+ * @constructor
+ * @param {Element} el The target element
+ * @param {Object} styleInfos The StyleInfo objects
+ * @param {PIE.RootRenderer} parent
+ */
+PIE.BorderRenderer = PIE.RendererBase.newRenderer( {
+
+    boxZIndex: 4,
+    boxName: 'border',
+
+    needsUpdate: function() {
+        var si = this.styleInfos;
+        return si.borderInfo.changed() || si.borderRadiusInfo.changed();
+    },
+
+    isActive: function() {
+        var si = this.styleInfos;
+        return si.borderRadiusInfo.isActive() &&
+               !si.borderImageInfo.isActive() &&
+               si.borderInfo.isActive(); //check BorderStyleInfo last because it's the most expensive
+    },
+
+    /**
+     * Draw the border shape(s)
+     */
+    draw: function() {
+        var el = this.targetElement,
+            props = this.styleInfos.borderInfo.getProps(),
+            bounds = this.boundsInfo.getBounds(),
+            w = bounds.w,
+            h = bounds.h,
+            shape, stroke, s,
+            segments, seg, i, len;
+
+        if( props ) {
+            this.hideBorder();
+
+            segments = this.getBorderSegments( 2 );
+            for( i = 0, len = segments.length; i < len; i++) {
+                seg = segments[i];
+                shape = this.getShape( 'borderPiece' + i, seg.stroke ? 'stroke' : 'fill', this.getBox() );
+                shape.coordsize = w * 2 + ',' + h * 2;
+                shape.coordorigin = '1,1';
+                shape.path = seg.path;
+                s = shape.style;
+                s.width = w;
+                s.height = h;
+
+                shape.filled = !!seg.fill;
+                shape.stroked = !!seg.stroke;
+                if( seg.stroke ) {
+                    stroke = shape.stroke;
+                    stroke['weight'] = seg.weight + 'px';
+                    stroke.color = seg.color.colorValue( el );
+                    stroke['dashstyle'] = seg.stroke === 'dashed' ? '2 2' : seg.stroke === 'dotted' ? '1 1' : 'solid';
+                    stroke['linestyle'] = seg.stroke === 'double' && seg.weight > 2 ? 'ThinThin' : 'Single';
+                } else {
+                    shape.fill.color = seg.fill.colorValue( el );
+                }
+            }
+
+            // remove any previously-created border shapes which didn't get used above
+            while( this.deleteShape( 'borderPiece' + i++ ) ) {}
+        }
+    },
+
+
+    /**
+     * Get the VML path definitions for the border segment(s).
+     * @param {number=} mult If specified, all coordinates will be multiplied by this number
+     * @return {Array.<string>}
+     */
+    getBorderSegments: function( mult ) {
+        var el = this.targetElement,
+            bounds, elW, elH,
+            borderInfo = this.styleInfos.borderInfo,
+            segments = [],
+            floor, ceil, wT, wR, wB, wL,
+            round = Math.round,
+            borderProps, radiusInfo, radii, widths, styles, colors;
+
+        if( borderInfo.isActive() ) {
+            borderProps = borderInfo.getProps();
+
+            widths = borderProps.widths;
+            styles = borderProps.styles;
+            colors = borderProps.colors;
+
+            if( borderProps.widthsSame && borderProps.stylesSame && borderProps.colorsSame ) {
+                if( colors['t'].alpha() > 0 ) {
+                    // shortcut for identical border on all sides - only need 1 stroked shape
+                    wT = widths['t'].pixels( el ); //thickness
+                    wR = wT / 2; //shrink
+                    segments.push( {
+                        path: this.getBoxPath( { t: wR, r: wR, b: wR, l: wR }, mult ),
+                        stroke: styles['t'],
+                        color: colors['t'],
+                        weight: wT
+                    } );
+                }
+            }
+            else {
+                mult = mult || 1;
+                bounds = this.boundsInfo.getBounds();
+                elW = bounds.w;
+                elH = bounds.h;
+
+                wT = round( widths['t'].pixels( el ) );
+                wR = round( widths['r'].pixels( el ) );
+                wB = round( widths['b'].pixels( el ) );
+                wL = round( widths['l'].pixels( el ) );
+                var pxWidths = {
+                    't': wT,
+                    'r': wR,
+                    'b': wB,
+                    'l': wL
+                };
+
+                radiusInfo = this.styleInfos.borderRadiusInfo;
+                if( radiusInfo.isActive() ) {
+                    radii = this.getRadiiPixels( radiusInfo.getProps() );
+                }
+
+                floor = Math.floor;
+                ceil = Math.ceil;
+
+                function radius( xy, corner ) {
+                    return radii ? radii[ xy ][ corner ] : 0;
+                }
+
+                function curve( corner, shrinkX, shrinkY, startAngle, ccw, doMove ) {
+                    var rx = radius( 'x', corner),
+                        ry = radius( 'y', corner),
+                        deg = 65535,
+                        isRight = corner.charAt( 1 ) === 'r',
+                        isBottom = corner.charAt( 0 ) === 'b';
+                    return ( rx > 0 && ry > 0 ) ?
+                                ( doMove ? 'al' : 'ae' ) +
+                                ( isRight ? ceil( elW - rx ) : floor( rx ) ) * mult + ',' + // center x
+                                ( isBottom ? ceil( elH - ry ) : floor( ry ) ) * mult + ',' + // center y
+                                ( floor( rx ) - shrinkX ) * mult + ',' + // width
+                                ( floor( ry ) - shrinkY ) * mult + ',' + // height
+                                ( startAngle * deg ) + ',' + // start angle
+                                ( 45 * deg * ( ccw ? 1 : -1 ) // angle change
+                            ) : (
+                                ( doMove ? 'm' : 'l' ) +
+                                ( isRight ? elW - shrinkX : shrinkX ) * mult + ',' +
+                                ( isBottom ? elH - shrinkY : shrinkY ) * mult
+                            );
+                }
+
+                function line( side, shrink, ccw, doMove ) {
+                    var
+                        start = (
+                            side === 't' ?
+                                floor( radius( 'x', 'tl') ) * mult + ',' + ceil( shrink ) * mult :
+                            side === 'r' ?
+                                ceil( elW - shrink ) * mult + ',' + floor( radius( 'y', 'tr') ) * mult :
+                            side === 'b' ?
+                                ceil( elW - radius( 'x', 'br') ) * mult + ',' + floor( elH - shrink ) * mult :
+                            // side === 'l' ?
+                                floor( shrink ) * mult + ',' + ceil( elH - radius( 'y', 'bl') ) * mult
+                        ),
+                        end = (
+                            side === 't' ?
+                                ceil( elW - radius( 'x', 'tr') ) * mult + ',' + ceil( shrink ) * mult :
+                            side === 'r' ?
+                                ceil( elW - shrink ) * mult + ',' + ceil( elH - radius( 'y', 'br') ) * mult :
+                            side === 'b' ?
+                                floor( radius( 'x', 'bl') ) * mult + ',' + floor( elH - shrink ) * mult :
+                            // side === 'l' ?
+                                floor( shrink ) * mult + ',' + floor( radius( 'y', 'tl') ) * mult
+                        );
+                    return ccw ? ( doMove ? 'm' + end : '' ) + 'l' + start :
+                                 ( doMove ? 'm' + start : '' ) + 'l' + end;
+                }
+
+
+                function addSide( side, sideBefore, sideAfter, cornerBefore, cornerAfter, baseAngle ) {
+                    var vert = side === 'l' || side === 'r',
+                        sideW = pxWidths[ side ],
+                        beforeX, beforeY, afterX, afterY;
+
+                    if( sideW > 0 && styles[ side ] !== 'none' && colors[ side ].alpha() > 0 ) {
+                        beforeX = pxWidths[ vert ? side : sideBefore ];
+                        beforeY = pxWidths[ vert ? sideBefore : side ];
+                        afterX = pxWidths[ vert ? side : sideAfter ];
+                        afterY = pxWidths[ vert ? sideAfter : side ];
+
+                        if( styles[ side ] === 'dashed' || styles[ side ] === 'dotted' ) {
+                            segments.push( {
+                                path: curve( cornerBefore, beforeX, beforeY, baseAngle + 45, 0, 1 ) +
+                                      curve( cornerBefore, 0, 0, baseAngle, 1, 0 ),
+                                fill: colors[ side ]
+                            } );
+                            segments.push( {
+                                path: line( side, sideW / 2, 0, 1 ),
+                                stroke: styles[ side ],
+                                weight: sideW,
+                                color: colors[ side ]
+                            } );
+                            segments.push( {
+                                path: curve( cornerAfter, afterX, afterY, baseAngle, 0, 1 ) +
+                                      curve( cornerAfter, 0, 0, baseAngle - 45, 1, 0 ),
+                                fill: colors[ side ]
+                            } );
+                        }
+                        else {
+                            segments.push( {
+                                path: curve( cornerBefore, beforeX, beforeY, baseAngle + 45, 0, 1 ) +
+                                      line( side, sideW, 0, 0 ) +
+                                      curve( cornerAfter, afterX, afterY, baseAngle, 0, 0 ) +
+
+                                      ( styles[ side ] === 'double' && sideW > 2 ?
+                                              curve( cornerAfter, afterX - floor( afterX / 3 ), afterY - floor( afterY / 3 ), baseAngle - 45, 1, 0 ) +
+                                              line( side, ceil( sideW / 3 * 2 ), 1, 0 ) +
+                                              curve( cornerBefore, beforeX - floor( beforeX / 3 ), beforeY - floor( beforeY / 3 ), baseAngle, 1, 0 ) +
+                                              'x ' +
+                                              curve( cornerBefore, floor( beforeX / 3 ), floor( beforeY / 3 ), baseAngle + 45, 0, 1 ) +
+                                              line( side, floor( sideW / 3 ), 1, 0 ) +
+                                              curve( cornerAfter, floor( afterX / 3 ), floor( afterY / 3 ), baseAngle, 0, 0 )
+                                          : '' ) +
+
+                                      curve( cornerAfter, 0, 0, baseAngle - 45, 1, 0 ) +
+                                      line( side, 0, 1, 0 ) +
+                                      curve( cornerBefore, 0, 0, baseAngle, 1, 0 ),
+                                fill: colors[ side ]
+                            } );
+                        }
+                    }
+                }
+
+                addSide( 't', 'l', 'r', 'tl', 'tr', 90 );
+                addSide( 'r', 't', 'b', 'tr', 'br', 0 );
+                addSide( 'b', 'r', 'l', 'br', 'bl', -90 );
+                addSide( 'l', 'b', 't', 'bl', 'tl', -180 );
+            }
+        }
+
+        return segments;
+    },
+
+    destroy: function() {
+        var me = this;
+        if (me.finalized || !me.styleInfos.borderImageInfo.isActive()) {
+            me.targetElement.runtimeStyle.borderColor = '';
+        }
+        PIE.RendererBase.destroy.call( me );
+    }
+
+
+} );
+/**
+ * Renderer for border-image
+ * @constructor
+ * @param {Element} el The target element
+ * @param {Object} styleInfos The StyleInfo objects
+ * @param {PIE.RootRenderer} parent
+ */
+PIE.BorderImageRenderer = PIE.RendererBase.newRenderer( {
+
+    boxZIndex: 5,
+    pieceNames: [ 't', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl', 'c' ],
+
+    needsUpdate: function() {
+        return this.styleInfos.borderImageInfo.changed();
+    },
+
+    isActive: function() {
+        return this.styleInfos.borderImageInfo.isActive();
+    },
+
+    draw: function() {
+        this.getBox(); //make sure pieces are created
+
+        var props = this.styleInfos.borderImageInfo.getProps(),
+            borderProps = this.styleInfos.borderInfo.getProps(),
+            bounds = this.boundsInfo.getBounds(),
+            el = this.targetElement,
+            pieces = this.pieces;
+
+        PIE.Util.withImageSize( props.src, function( imgSize ) {
+            var elW = bounds.w,
+                elH = bounds.h,
+                zero = PIE.getLength( '0' ),
+                widths = props.widths || ( borderProps ? borderProps.widths : { 't': zero, 'r': zero, 'b': zero, 'l': zero } ),
+                widthT = widths['t'].pixels( el ),
+                widthR = widths['r'].pixels( el ),
+                widthB = widths['b'].pixels( el ),
+                widthL = widths['l'].pixels( el ),
+                slices = props.slice,
+                sliceT = slices['t'].pixels( el ),
+                sliceR = slices['r'].pixels( el ),
+                sliceB = slices['b'].pixels( el ),
+                sliceL = slices['l'].pixels( el );
+
+            // Piece positions and sizes
+            function setSizeAndPos( piece, w, h, x, y ) {
+                var s = pieces[piece].style,
+                    max = Math.max;
+                s.width = max(w, 0);
+                s.height = max(h, 0);
+                s.left = x;
+                s.top = y;
+            }
+            setSizeAndPos( 'tl', widthL, widthT, 0, 0 );
+            setSizeAndPos( 't', elW - widthL - widthR, widthT, widthL, 0 );
+            setSizeAndPos( 'tr', widthR, widthT, elW - widthR, 0 );
+            setSizeAndPos( 'r', widthR, elH - widthT - widthB, elW - widthR, widthT );
+            setSizeAndPos( 'br', widthR, widthB, elW - widthR, elH - widthB );
+            setSizeAndPos( 'b', elW - widthL - widthR, widthB, widthL, elH - widthB );
+            setSizeAndPos( 'bl', widthL, widthB, 0, elH - widthB );
+            setSizeAndPos( 'l', widthL, elH - widthT - widthB, 0, widthT );
+            setSizeAndPos( 'c', elW - widthL - widthR, elH - widthT - widthB, widthL, widthT );
+
+
+            // image croppings
+            function setCrops( sides, crop, val ) {
+                for( var i=0, len=sides.length; i < len; i++ ) {
+                    pieces[ sides[i] ]['imagedata'][ crop ] = val;
+                }
+            }
+
+            // corners
+            setCrops( [ 'tl', 't', 'tr' ], 'cropBottom', ( imgSize.h - sliceT ) / imgSize.h );
+            setCrops( [ 'tl', 'l', 'bl' ], 'cropRight', ( imgSize.w - sliceL ) / imgSize.w );
+            setCrops( [ 'bl', 'b', 'br' ], 'cropTop', ( imgSize.h - sliceB ) / imgSize.h );
+            setCrops( [ 'tr', 'r', 'br' ], 'cropLeft', ( imgSize.w - sliceR ) / imgSize.w );
+
+            // edges and center
+            // TODO right now this treats everything like 'stretch', need to support other schemes
+            //if( props.repeat.v === 'stretch' ) {
+                setCrops( [ 'l', 'r', 'c' ], 'cropTop', sliceT / imgSize.h );
+                setCrops( [ 'l', 'r', 'c' ], 'cropBottom', sliceB / imgSize.h );
+            //}
+            //if( props.repeat.h === 'stretch' ) {
+                setCrops( [ 't', 'b', 'c' ], 'cropLeft', sliceL / imgSize.w );
+                setCrops( [ 't', 'b', 'c' ], 'cropRight', sliceR / imgSize.w );
+            //}
+
+            // center fill
+            pieces['c'].style.display = props.fill ? '' : 'none';
+        }, this );
+    },
+
+    getBox: function() {
+        var box = this.parent.getLayer( this.boxZIndex ),
+            s, piece, i,
+            pieceNames = this.pieceNames,
+            len = pieceNames.length;
+
+        if( !box ) {
+            box = doc.createElement( 'border-image' );
+            s = box.style;
+            s.position = 'absolute';
+
+            this.pieces = {};
+
+            for( i = 0; i < len; i++ ) {
+                piece = this.pieces[ pieceNames[i] ] = PIE.Util.createVmlElement( 'rect' );
+                piece.appendChild( PIE.Util.createVmlElement( 'imagedata' ) );
+                s = piece.style;
+                s['behavior'] = 'url(#default#VML)';
+                s.position = "absolute";
+                s.top = s.left = 0;
+                piece['imagedata'].src = this.styleInfos.borderImageInfo.getProps().src;
+                piece.stroked = false;
+                piece.filled = false;
+                box.appendChild( piece );
+            }
+
+            this.parent.addLayer( this.boxZIndex, box );
+        }
+
+        return box;
+    },
+
+    prepareUpdate: function() {
+        if (this.isActive()) {
+            var me = this,
+                el = me.targetElement,
+                rs = el.runtimeStyle,
+                widths = me.styleInfos.borderImageInfo.getProps().widths;
+
+            // Force border-style to solid so it doesn't collapse
+            rs.borderStyle = 'solid';
+
+            // If widths specified in border-image shorthand, override border-width
+            // NOTE px units needed here as this gets used by the IE9 renderer too
+            if ( widths ) {
+                rs.borderTopWidth = widths['t'].pixels( el ) + 'px';
+                rs.borderRightWidth = widths['r'].pixels( el ) + 'px';
+                rs.borderBottomWidth = widths['b'].pixels( el ) + 'px';
+                rs.borderLeftWidth = widths['l'].pixels( el ) + 'px';
+            }
+
+            // Make the border transparent
+            me.hideBorder();
+        }
+    },
+
+    destroy: function() {
+        var me = this,
+            rs = me.targetElement.runtimeStyle;
+        rs.borderStyle = '';
+        if (me.finalized || !me.styleInfos.borderInfo.isActive()) {
+            rs.borderColor = rs.borderWidth = '';
+        }
+        PIE.RendererBase.destroy.call( this );
+    }
+
+} );
+/**
+ * Renderer for outset box-shadows
+ * @constructor
+ * @param {Element} el The target element
+ * @param {Object} styleInfos The StyleInfo objects
+ * @param {PIE.RootRenderer} parent
+ */
+PIE.BoxShadowOutsetRenderer = PIE.RendererBase.newRenderer( {
+
+    boxZIndex: 1,
+    boxName: 'outset-box-shadow',
+
+    needsUpdate: function() {
+        var si = this.styleInfos;
+        return si.boxShadowInfo.changed() || si.borderRadiusInfo.changed();
+    },
+
+    isActive: function() {
+        var boxShadowInfo = this.styleInfos.boxShadowInfo;
+        return boxShadowInfo.isActive() && boxShadowInfo.getProps().outset[0];
+    },
+
+    draw: function() {
+        var me = this,
+            el = this.targetElement,
+            box = this.getBox(),
+            styleInfos = this.styleInfos,
+            shadowInfos = styleInfos.boxShadowInfo.getProps().outset,
+            radii = styleInfos.borderRadiusInfo.getProps(),
+            len = shadowInfos.length,
+            i = len, j,
+            bounds = this.boundsInfo.getBounds(),
+            w = bounds.w,
+            h = bounds.h,
+            clipAdjust = PIE.ieVersion === 8 ? 1 : 0, //workaround for IE8 bug where VML leaks out top/left of clip region by 1px
+            corners = [ 'tl', 'tr', 'br', 'bl' ], corner,
+            shadowInfo, shape, fill, ss, xOff, yOff, spread, blur, shrink, color, alpha, path,
+            totalW, totalH, focusX, focusY, isBottom, isRight;
+
+
+        function getShadowShape( index, corner, xOff, yOff, color, blur, path ) {
+            var shape = me.getShape( 'shadow' + index + corner, 'fill', box, len - index ),
+                fill = shape.fill;
+
+            // Position and size
+            shape['coordsize'] = w * 2 + ',' + h * 2;
+            shape['coordorigin'] = '1,1';
+
+            // Color and opacity
+            shape['stroked'] = false;
+            shape['filled'] = true;
+            fill.color = color.colorValue( el );
+            if( blur ) {
+                fill['type'] = 'gradienttitle'; //makes the VML gradient follow the shape's outline - hooray for undocumented features?!?!
+                fill['color2'] = fill.color;
+                fill['opacity'] = 0;
+            }
+
+            // Path
+            shape.path = path;
+
+            // This needs to go last for some reason, to prevent rendering at incorrect size
+            ss = shape.style;
+            ss.left = xOff;
+            ss.top = yOff;
+            ss.width = w;
+            ss.height = h;
+
+            return shape;
+        }
+
+
+        while( i-- ) {
+            shadowInfo = shadowInfos[ i ];
+            xOff = shadowInfo.xOffset.pixels( el );
+            yOff = shadowInfo.yOffset.pixels( el );
+            spread = shadowInfo.spread.pixels( el );
+            blur = shadowInfo.blur.pixels( el );
+            color = shadowInfo.color;
+            // Shape path
+            shrink = -spread - blur;
+            if( !radii && blur ) {
+                // If blurring, use a non-null border radius info object so that getBoxPath will
+                // round the corners of the expanded shadow shape rather than squaring them off.
+                radii = PIE.BorderRadiusStyleInfo.ALL_ZERO;
+            }
+            path = this.getBoxPath( { t: shrink, r: shrink, b: shrink, l: shrink }, 2, radii );
+
+            if( blur ) {
+                totalW = ( spread + blur ) * 2 + w;
+                totalH = ( spread + blur ) * 2 + h;
+                focusX = totalW ? blur * 2 / totalW : 0;
+                focusY = totalH ? blur * 2 / totalH : 0;
+                if( blur - spread > w / 2 || blur - spread > h / 2 ) {
+                    // If the blur is larger than half the element's narrowest dimension, we cannot do
+                    // this with a single shape gradient, because its focussize would have to be less than
+                    // zero which results in ugly artifacts. Instead we create four shapes, each with its
+                    // gradient focus past center, and then clip them so each only shows the quadrant
+                    // opposite the focus.
+                    for( j = 4; j--; ) {
+                        corner = corners[j];
+                        isBottom = corner.charAt( 0 ) === 'b';
+                        isRight = corner.charAt( 1 ) === 'r';
+                        shape = getShadowShape( i, corner, xOff, yOff, color, blur, path );
+                        fill = shape.fill;
+                        fill['focusposition'] = ( isRight ? 1 - focusX : focusX ) + ',' +
+                                                ( isBottom ? 1 - focusY : focusY );
+                        fill['focussize'] = '0,0';
+
+                        // Clip to show only the appropriate quadrant. Add 1px to the top/left clip values
+                        // in IE8 to prevent a bug where IE8 displays one pixel outside the clip region.
+                        shape.style.clip = 'rect(' + ( ( isBottom ? totalH / 2 : 0 ) + clipAdjust ) + 'px,' +
+                                                     ( isRight ? totalW : totalW / 2 ) + 'px,' +
+                                                     ( isBottom ? totalH : totalH / 2 ) + 'px,' +
+                                                     ( ( isRight ? totalW / 2 : 0 ) + clipAdjust ) + 'px)';
+                    }
+                } else {
+                    // TODO delete old quadrant shapes if resizing expands past the barrier
+                    shape = getShadowShape( i, '', xOff, yOff, color, blur, path );
+                    fill = shape.fill;
+                    fill['focusposition'] = focusX + ',' + focusY;
+                    fill['focussize'] = ( 1 - focusX * 2 ) + ',' + ( 1 - focusY * 2 );
+                }
+            } else {
+                shape = getShadowShape( i, '', xOff, yOff, color, blur, path );
+                alpha = color.alpha();
+                if( alpha < 1 ) {
+                    // shape.style.filter = 'alpha(opacity=' + ( alpha * 100 ) + ')';
+                    // ss.filter = 'progid:DXImageTransform.Microsoft.BasicImage(opacity=' + ( alpha  ) + ')';
+                    shape.fill.opacity = alpha;
+                }
+            }
+        }
+    }
+
+} );
+/**
+ * Renderer for re-rendering img elements using VML. Kicks in if the img has
+ * a border-radius applied, or if the -pie-png-fix flag is set.
+ * @constructor
+ * @param {Element} el The target element
+ * @param {Object} styleInfos The StyleInfo objects
+ * @param {PIE.RootRenderer} parent
+ */
+PIE.ImgRenderer = PIE.RendererBase.newRenderer( {
+
+    boxZIndex: 6,
+    boxName: 'imgEl',
+
+    needsUpdate: function() {
+        var si = this.styleInfos;
+        return this.targetElement.src !== this._lastSrc || si.borderRadiusInfo.changed();
+    },
+
+    isActive: function() {
+        var si = this.styleInfos;
+        return si.borderRadiusInfo.isActive() || si.backgroundInfo.isPngFix();
+    },
+
+    draw: function() {
+        this._lastSrc = src;
+        this.hideActualImg();
+
+        var shape = this.getShape( 'img', 'fill', this.getBox() ),
+            fill = shape.fill,
+            bounds = this.boundsInfo.getBounds(),
+            w = bounds.w,
+            h = bounds.h,
+            borderProps = this.styleInfos.borderInfo.getProps(),
+            borderWidths = borderProps && borderProps.widths,
+            el = this.targetElement,
+            src = el.src,
+            round = Math.round,
+            cs = el.currentStyle,
+            getLength = PIE.getLength,
+            s, zero;
+
+        // In IE6, the BorderRenderer will have hidden the border by moving the border-width to
+        // the padding; therefore we want to pretend the borders have no width so they aren't doubled
+        // when adding in the current padding value below.
+        if( !borderWidths || PIE.ieVersion < 7 ) {
+            zero = PIE.getLength( '0' );
+            borderWidths = { 't': zero, 'r': zero, 'b': zero, 'l': zero };
+        }
+
+        shape.stroked = false;
+        fill.type = 'frame';
+        fill.src = src;
+        fill.position = (w ? 0.5 / w : 0) + ',' + (h ? 0.5 / h : 0);
+        shape.coordsize = w * 2 + ',' + h * 2;
+        shape.coordorigin = '1,1';
+        shape.path = this.getBoxPath( {
+            t: round( borderWidths['t'].pixels( el ) + getLength( cs.paddingTop ).pixels( el ) ),
+            r: round( borderWidths['r'].pixels( el ) + getLength( cs.paddingRight ).pixels( el ) ),
+            b: round( borderWidths['b'].pixels( el ) + getLength( cs.paddingBottom ).pixels( el ) ),
+            l: round( borderWidths['l'].pixels( el ) + getLength( cs.paddingLeft ).pixels( el ) )
+        }, 2 );
+        s = shape.style;
+        s.width = w;
+        s.height = h;
+    },
+
+    hideActualImg: function() {
+        this.targetElement.runtimeStyle.filter = 'alpha(opacity=0)';
+    },
+
+    destroy: function() {
+        PIE.RendererBase.destroy.call( this );
+        this.targetElement.runtimeStyle.filter = '';
+    }
+
+} );
 /**
  * Root renderer for IE9; manages the rendering layers in the element's background
  * @param {Element} el The target element
  * @param {Object} styleInfos The StyleInfo objects
  */
 PIE.IE9RootRenderer = PIE.RendererBase.newRenderer( {
+
+    updatePos: PIE.emptyFn,
+    updateSize: PIE.emptyFn,
+    updateVisibility: PIE.emptyFn,
+    updateProps: PIE.emptyFn,
 
     outerCommasRE: /^,+|,+$/g,
     innerCommasRE: /,+/g,
@@ -2128,7 +3568,7 @@ PIE.IE9RootRenderer = PIE.RendererBase.newRenderer( {
         bgLayers[zIndex] = bg || undef;
     },
 
-    updateRendering: function() {
+    finishUpdate: function() {
         var me = this,
             bgLayers = me._bgLayers,
             bg;
@@ -2152,8 +3592,6 @@ PIE.IE9RootRenderer = PIE.RendererBase.newRenderer( {
  */
 PIE.IE9BackgroundRenderer = PIE.RendererBase.newRenderer( {
 
-    drawingCanvas: doc.createElement( 'canvas' ),
-
     bgLayerZIndex: 1,
 
     needsUpdate: function() {
@@ -2168,9 +3606,7 @@ PIE.IE9BackgroundRenderer = PIE.RendererBase.newRenderer( {
 
     draw: function() {
         var me = this,
-            styleInfos = me.styleInfos,
-            bgInfo = styleInfos.backgroundInfo,
-            props = bgInfo.getProps(),
+            props = me.styleInfos.backgroundInfo.getProps(),
             bg, images, i = 0, img, bgAreaSize, bgSize;
 
         if ( props ) {
@@ -2180,12 +3616,12 @@ PIE.IE9BackgroundRenderer = PIE.RendererBase.newRenderer( {
             if ( images ) {
                 while( img = images[ i++ ] ) {
                     if (img.imgType === 'linear-gradient' ) {
-                        bgAreaSize = bgInfo.getBgAreaSize( bg.bgOrigin, me.boundsInfo, styleInfos.borderInfo, styleInfos.paddingInfo );
+                        bgAreaSize = me.getBgAreaSize( img.bgOrigin );
                         bgSize = ( img.bgSize || PIE.BgSize.DEFAULT ).pixels(
                             me.targetElement, bgAreaSize.w, bgAreaSize.h, bgAreaSize.w, bgAreaSize.h
-                        );
+                        ),
                         bg.push(
-                            'url(' + me.getGradientImgData( img, bgSize.w, bgSize.h )  + ') ' +
+                            'url(data:image/svg+xml,' + escape( me.getGradientSvg( img, bgSize.w, bgSize.h ) ) + ') ' +
                             me.bgPositionToString( img.bgPosition ) + ' / ' + bgSize.w + 'px ' + bgSize.h + 'px ' +
                             ( img.bgAttachment || '' ) + ' ' + ( img.bgOrigin || '' ) + ' ' + ( img.bgClip || '' )
                         );
@@ -2196,7 +3632,7 @@ PIE.IE9BackgroundRenderer = PIE.RendererBase.newRenderer( {
             }
 
             if ( props.color ) {
-                bg.push( props.color.val + ' ' + ( props.colorClip || '' ) );
+                bg.push( props.color.val );
             }
 
             me.parent.setBackgroundLayer(me.bgLayerZIndex, bg.join(','));
@@ -2209,23 +3645,53 @@ PIE.IE9BackgroundRenderer = PIE.RendererBase.newRenderer( {
         }).join(' ') : '0 0';
     },
 
-    getGradientImgData: function( info, bgWidth, bgHeight ) {
+    getBgAreaSize: function( bgOrigin ) {
         var me = this,
             el = me.targetElement,
+            bounds = me.boundsInfo.getBounds(),
+            elW = bounds.w,
+            elH = bounds.h,
+            w = elW,
+            h = elH,
+            borders, getLength, cs;
+
+        if( bgOrigin !== 'border-box' ) {
+            borders = me.styleInfos.borderInfo.getProps();
+            if( borders && ( borders = borders.widths ) ) {
+                w -= borders[ 'l' ].pixels( el ) + borders[ 'l' ].pixels( el );
+                h -= borders[ 't' ].pixels( el ) + borders[ 'b' ].pixels( el );
+            }
+        }
+
+        if ( bgOrigin === 'content-box' ) {
+            getLength = PIE.getLength;
+            cs = el.currentStyle;
+            w -= getLength( cs.paddingLeft ).pixels( el ) + getLength( cs.paddingRight ).pixels( el );
+            h -= getLength( cs.paddingTop ).pixels( el ) + getLength( cs.paddingBottom ).pixels( el );
+        }
+
+        return { w: w, h: h };
+    },
+
+    getGradientSvg: function( info, bgWidth, bgHeight ) {
+        var el = this.targetElement,
             stopsInfo = info.stops,
             stopCount = stopsInfo.length,
             metrics = PIE.GradientUtil.getGradientMetrics( el, bgWidth, bgHeight, info ),
+            startX = metrics.startX,
+            startY = metrics.startY,
+            endX = metrics.endX,
+            endY = metrics.endY,
             lineLength = metrics.lineLength,
-            canvas = me.drawingCanvas,
-            context = canvas.getContext( '2d' ),
-            gradient = context.createLinearGradient( metrics.startX, metrics.startY, metrics.endX, metrics.endY ),
-            stopPx = [],
-            i, j, before, after;
+            stopPx,
+            i, j, before, after,
+            svg;
 
         // Find the pixel offsets along the CSS3 gradient-line for each stop.
+        stopPx = [];
         for( i = 0; i < stopCount; i++ ) {
             stopPx.push( stopsInfo[i].offset ? stopsInfo[i].offset.pixels( el, lineLength ) :
-                i === 0 ? 0 : i === stopCount - 1 ? lineLength : null );
+                         i === 0 ? 0 : i === stopCount - 1 ? lineLength : null );
         }
         // Fill in gaps with evenly-spaced offsets
         for( i = 1; i < stopCount; i++ ) {
@@ -2239,16 +3705,30 @@ PIE.IE9BackgroundRenderer = PIE.RendererBase.newRenderer( {
             }
         }
 
-        // Convert stops to percentages along the gradient line and add a stop for each
+        svg = [
+            '<svg width="' + bgWidth + '" height="' + bgHeight + '" xmlns="http://www.w3.org/2000/svg">' +
+                '<defs>' +
+                    '<linearGradient id="g" gradientUnits="userSpaceOnUse"' +
+                    ' x1="' + ( startX / bgWidth * 100 ) + '%" y1="' + ( startY / bgHeight * 100 ) + '%" x2="' + ( endX / bgWidth * 100 ) + '%" y2="' + ( endY / bgHeight * 100 ) + '%">'
+        ];
+
+        // Convert to percentage along the SVG gradient line and add to the stops list
         for( i = 0; i < stopCount; i++ ) {
-            gradient.addColorStop( stopPx[ i ] / lineLength, stopsInfo[ i ].color.val );
+            svg.push(
+                '<stop offset="' + ( stopPx[ i ] / lineLength ) +
+                    '" stop-color="' + stopsInfo[i].color.colorValue( el ) +
+                    '" stop-opacity="' + stopsInfo[i].color.alpha() + '"/>'
+            );
         }
 
-        canvas.width = bgWidth;
-        canvas.height = bgHeight;
-        context.fillStyle = gradient;
-        context.fillRect( 0, 0, bgWidth, bgHeight );
-        return canvas.toDataURL();
+        svg.push(
+                    '</linearGradient>' +
+                '</defs>' +
+                '<rect width="100%" height="100%" fill="url(#g)"/>' +
+            '</svg>'
+        );
+
+        return svg.join( '' );
     },
 
     destroy: function() {
@@ -2395,7 +3875,7 @@ PIE.IE9BorderImageRenderer = PIE.RendererBase.newRenderer( {
             // will have been created asynchronously after the main element's update has finished; we'll
             // therefore need to force the root renderer to sync to the final background once finished.
             if( isAsync ) {
-                me.parent.updateRendering();
+                me.parent.finishUpdate();
             }
         }, me );
 
@@ -2423,28 +3903,7 @@ PIE.IE9BorderImageRenderer = PIE.RendererBase.newRenderer( {
         }
     })(),
 
-    prepareUpdate: function() {
-        if (this.isActive()) {
-            var me = this,
-                el = me.targetElement,
-                rs = el.runtimeStyle,
-                widths = me.styleInfos.borderImageInfo.getProps().widths;
-
-            // Force border-style to solid so it doesn't collapse
-            rs.borderStyle = 'solid';
-
-            // If widths specified in border-image shorthand, override border-width
-            if ( widths ) {
-                rs.borderTopWidth = widths['t'].pixels( el ) + 'px';
-                rs.borderRightWidth = widths['r'].pixels( el ) + 'px';
-                rs.borderBottomWidth = widths['b'].pixels( el ) + 'px';
-                rs.borderLeftWidth = widths['l'].pixels( el ) + 'px';
-            }
-
-            // Make the border transparent
-            me.hideBorder();
-        }
-    },
+    prepareUpdate: PIE.BorderImageRenderer.prototype.prepareUpdate,
 
     destroy: function() {
         var me = this,
@@ -2508,8 +3967,7 @@ PIE.Element = (function() {
 
 
     function Element( el ) {
-        var me = this,
-            childRenderers,
+        var renderers,
             rootRenderer,
             boundsInfo = new PIE.BoundsInfo( el ),
             styleInfos,
@@ -2522,8 +3980,6 @@ PIE.Element = (function() {
             destroyed,
             poll;
 
-        me.el = el;
-
         /**
          * Initialize PIE for this element.
          */
@@ -2535,7 +3991,8 @@ PIE.Element = (function() {
                     cs = el.currentStyle,
                     lazy = cs.getAttribute( lazyInitCssProp ) === 'true',
                     trackActive = cs.getAttribute( trackActiveCssProp ) !== 'false',
-                    trackHover = cs.getAttribute( trackHoverCssProp ) !== 'false';
+                    trackHover = cs.getAttribute( trackHoverCssProp ) !== 'false',
+                    childRenderers;
 
                 // Polling for size/position changes: default to on in IE8, off otherwise, overridable by -pie-poll
                 poll = cs.getAttribute( pollCssProp );
@@ -2568,14 +4025,11 @@ PIE.Element = (function() {
                         styleInfos = {
                             backgroundInfo: new PIE.BackgroundStyleInfo( el ),
                             borderImageInfo: new PIE.BorderImageStyleInfo( el ),
-                            borderInfo: new PIE.BorderStyleInfo( el ),
-                            paddingInfo: new PIE.PaddingStyleInfo( el )
+                            borderInfo: new PIE.BorderStyleInfo( el )
                         };
                         styleInfosArr = [
                             styleInfos.backgroundInfo,
-                            styleInfos.borderInfo,
-                            styleInfos.borderImageInfo,
-                            styleInfos.paddingInfo
+                            styleInfos.borderImageInfo
                         ];
                         rootRenderer = new PIE.IE9RootRenderer( el, boundsInfo, styleInfos );
                         childRenderers = [
@@ -2590,7 +4044,6 @@ PIE.Element = (function() {
                             borderImageInfo: new PIE.BorderImageStyleInfo( el ),
                             borderRadiusInfo: new PIE.BorderRadiusStyleInfo( el ),
                             boxShadowInfo: new PIE.BoxShadowStyleInfo( el ),
-                            paddingInfo: new PIE.PaddingStyleInfo( el ),
                             visibilityInfo: new PIE.VisibilityStyleInfo( el )
                         };
                         styleInfosArr = [
@@ -2599,7 +4052,6 @@ PIE.Element = (function() {
                             styleInfos.borderImageInfo,
                             styleInfos.borderRadiusInfo,
                             styleInfos.boxShadowInfo,
-                            styleInfos.paddingInfo,
                             styleInfos.visibilityInfo
                         ];
                         rootRenderer = new PIE.RootRenderer( el, boundsInfo, styleInfos );
@@ -2615,18 +4067,19 @@ PIE.Element = (function() {
                         }
                         rootRenderer.childRenderers = childRenderers; // circular reference, can't pass in constructor; TODO is there a cleaner way?
                     }
+                    renderers = [ rootRenderer ].concat( childRenderers );
 
                     // Add property change listeners to ancestors if requested
                     initAncestorEventListeners();
 
-                    // Add to list of polled elements when -pie-poll:true
+                    // Add to list of polled elements in IE8
                     if( poll ) {
                         PIE.Heartbeat.observe( update );
                         PIE.Heartbeat.run();
                     }
 
                     // Trigger rendering
-                    update( 0, 1 );
+                    update( 1 );
                 }
 
                 if( !eventsAttached ) {
@@ -2678,25 +4131,33 @@ PIE.Element = (function() {
          * this rather than the updatePos/Size functions because sometimes, particularly
          * during page load, one will fire but the other won't.
          */
-        function update( isPropChange, force ) {
+        function update( force ) {
             if( !destroyed ) {
                 if( initialized ) {
-                    lockAll();
+                    var i, len = renderers.length;
 
-                    var i = 0, len = childRenderers.length,
-                        sizeChanged = boundsInfo.sizeChanged();
-                    for( ; i < len; i++ ) {
-                        childRenderers[i].prepareUpdate();
-                    }
+                    lockAll();
                     for( i = 0; i < len; i++ ) {
-                        if( force || sizeChanged || ( isPropChange && childRenderers[i].needsUpdate() ) ) {
-                            childRenderers[i].updateRendering();
+                        renderers[i].prepareUpdate();
+                    }
+                    if( force || boundsInfo.positionChanged() ) {
+                        /* TODO just using getBoundingClientRect (used internally by BoundsInfo) for detecting
+                           position changes may not always be accurate; it's possible that
+                           an element will actually move relative to its positioning parent, but its position
+                           relative to the viewport will stay the same. Need to come up with a better way to
+                           track movement. The most accurate would be the same logic used in RootRenderer.updatePos()
+                           but that is a more expensive operation since it does some DOM walking, and we want this
+                           check to be as fast as possible. */
+                        for( i = 0; i < len; i++ ) {
+                            renderers[i].updatePos();
                         }
                     }
-                    if( force || sizeChanged || isPropChange || boundsInfo.positionChanged() ) {
-                        rootRenderer.updateRendering();
+                    if( force || boundsInfo.sizeChanged() ) {
+                        for( i = 0; i < len; i++ ) {
+                            renderers[i].updateSize();
+                        }
                     }
-
+                    rootRenderer.finishUpdate();
                     unlockAll();
                 }
                 else if( !initializing ) {
@@ -2709,13 +4170,38 @@ PIE.Element = (function() {
          * Handle property changes to trigger update when appropriate.
          */
         function propChanged() {
+            var i, len = renderers.length,
+                renderer,
+                e = event;
+
             // Some elements like <table> fire onpropertychange events for old-school background properties
             // ('background', 'bgColor') when runtimeStyle background properties are changed, which
             // results in an infinite loop; therefore we filter out those property names. Also, 'display'
             // is ignored because size calculations don't work correctly immediately when its onpropertychange
             // event fires, and because it will trigger an onresize event anyway.
-            if( initialized && !( event && event.propertyName in ignorePropertyNames ) ) {
-                update( 1 );
+            if( !destroyed && !( e && e.propertyName in ignorePropertyNames ) ) {
+                if( initialized ) {
+                    lockAll();
+                    for( i = 0; i < len; i++ ) {
+                        renderers[i].prepareUpdate();
+                    }
+                    for( i = 0; i < len; i++ ) {
+                        renderer = renderers[i];
+                        // Make sure position is synced if the element hasn't already been rendered.
+                        // TODO this feels sloppy - look into merging propChanged and update functions
+                        if( !renderer.isPositioned ) {
+                            renderer.updatePos();
+                        }
+                        if( renderer.needsUpdate() ) {
+                            renderer.updateProps();
+                        }
+                    }
+                    rootRenderer.finishUpdate();
+                    unlockAll();
+                }
+                else if( !initializing ) {
+                    init();
+                }
             }
         }
 
@@ -2783,7 +4269,7 @@ PIE.Element = (function() {
          */
         function ancestorPropChanged() {
             var name = event.propertyName;
-            if( name === 'className' || name === 'id' || name.indexOf( 'style.' ) === 0 ) {
+            if( name === 'className' || name === 'id' ) {
                 propChanged();
             }
         }
@@ -2841,13 +4327,12 @@ PIE.Element = (function() {
                 destroyed = 1;
 
                 // destroy any active renderers
-                if( childRenderers ) {
-                    for( i = 0, len = childRenderers.length; i < len; i++ ) {
-                        childRenderers[i].finalized = 1;
-                        childRenderers[i].destroy();
+                if( renderers ) {
+                    for( i = 0, len = renderers.length; i < len; i++ ) {
+                        renderers[i].finalized = 1;
+                        renderers[i].destroy();
                     }
                 }
-                rootRenderer.destroy();
 
                 // Remove from list of polled elements in IE8
                 if( poll ) {
@@ -2857,8 +4342,7 @@ PIE.Element = (function() {
                 PIE.OnResize.unobserve( update );
 
                 // Kill references
-                childRenderers = rootRenderer = boundsInfo = styleInfos = styleInfosArr = el = null;
-                me.el = me = 0;
+                renderers = boundsInfo = styleInfos = styleInfosArr = el = null;
             }
         }
 
@@ -2912,17 +4396,19 @@ PIE.Element = (function() {
 
         // These methods are all already bound to this instance so there's no need to wrap them
         // in a closure to maintain the 'this' scope object when calling them.
-        me.init = init;
-        me.destroy = destroy;
+        this.init = init;
+        this.update = update;
+        this.destroy = destroy;
+        this.el = el;
     }
 
     Element.getInstance = function( el ) {
-        var id = el[ 'uniqueID' ];
+        var id = PIE.Util.getUID( el );
         return wrappers[ id ] || ( wrappers[ id ] = new Element( el ) );
     };
 
     Element.destroy = function( el ) {
-        var id = el[ 'uniqueID' ],
+        var id = PIE.Util.getUID( el ),
             wrapper = wrappers[ id ];
         if( wrapper ) {
             wrapper.destroy();
@@ -2954,17 +4440,11 @@ PIE.Element = (function() {
 
 
 /**
- * The version number of this PIE build.
- */
-PIE[ 'version' ] = '2.0beta1';
-
-
-/**
  * @property supportsVML
  * True if the current IE browser environment has a functioning VML engine. Should be true
  * in most IEs, but in rare cases may be false. If false, PIE will exit immediately when
- * attached to an element (for IE<9) to prevent errors; this property may also be used for
- * debugging or by external scripts to perform some special action when VML support is absent.
+ * attached to an element; this property may be used for debugging or by external scripts
+ * to perform some special action when VML support is absent.
  * @type {boolean}
  */
 PIE[ 'supportsVML' ] = PIE.supportsVML;
@@ -2975,7 +4455,7 @@ PIE[ 'supportsVML' ] = PIE.supportsVML;
  * @param {Element} el
  */
 PIE[ 'attach' ] = function( el ) {
-    if ( PIE.ieDocMode === 9 || ( PIE.ieDocMode < 9 && PIE.supportsVML ) ) {
+    if (PIE.ieDocMode < 10 && PIE.supportsVML) {
         PIE.Element.getInstance( el ).init();
     }
 };
@@ -2989,4 +4469,6 @@ PIE[ 'detach' ] = function( el ) {
     PIE.Element.destroy( el );
 };
 
-})( window, document );
+
+} // if( !PIE )
+})();
