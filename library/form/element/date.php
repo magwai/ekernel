@@ -33,21 +33,21 @@ class k_form_element_date extends form_element_input {
 			if ($this->ui->opt) {
 				$opt = array_merge($opt, $this->ui->opt->to_array());
 			}
-			
-			$this->view->js		->append('/library/ctl/ui/ui/jquery.ui.core.js')
-								->append('/library/ctl/ui/ui/jquery.ui.datepicker.js')
-								->append('/library/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->ui->lang.'.js')
+
+			$this->view->js		->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.core.js')
+								->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.datepicker.js')
+								->append('/'.DIR_KERNEL.'/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->ui->lang.'.js')
 								->append_inline('$("input[name=\''.$this->name.'\']").'.($this->time ? 'datetimepicker' : 'datepicker').'('.Zend\Json\Json::encode($opt, false, array(
 									'enableJsonExprFinder' => true
 								)).');');
 			if ($this->time) $this->view->js
-								->append('/library/ctl/timepicker/jquery-ui-timepicker-addon.js');
-			
-			$this->view->css	->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
-								->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
-								->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.datepicker.css');
+								->append('/'.DIR_KERNEL.'/ctl/timepicker/jquery-ui-timepicker-addon.js');
+
+			$this->view->css	->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
+								->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
+								->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.datepicker.css');
 			if ($this->time) $this->view->css
-								->append('/library/ctl/timepicker/jquery-ui-timepicker-addon.css');
+								->append('/'.DIR_KERNEL.'/ctl/timepicker/jquery-ui-timepicker-addon.css');
 		}
 		return parent::render();
 	}

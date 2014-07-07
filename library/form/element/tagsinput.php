@@ -23,8 +23,8 @@ class k_form_element_tagsinput extends form_element_text {
 				'source' => new Zend\Json\Expr('adapter.ttAdapter()')
 			)
 		), $this->opt->to_array());
-		$this->view->js	->append('/library/js/jquery/typeahead.bundle.js')
-						->append('/library/ctl/bootstrap/tokenfield/bootstrap-tokenfield.js');
+		$this->view->js	->append('/'.DIR_KERNEL.'/js/jquery/typeahead.bundle.js')
+						->append('/'.DIR_KERNEL.'/ctl/bootstrap/tokenfield/bootstrap-tokenfield.js');
 		$this->view->js->append_inline('var adapter = new Bloodhound('.Zend\Json\Json::encode(array(
 			'datumTokenizer' => new Zend\Json\Expr('Bloodhound.tokenizers.obj.whitespace("value")'),
 			'queryTokenizer' => new Zend\Json\Expr('Bloodhound.tokenizers.whitespace'),
@@ -44,9 +44,9 @@ class k_form_element_tagsinput extends form_element_text {
 		)).');adapter.initialize();var o = $("input[name=\''.$this->name.'\']");o.tokenfield('.Zend\Json\Json::encode($opt, false, array(
 			'enableJsonExprFinder' => true
 		)).');');
-		
-		$this->view->css	->append('/library/ctl/bootstrap/tokenfield/bootstrap-tokenfield.css')
-							->append('/library/ctl/bootstrap/tokenfield/tokenfield-typeahead.css');
+
+		$this->view->css	->append('/'.DIR_KERNEL.'/ctl/bootstrap/tokenfield/bootstrap-tokenfield.css')
+							->append('/'.DIR_KERNEL.'/ctl/bootstrap/tokenfield/tokenfield-typeahead.css');
 		return parent::render();
 	}
 }

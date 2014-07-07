@@ -47,7 +47,7 @@ class k_form_element_textarea extends form_element {
 			);
 			$param['markitup']->opt = $param['markitup']->set->def;
 			$param['markitup']->opt = $param['markitup']->set->{$param['markitup']->style};
-			if (!$param['markitup']->set_style) $param['markitup']->set_style = '/library/ctl/markitup/sets/'.$this->markitup->style.'/style.css';
+			if (!$param['markitup']->set_style) $param['markitup']->set_style = '/'.DIR_KERNEL.'/ctl/markitup/sets/'.$this->markitup->style.'/style.css';
 			$this->markitup = $param['markitup'];
 		}
 		if (isset($param['ckeditor'])) {
@@ -64,7 +64,7 @@ class k_form_element_textarea extends form_element {
 				),
 				'full' => array(
 					'toolbar' => array(
-						array( 'name' => 'basicstyles', 'items' => array( 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat' ) ),
+						array( 'name' => 'basicstyles', 'items' => array( 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', 'Blockquote', '-', 'RemoveFormat' ) ),
 						array( 'name' => 'styles', 'items' => array( 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ) ),
 						array( 'name' => 'paragraph', 'items' => array( 'NumberedList', 'BulletedList', 'Outdent', 'Indent' ) ),
 						array( 'name' => 'links', 'items' => array( 'Link', 'Unlink', 'Anchor' ) ),
@@ -78,7 +78,7 @@ class k_form_element_textarea extends form_element {
 						array( 'name' => 'tools2', 'items' => array( 'Maximize' ) ),
 						array( 'name' => 'tools3', 'items' => array( 'Source' ) )
 					),
-					'plugins' => 'dialogadvtab,basicstyles,colorbutton,resize,toolbar,elementspath,list,indent,enterkey,filebrowser,flash,font,format,htmlwriter,wysiwygarea,image,justify,link,liststyle,maximize,pagebreak,pastetext,pastefromword,removeformat,sourcearea,table,tabletools'
+					'plugins' => 'dialogadvtab,basicstyles,colorbutton,resize,toolbar,elementspath,list,indent,enterkey,filebrowser,flash,font,format,htmlwriter,wysiwygarea,image,justify,link,liststyle,maximize,pagebreak,pastetext,pastefromword,removeformat,sourcearea,table,tabletools,blockquote'
 				),
 				'small' => array()
 			);
@@ -101,9 +101,9 @@ class k_form_element_textarea extends form_element {
 		if (@$this->markitup) {
 			$opt = clone $this->markitup->opt;
 			to_array($opt);
-			$this->view->css->append('/library/ctl/markitup/skins/'.$this->markitup->skin.'/style.css');
+			$this->view->css->append('/'.DIR_KERNEL.'/ctl/markitup/skins/'.$this->markitup->skin.'/style.css');
 			$this->view->css->append($this->markitup->set_style);
-			$this->view->js->append('/library/ctl/markitup/jquery.markitup.js');
+			$this->view->js->append('/'.DIR_KERNEL.'/ctl/markitup/jquery.markitup.js');
 			$this->view->js->append_inline('$("textarea[name=\''.$this->name.'\']").markItUp('.Zend\Json\Json::encode($opt, false, array(
 				'enableJsonExprFinder' => true
 			)).');');
@@ -113,11 +113,11 @@ class k_form_element_textarea extends form_element {
 			$opt = clone $this->ckeditor->opt;
 			to_array($opt);
 
-			$this->view->js->append('/library/ctl/ckeditor/ckeditor.js');
-			$this->view->js->append('/library/ctl/ckfinder/ckfinder.js');
+			$this->view->js->append('/'.DIR_KERNEL.'/ctl/ckeditor/ckeditor.js');
+			$this->view->js->append('/'.DIR_KERNEL.'/ctl/ckfinder/ckfinder.js');
 			$this->view->js->append_inline('var editor_'.$this->name.' = CKEDITOR.replace("'.$this->name.'", '.Zend\Json\Json::encode($opt, false, array(
 				'enableJsonExprFinder' => true
-			)).');CKFinder.setupCKEditor(editor_'.$this->name.', "/library/ctl/ckfinder/");');
+			)).');CKFinder.setupCKEditor(editor_'.$this->name.', "/'.DIR_KERNEL.'/ctl/ckfinder/");');
 			if ($this->ckeditor->class) $res = '<div class="'.$this->ckeditor->class.'">'.$res.'</div>';
 		}
 		return $res;

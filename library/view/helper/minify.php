@@ -78,8 +78,9 @@ class k_view_helper_minify extends view_helper {
 		$config = application::get_instance()->config->$type;
 		$ret = '';
 		if ($config->compressor) foreach ($config->compressor as $el) {
-			$method = 'minify_'.$el;
-			$ret = $this->$method($res, $type);
+			$ret = $this->minify_util($res, $type, $el);
+			/*$method = 'minify_'.$el;
+			$ret = $this->$method($res, $type);*/
 			if ($ret !== false) break;
 		}
 		return $ret;
@@ -108,6 +109,24 @@ class k_view_helper_minify extends view_helper {
 				$res = "/* minified_yuicompressor */\n".$res_1;
 			}
 			proc_close($process);
+		}
+		return $res;
+	}
+
+	public function minify_util($res, $type, $compressor) {
+		$config = application::get_instance()->config->util;
+		$data = urlencode($res);
+		$context = stream_context_create(array(
+			'http' => array(
+				'method' => 'POST',
+				'header' => 'Content-Type: multipart/form-data'."\r\n".'Content-Length: '.strlen($data)."\r\n",
+				'content' => $data
+			)
+		));
+		$result = file_get_contents($config->host.'/x/minify/type/'.$type.'/compressor/'.$compressor, false, $context);
+		if ($result) {
+			$result = json_decode($result, true);
+			$res = "/* minified_".$compressor." */\n".$result['data'];
 		}
 		return $res;
 	}

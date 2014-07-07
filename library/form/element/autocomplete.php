@@ -66,21 +66,21 @@ class k_form_element_autocomplete extends form_element_input {
 	});
 	return false;
 }');
-			$this->view->js		->append('/library/ctl/ui/ui/jquery.ui.core.js')
-								->append('/library/ctl/ui/ui/jquery.ui.widget.js')
-								->append('/library/ctl/ui/ui/jquery.ui.position.js')
-								->append('/library/ctl/ui/ui/jquery.ui.menu.js')
-								->append('/library/ctl/ui/ui/jquery.ui.autocomplete.js')
+			$this->view->js		->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.core.js')
+								->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.widget.js')
+								->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.position.js')
+								->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.menu.js')
+								->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.autocomplete.js')
 								->append_inline('$("input[name=\''.$this->name.'_fake\']").autocomplete('.Zend\Json\Json::encode($opt, false, array(
 									'enableJsonExprFinder' => true
 								)).');$("input[name=\''.$this->name.'_fake\']").focus(function() {
 									$("input[name=\''.$this->name.'\']").data("was_selected", false);
 								});');
 
-			$this->view->css	->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
-								->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
-								->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.menu.css')
-								->append('/library/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.autocomplete.css');
+			$this->view->css	->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
+								->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
+								->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.menu.css')
+								->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.autocomplete.css');
 		}
 		return parent::render();
 	}

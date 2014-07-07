@@ -1,32 +1,32 @@
 <?php
 
 if (stripos($this->control()->config->content, 'c-fancy') !== false) {
-	$this->js->prepend('/library/ctl/fancybox2/jquery.fancybox.js');
-	$this->css->prepend('/library/ctl/fancybox2/jquery.fancybox.css');
+	$this->js->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js');
+	$this->css->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css');
 }
 
 $p = clone $this->control()->config->param;
 unset($p['page']);
 $p['replace'] = 'replace';
 
-$this->js	->prepend('/library/ctl/noty/themes/default.js')
-			->prepend('/library/ctl/noty/layouts/top.js')
-			->prepend('/library/ctl/noty/jquery.noty.js')
-			->prepend('/library/ctl/bootstrap/js/bootstrap.js')
-			->prepend('/library/js/respond.js')
-			->prepend('/library/js/jquery/jquery-migrate.js')
-			->prepend('/library/js/jquery/jquery.js')
-			->set(1000, '/library/ctl/control/main.js')->set_inline(1000, '$(function() { c.init('.json_encode(array(
+$this->js	->prepend('/'.DIR_KERNEL.'/ctl/control/noty/layouts/top.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/control/noty/themes/default.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/noty/jquery.noty.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/bootstrap/js/bootstrap.js')
+			->prepend('/'.DIR_KERNEL.'/js/respond.js')
+			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery-migrate.js')
+			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery.js')
+			->set(1000, '/'.DIR_KERNEL.'/ctl/control/main.js')->set_inline(1000, '$(function() { c.init('.json_encode(array(
 				'url' => $this->url(array('ccontroller' => 'cindex', 'caction' => 'index'), 'control'),
 				'url_current' => str_replace('/replace/replace', '', $this->url($p, 'control'))
 			)).') });');
 
-$this->css	->prepend('/library/ctl/bootstrap/css/bootstrap-theme.css')
-			->prepend('/library/ctl/bootstrap/css/bootstrap.css')
-			->set(1000, '/library/ctl/control/main.css');
+$this->css	->prepend('/'.DIR_KERNEL.'/ctl/bootstrap/css/bootstrap-theme.css')
+			->prepend('/'.DIR_KERNEL.'/ctl/bootstrap/css/bootstrap.css')
+			->set(1000, '/'.DIR_KERNEL.'/ctl/control/main.css');
 
 if (stripos($this->control()->config->content_bottom, 'navbar-fixed-bottom') !== false) {
-	$this->css->append('/library/ctl/control/bottom.css');
+	$this->css->append('/'.DIR_KERNEL.'/ctl/control/bottom.css');
 }
 
 $this->meta	->set('name', 'viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
@@ -73,7 +73,7 @@ $reg = $this->lang(true);
 		<?php echo (string)$this->meta() ?>
 		<?php echo (string)$this->title() ?>
 		<?php echo (string)$this->css() ?>
-		<link href="/library/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
+		<link href="/<?php echo DIR_KERNEL ?>/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
 	</head>
 	<body>
 		<?php echo $top_left || $top_right ? '' : '' ?>
@@ -88,7 +88,6 @@ $reg = $this->lang(true);
 						<span class="icon-bar"></span>
 					</button>
 				</li>
-				<li class="c-inner-menu c-invisible" id="d_inner_menu"></li>
 				<li class="c-button-top" id="d_button_top"><?php echo $this->xlist(array(
 					'fetch' => array(
 						'data' => $this->control()->config->button_top
@@ -112,10 +111,11 @@ $reg = $this->lang(true);
 		</div>
 		<div class="c-middle">
 			<div class="sidebar collapse c-menu" id="d_menu"><?php echo $menu ?></div>
+			<div class="c-inner-menu c-invisible" id="d_inner_menu"></div>
 			<div id="d_content"><?php echo $this->control()->config->content ?></div>
 		</div>
 		<?php echo $this->control()->config->content_bottom ?>
-		<script type="text/javascript">window.CKEDITOR_BASEPATH = '/library/ctl/ckeditor/';</script>
+		<script type="text/javascript">window.CKEDITOR_BASEPATH = '/<?php echo DIR_KERNEL ?>/ctl/ckeditor/';</script>
 		<?php echo (string)$this->js() ?>
 	</body>
 </html>

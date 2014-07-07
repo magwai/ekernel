@@ -33,9 +33,10 @@ class k_view_helper_css extends view_helper_minify {
 		$m = md5($c);
 		$nm = $this->name('css', $m);
 		if (file_exists(PATH_ROOT.$nm)) {
-			$content = file_get_contents(PATH_ROOT.$nm);
+			$c = file_get_contents(PATH_ROOT.$nm);
 		}
 		else {
+			$c = $this->preprocess_util($c, $fn);
 			$dir_full = dirname($fn);
 			$matches = $files = array();
 			preg_match_all('/url\((\'|\"|)(.*?)(\'|\"|)\)/si', $c, $res);
@@ -91,13 +92,12 @@ class k_view_helper_css extends view_helper_minify {
 					$c = str_ireplace($matches[$k_1], 'src="'.$su.($el_res ? $el_res[0] : '').($modified && !$el_res ? '?'.filemtime($dir_full.'/'.$el_1_r) : '').'"', $c);
 				}
 			}
-			$content = $this->preprocess($c, $fn);
-			$this->save('css', PATH_ROOT.$nm, $content);
+			//$this->save('css', PATH_ROOT.$nm, $c);
 		}
 		return array(
 			'md5' => $m,
 			'name' => $nm,
-			'content' => $content
+			'content' => $c
 		);
 	}
 
@@ -160,13 +160,79 @@ class k_view_helper_css extends view_helper_minify {
 		return "/* minified_cssmin */\n".CssMin::minify($res);
 	}
 
+	public function preprocess_util($content, $file) {
+		if (substr($file, -5) == '.scss') {
+			$config = application::get_instance()->config->util;
+			$path = PATH_ROOT.'/img';
+			$d = array(
+				basename($file) => md5(file_get_contents($file))
+			);
+			if (!function_exists('recursive_scss')) {
+				function recursive_scss($path, $dir, &$d) {
+					$cur = $path.($dir ? '/'.$dir : '');
+					foreach (scandir($cur) as $fn) {
+						if ($fn == '.' || $fn == '..') continue;
+						if (is_dir($cur.'/'.$fn) && !in_array($fn, array('font'))) {
+							recursive_scss($path, $dir.($dir ? '/' : '').$fn, $d);
+						}
+						else if (preg_match('/\.('.($dir == 'sprites' ? 'png|' : '').'scss)/i', $fn)) {
+							$d[$dir.($dir ? '/' : '').$fn] = md5(file_get_contents($cur.'/'.$fn));
+						}
+					}
+
+				}
+			}
+
+			recursive_scss($path, '', $d);
+			if ($d) {
+				$res = file_get_contents($config->host.'/x/scss/ch/get/host/'.$_SERVER['HTTP_HOST'].'/file/'.basename($file));
+				if ($res) {
+					if (!class_exists('Zip')) require PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zip.php';
+					$zip = new Zip();
+					$res = json_decode($res, true);
+					$cnt = 0;
+					foreach ($d as $k => $v) {
+						if ($v != @$res[$k]) {
+							$zip->addFile(file_get_contents($path.'/'.$k), $k);
+							$cnt++;
+						}
+					}
+					if ($cnt) {
+						$data = urlencode($zip->getZipData());
+						$context = stream_context_create(array(
+							'http' => array(
+								'method' => 'POST',
+								'header' => 'Content-Type: multipart/form-data'."\r\n".'Content-Length: '.strlen($data)."\r\n",
+								'content' => $data
+							)
+						));
+						$res = file_get_contents($config->host.'/x/scss/ch/set/host/'.$_SERVER['HTTP_HOST'].'/file/'.basename($file), false, $context);
+						if ($res) {
+							$res = json_decode($res, true);
+							file_put_contents(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip', urldecode($res['data']));
+							require PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Unzip.php';
+							$zip = new Unzip();
+							$zip->extract(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip', PATH_ROOT.'/'.DIR_CACHE.'/css');
+							unlink(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip');
+							$nfn = str_replace('.scss', '.css', basename($file));
+							$content = @file_get_contents(PATH_ROOT.'/'.DIR_CACHE.'/css/'.$nfn);
+							unlink(PATH_ROOT.'/'.DIR_CACHE.'/css/'.$nfn);
+						}
+					}
+				}
+			}
+		}
+		return $content;
+	}
+
 	public function preprocess($content, $file) {
 		if (substr($file, -5) == '.scss') {
 			$dir = PATH_ROOT.'/'.DIR_CACHE.'/css/'.microtime(true);
 			$dir_file = dirname($file);
 			exec('mkdir "'.$dir.'" ; cd "'.$dir.'" ; compass create; chmod 777 "'.$dir.'/sass" ; mkdir "'.$dir.'/'.DIR_CACHE.'" ; ln -s "'.PATH_ROOT.'/img" "'.$dir.'/'.DIR_CACHE.'/css"');
 			file_put_contents($dir.'/sass/style.scss', $content);
-			exec('cd "'.$dir.'" ; compass compile --import-path "'.$dir_file.'" --images-dir "'.DIR_CACHE.'/css" --fonts-dir "img"');
+			file_put_contents($dir.'/config.rb', "line_comments = false\nimages_dir = \"".DIR_CACHE."/css\"\nfonts_dir = \"img\"\nadditional_import_paths = [\"".$dir_file."\", \"".PATH_ROOT."/".DIR_KERNEL."/img\"]", FILE_APPEND);
+			exec('cd "'.$dir.'" ; compass compile');
 			exec('cd "'.$dir.'/'.DIR_CACHE.'/css" ; cp sprites-* "'.PATH_ROOT.'/'.DIR_CACHE.'/css" ; rm sprites-*; chmod 777 '.PATH_ROOT.'/'.DIR_CACHE.'/css/*');
 			$content = @file_get_contents($dir.'/stylesheets/style.css');
 			exec('rm -R "'.$dir.'"');

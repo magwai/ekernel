@@ -139,7 +139,7 @@ class k_form_element_file extends form_element_input {
 				unset($opt1['customCancel']);
 				$opt = array_merge($opt, $opt1);
 			}
-			$this->view->js->append('/library/ctl/uploadifive/jquery.uploadifive.js');
+			$this->view->js->append('/'.DIR_KERNEL.'/ctl/uploadifive/jquery.uploadifive.js');
 			$this->view->js->append_inline(
 'if (typeof window.uploadifive_update == "undefined") window.uploadifive_update = function(o) {
 	var val = [];
@@ -161,7 +161,7 @@ if (typeof window.uploadifive_data == "undefined") window.uploadifive_data = fun
 $("input[type=file][name=\''.$this->name.'\']").uploadifive('.Zend\Json\Json::encode($opt, false, array(
 	'enableJsonExprFinder' => true
 )).');');
-			if ($this->uploadifive->css) $this->view->css->append('/library/ctl/uploadifive/uploadifive.css');
+			if ($this->uploadifive->css) $this->view->css->append('/'.DIR_KERNEL.'/ctl/uploadifive/uploadifive.css');
 		}
 		return parent::render();
 	}

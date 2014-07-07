@@ -25,12 +25,9 @@
 						center: val && val.length ? val.split(',') : this.opt.center,
 						zoom: this.opt.zoom
 					});
-					this.map.controls
-						.add('zoomControl')
-						.add('typeSelector');
 					this.map.events.add('click', function (e) {
 						this.mark_remove();
-						this.mark_set(e.get('coordPosition'));
+						this.mark_set(e.get('coords'));
 						this.input_update();
 					}.bind(this));
 					this.map.cursors.push('crosshair');

@@ -17,4 +17,15 @@ class k_controller_x extends controller {
 		$this->view->term = @urldecode($this->request->param->term);
 		$this->view->value = @urldecode($this->request->param->value);
 	}
+
+	public function scss_action() {
+		$this->view->file = $this->request->param->file;
+		$this->view->host = $this->request->param->host;
+		$this->view->ch = $this->request->param->ch;
+	}
+
+	public function minify_action() {
+		$this->view->type = $this->request->param->type;
+		$this->view->compressor = $this->request->param->compressor;
+	}
 }

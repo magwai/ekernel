@@ -149,12 +149,12 @@ c.clink_set = function(name, height, value) {
 };
 
 c.build_inner_menu = function(inner_menu, ul) {
-	inner_menu.append('<div class="navbar-btn btn-group c-inner-menu-group"></div>');
-	var inner = inner_menu.find('.navbar-btn:last');
+	inner_menu.append('<div class="c-inner-menu-group"><ul class="nav nav-pills"></ul></div>');
+	var inner = inner_menu.find('.c-inner-menu-group:last>ul');
 	ul.find('>li').each(function() {
 		var t = $(this);
 		var a = t.find('a:first');
-		inner.append('<a href="' + a.attr('href') + '" class="btn btn-small btn-primary' + (t.hasClass('active') ? ' active' : '') + '">' + a.html() + '</a>');
+		inner.append('<li' + (t.hasClass('active') ? ' class="active"' : '') + '><a href="' + a.attr('href') + '">' + a.html() + '</a></li>');
 		var ul = t.find('ul:first');
 		if (ul.length) {
 			if (t.hasClass('active')) c.build_inner_menu(inner_menu, ul);

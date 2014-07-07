@@ -3,21 +3,21 @@
 $model_notify = new model_cnotify;
 $notify = $model_notify->fetch_control_no_read_count();
 
-$this->js	->prepend('/library/ctl/noty/themes/default.js')
-			->prepend('/library/ctl/noty/layouts/top.js')
-			->prepend('/library/ctl/noty/jquery.noty.js')
-			->prepend('/library/ctl/fancybox2/jquery.fancybox.js')
-			->prepend('/library/ctl/control/js/plugins/ui/jquery.collapsible.min.js')
-			->prepend('/library/ctl/uniform/jquery.uniform.js')
-			->prepend('/library/js/jquery/jquery-migrate.js')
-			->prepend('/library/js/jquery/jquery.js')
-			->set(1000, '/library/ctl/control/js/custom.js');
+$this->js	->prepend('/'.DIR_KERNEL.'/ctl/noty/themes/default.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/noty/layouts/top.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/noty/jquery.noty.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/control/js/plugins/ui/jquery.collapsible.min.js')
+			->prepend('/'.DIR_KERNEL.'/ctl/uniform/jquery.uniform.js')
+			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery-migrate.js')
+			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery.js')
+			->set(1000, '/'.DIR_KERNEL.'/ctl/control/js/custom.js');
 
-$this->css	->prepend('/library/ctl/fancybox2/jquery.fancybox.css')
-			->prepend('/library/ctl/control/css/ui_custom.css')
-			->prepend('/library/ctl/control/css/dataTable.css')
-			->prepend('/library/ctl/control/css/reset.css')
-			->set(1000, '/library/ctl/control/css/main.css')
+$this->css	->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css')
+			->prepend('/'.DIR_KERNEL.'/ctl/control/css/ui_custom.css')
+			->prepend('/'.DIR_KERNEL.'/ctl/control/css/dataTable.css')
+			->prepend('/'.DIR_KERNEL.'/ctl/control/css/reset.css')
+			->set(1000, '/'.DIR_KERNEL.'/ctl/control/css/main.css')
 			->append('http://fonts.googleapis.com/css?family=Cuprum');
 
 $this->js	->set_inline(1000, '$(function() { c.init('.json_encode(array(
@@ -40,7 +40,7 @@ $bread = (string)$this->navigation()->bread();
 		<?php echo (string)$this->meta() ?>
 		<?php echo (string)$this->title() ?>
 		<?php echo (string)$this->css() ?>
-		<link href="/library/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
+		<link href="/<?php echo DIR_KERNEL ?>/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
 	</head>
 	<body>
 		<!-- Top navigation bar -->
@@ -50,9 +50,9 @@ $bread = (string)$this->navigation()->bread();
 					<div class="welcome"><a href="<?php echo $this->url(array('ccontroller' => 'cindex', 'caction' => 'index'), 'control') ?>"><span><?php echo $this->translate('control_name') ?></span></a></div>
 					<div class="userNav">
 						<ul>
-							<?php echo $this->user('id') ? '<li><a href="'.$this->url(array('ccontroller' => 'cnotify', 'caction' => 'index'), 'control').'"><img src="/library/ctl/control/images/icons/topnav/messages.png" alt="" /><span>'.$this->translate('control_notify').'</span>'.($notify ? '<span class="numberTop">'.$notify.'</span>' : '').'</a></li>' : '' ?>
-							<li><a href="<?php echo $this->url(array('controller' => 'index', 'action' => 'index')) ?>"><img src="/library/ctl/control/images/icons/topnav/mainWebsite.png" alt="" /><span><?php echo $this->translate('control_goindex') ?></span></a></li>
-							<li><?php echo $this->user('id') ? '<a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'logout'), 'control').'"><img src="/library/ctl/control/images/icons/topnav/logout.png" alt="" /><span>'.$this->translate('control_logout').'</span></a>' : '<a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'login'), 'control').'"><img src="/library/ctl/control/images/icons/topnav/logout.png" alt="" /><span>'.$this->translate('control_login').'</span></a>' ?></li>
+							<?php echo $this->user('id') ? '<li><a href="'.$this->url(array('ccontroller' => 'cnotify', 'caction' => 'index'), 'control').'"><img src="/'.DIR_KERNEL.'/ctl/control/images/icons/topnav/messages.png" alt="" /><span>'.$this->translate('control_notify').'</span>'.($notify ? '<span class="numberTop">'.$notify.'</span>' : '').'</a></li>' : '' ?>
+							<li><a href="<?php echo $this->url(array('controller' => 'index', 'action' => 'index')) ?>"><img src="/<?php echo DIR_KERNEL ?>/ctl/control/images/icons/topnav/mainWebsite.png" alt="" /><span><?php echo $this->translate('control_goindex') ?></span></a></li>
+							<li><?php echo $this->user('id') ? '<a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'logout'), 'control').'"><img src="/'.DIR_KERNEL.'/ctl/control/images/icons/topnav/logout.png" alt="" /><span>'.$this->translate('control_logout').'</span></a>' : '<a href="'.$this->url(array('ccontroller' => 'cuser', 'caction' => 'login'), 'control').'"><img src="/'.DIR_KERNEL.'/ctl/control/images/icons/topnav/logout.png" alt="" /><span>'.$this->translate('control_login').'</span></a>' ?></li>
 						</ul>
 					</div>
 					<div class="fix"></div>

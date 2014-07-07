@@ -2,17 +2,17 @@
 
 $val = explode(',', $this->control()->config->param->{'search_'.$this->name});
 if ($this->range_type == 'date') {
-	$this->js	->append('/library/ctl/ui/ui/jquery.ui.core.js')
-				->append('/library/ctl/ui/ui/jquery.ui.datepicker.js')
-				->append('/library/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->control()->config->ui->lang.'.js')
+	$this->js	->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.core.js')
+				->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.datepicker.js')
+				->append('/'.DIR_KERNEL.'/ctl/ui/ui/i18n/jquery.ui.datepicker-'.$this->control()->config->ui->lang.'.js')
 				->append_inline('$(function() { $("#c-table-filter-'.$this->name.'-1").datepicker('.Zend\Json\Json::encode($this->range_ui_param->to_array(), false, array(
 					'enableJsonExprFinder' => true
 				)).');$("#c-table-filter-'.$this->name.'-2").datepicker('.Zend\Json\Json::encode($this->range_ui_param->to_array(), false, array(
 					'enableJsonExprFinder' => true
 				)).'); });');
-	$this->css	->append('/library/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.core.css')
-				->append('/library/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.theme.css')
-				->append('/library/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.datepicker.css');
+	$this->css	->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.core.css')
+				->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.theme.css')
+				->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->control()->config->ui->theme.'/jquery.ui.datepicker.css');
 }
 
 ?>

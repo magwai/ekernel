@@ -116,9 +116,11 @@ class k_view_helper_control extends view_helper  {
 			}
 			$this->$k = $v;
 		}
-		$name_valid = substr($name, 0, 2) == 'k_' ? substr($name, 2) : $name;
+		$is_kernel = substr($name, 0, 2) == 'k_';
+		$name_valid = $is_kernel ? substr($name, 2) : $name;
 		$fn = 'control/'.$name_valid.'.php';
 		if ($name_valid == $name && file_exists(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn)) $ret = include(PATH_ROOT.'/'.DIR_APPLICATION.'/'.$fn);
+		else if (!$is_kernel && defined('DIR_ZLIBRARY') && file_exists(PATH_ROOT.'/'.DIR_ZLIBRARY.'/'.$fn)) $ret = include(PATH_ROOT.'/'.DIR_ZLIBRARY.'/'.$fn);
 		else if (file_exists(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn)) $ret = include(PATH_ROOT.'/'.DIR_LIBRARY.'/'.$fn);
 		if ($param) foreach ($param as $k => $v) {
 			unset($this->$k);
@@ -439,6 +441,10 @@ class k_view_helper_control extends view_helper  {
 			if ($this->config->oac->apply) {
 				if (!isset($this->config->oac->apply->order)) $this->config->oac->apply->order = 3;
 				if (!isset($this->config->oac->apply->onclick))$this->config->oac->apply->onclick = '$(this).parents(\'form\').append(\'<input type=hidden name=is_apply value=1 />\').submit().find(\'input[name=is_apply]\').remove();return false;';
+			}
+
+			if ($this->config->oac->custom) {
+				if (!isset($this->config->oac->custom->order)) $this->config->oac->custom->order = 4;
 			}
 
 			// Сортируем кнопки

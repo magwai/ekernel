@@ -28,6 +28,7 @@ class k_common {
 		$str = @preg_replace('/[^\w]/', '_', $str);
 		while (strpos($str, '__') !== false) $str = str_replace('__', '_', $str);
 		$str = trim($str, '_');
+		if (!strlen($str)) $str = '_';
 		if (strlen($str) > $length) {
 			$p = explode('_', $str);
 			$c = array();

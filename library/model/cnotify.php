@@ -27,9 +27,12 @@ class k_model_cnotify extends database_model {
 	}
 
 	function set_control_read($id) {
-		$this->update(array(
+		/*$this->update(array(
 			'is_read' => 1
 		), array(
+			'id' => (int)$id
+		));*/
+		$this->delete(array(
 			'id' => (int)$id
 		));
 	}

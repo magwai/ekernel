@@ -3,6 +3,7 @@
 class k_vk {
 	public $api_url = 'https://api.vk.com/method/';
 	public $last_response = null;
+	public $last_error = null;
 	private $last = null;
 
 	static function get_key() {
@@ -210,6 +211,7 @@ class k_vk {
 		echo $this->last_response.'***';
 		if ($this->last_response) {
 			$this->last_response = json_decode($this->last_response);
+			if (@$this->last_response->error) $this->last_error = $this->last_response->error;
 			if (@$this->last_response->response) return $this->last_response->response;
 		}
 		$this->last = time();

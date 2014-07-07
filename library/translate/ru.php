@@ -10,6 +10,7 @@ return array(
 	'form_element_error_numval_min' => 'Значение должно быть болше {value}',
 	'form_element_error_numval_max' => 'Значение должно быть меньше {value}',
 	'form_element_error_not_int' => 'Требуется указать целое цисло',
+	'form_element_error_not_unique' => 'Требуется уникальное значение',
 	'form_element_error_date' => 'Неверная дата',
 	'form_element_error_regex' => 'Значение не соответствует маске',
 	'form_element_error_imagesize_nf' => 'Файл не является картинкой',

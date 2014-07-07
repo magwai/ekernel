@@ -84,6 +84,11 @@ class k_form_element {
 					$option = $v;
 				}
 				$class = 'validator_'.$validator;
+				if ($validator == 'unique') {
+					if (!isset($option['field'])) {
+						$option['field'] = $this->name;
+					}
+				}
 				$obj = new $class($option);
 				$valid = $obj->validate($value);
 				//if ($this->name=='tag'){print_r($valid);exit();}
