@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_preview_image {
 	var $path;
@@ -65,7 +72,7 @@ class k_preview_image {
 		if ($fit) $thumb->setParameter('zc',  $fit);//$thumb->adaptiveResize($width, $height, $align);
 		//else $thumb->resize($width, $height);
 
-		
+
 
 		/*if ($mark) {
 			$image = $thumb->getOldImage();
@@ -102,9 +109,9 @@ class k_preview_image {
 		//$thumb->setParameter('f',  'png');
 		//print_r($thumb);exit();
 		$thumb->GenerateThumbnail();
-		
+
 		if ($min_width || $min_height) {
-			
+
 			if ($min_width) $thumb->setParameter('w',  $min_width);
 			if ($min_height) $thumb->setParameter('h',  $min_height);
 			$thumb->GenerateThumbnail();
@@ -201,9 +208,9 @@ class k_preview_image {
 			}
 		}
 		*/
-		
-		
-		
+
+
+
 		$thumb->RenderToFile($this->path.'/'.$prefix.@$param['crop'].$name/*, $format*/);
 
 		return true;

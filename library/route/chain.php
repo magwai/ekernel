@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_route_chain extends route {
 	public function __construct($param = array()) {
@@ -54,12 +61,12 @@ class k_route_chain extends route {
 					$all_ok = false;
 					continue;
 				}
-				$ok = $v->match($data, $request_clone);	
-				
+				$ok = $v->match($data, $request_clone);
+
 				if ($ok) {
 					$repl = $v->assemble($request_clone->param, $request_clone);
 					if ($repl && stripos($request_clone->url, $repl) === 0) $request_clone->url = trim(str_ireplace($repl, '', $request_clone->url), '/ ');
-					
+
 					$maps = $v->param ? explode(',', $v->param->map) : array();
 					if ($maps) foreach ($maps as $el) unset($data[$el]);
 				}

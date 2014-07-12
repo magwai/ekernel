@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_router {
 	public $route = array();
@@ -20,7 +27,7 @@ class k_router {
 		if ($this->route) {
 			// Роутинг состоит в поочередном запуске каждого роута. Первый совпадающий с адресом заполняем request своими данными и роутинг прекращается
 			$route = array_reverse($this->route);
-			
+
 			foreach ($route as $el) if ($el instanceof route && $el->route($request)) break;
 		}
 	}

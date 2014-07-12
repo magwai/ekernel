@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 $yn = array(
 	'0' => 'Слева в основном меню',
@@ -50,7 +57,7 @@ $this->control(array(
 		'route' => array(
 			'active' => false
 		)
-		
+
 	),
 	'config_action' => array(
 		'index' => array(

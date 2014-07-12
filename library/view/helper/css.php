@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_view_helper_css extends view_helper_minify {
 	public function prepend($url, $media = 'all', $condition = '') {
@@ -28,7 +35,7 @@ class k_view_helper_css extends view_helper_minify {
 		return $this;
 	}
 
-	public function render_el($fn) {
+	public function render_el($fn, $compress = true) {
 		$c = trim(file_get_contents($fn));
 		$m = md5($c);
 		$nm = $this->name('css', $m);
@@ -92,7 +99,7 @@ class k_view_helper_css extends view_helper_minify {
 					$c = str_ireplace($matches[$k_1], 'src="'.$su.($el_res ? $el_res[0] : '').($modified && !$el_res ? '?'.filemtime($dir_full.'/'.$el_1_r) : '').'"', $c);
 				}
 			}
-			//$this->save('css', PATH_ROOT.$nm, $c);
+			$this->save('css', PATH_ROOT.$nm, $c, $compress);
 		}
 		return array(
 			'md5' => $m,
@@ -119,7 +126,7 @@ class k_view_helper_css extends view_helper_minify {
 					$c = '';
 					$items = $conts = array();
 					foreach ($els as $item) {
-						$ret = $this->render_el(PATH_ROOT.$item['url']);
+						$ret = $this->render_el(PATH_ROOT.$item['url'], false);
 						$items[] = $ret['name'];
 						$conts[] = $ret['content'];
 						$m .= $ret['md5'];
@@ -190,34 +197,30 @@ class k_view_helper_css extends view_helper_minify {
 					if (!class_exists('Zip')) require PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zip.php';
 					$zip = new Zip();
 					$res = json_decode($res, true);
-					$cnt = 0;
 					foreach ($d as $k => $v) {
 						if ($v != @$res[$k]) {
 							$zip->addFile(file_get_contents($path.'/'.$k), $k);
-							$cnt++;
 						}
 					}
-					if ($cnt) {
-						$data = urlencode($zip->getZipData());
-						$context = stream_context_create(array(
-							'http' => array(
-								'method' => 'POST',
-								'header' => 'Content-Type: multipart/form-data'."\r\n".'Content-Length: '.strlen($data)."\r\n",
-								'content' => $data
-							)
-						));
-						$res = file_get_contents($config->host.'/x/scss/ch/set/host/'.$_SERVER['HTTP_HOST'].'/file/'.basename($file), false, $context);
-						if ($res) {
-							$res = json_decode($res, true);
-							file_put_contents(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip', urldecode($res['data']));
-							require PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Unzip.php';
-							$zip = new Unzip();
-							$zip->extract(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip', PATH_ROOT.'/'.DIR_CACHE.'/css');
-							unlink(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip');
-							$nfn = str_replace('.scss', '.css', basename($file));
-							$content = @file_get_contents(PATH_ROOT.'/'.DIR_CACHE.'/css/'.$nfn);
-							unlink(PATH_ROOT.'/'.DIR_CACHE.'/css/'.$nfn);
-						}
+					$data = urlencode($zip->getZipData());
+					$context = stream_context_create(array(
+						'http' => array(
+							'method' => 'POST',
+							'header' => 'Content-Type: multipart/form-data'."\r\n".'Content-Length: '.strlen($data)."\r\n",
+							'content' => $data
+						)
+					));
+					$res = file_get_contents($config->host.'/x/scss/ch/set/host/'.$_SERVER['HTTP_HOST'].'/file/'.basename($file), false, $context);
+					if ($res) {
+						$res = json_decode($res, true);
+						file_put_contents(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip', urldecode($res['data']));
+						require PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Unzip.php';
+						$zip = new Unzip();
+						$zip->extract(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip', PATH_ROOT.'/'.DIR_CACHE.'/css');
+						unlink(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip');
+						$nfn = str_replace('.scss', '.css', basename($file));
+						$content = @file_get_contents(PATH_ROOT.'/'.DIR_CACHE.'/css/'.$nfn);
+						unlink(PATH_ROOT.'/'.DIR_CACHE.'/css/'.$nfn);
 					}
 				}
 			}

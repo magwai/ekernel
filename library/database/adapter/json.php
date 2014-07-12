@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_database_adapter_json extends database_adapter {
 	public $cache = array();
@@ -12,17 +19,17 @@ class k_database_adapter_json extends database_adapter {
 		//$sql = preg_replace('/ORDER\ BY\ \`([^\`]+?)\`/si', 'ORDER BY $1', $sql);
 		$sql = str_replace('`', '', $sql);
 		$ret = null;
-		
+
 		$parser = new k_lib_phpsqlparser_class($sql, true);
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+
+
+
+
+
+
+
+
 		/*
 		$name = null;
 
@@ -40,7 +47,7 @@ class k_database_adapter_json extends database_adapter {
 
 		$parser = new k_lib_phpsqlparser_class($sql, true);*/
 
-		
+
 		if (isset($parser->parsed['DESCRIBE'])) {
 			$all = $this->load_table($parser->parsed['DESCRIBE'][1]);
 			$field = $all['meta']['field'];
@@ -64,11 +71,11 @@ class k_database_adapter_json extends database_adapter {
 				$tables[$name] = $this->load_table($el['table']);
 				if ($tables[$name]) {
 					foreach ($tables[$name]['data'] as $k => $v) {
-						
-						
-						
-						
-						
+
+
+
+
+
 						if (!isset($all[$k])) $all[$k] = array();
 						$all[$k] = array_merge($all[$k], $v);
 					}
@@ -78,18 +85,18 @@ class k_database_adapter_json extends database_adapter {
 				$all = array('data' => $this->query($parser->parsed['FROM'][0]['base_expr'], 'all'));
 			}*/
 			$result = $all;
-			
+
 			if ($sql == 'SELECT i.id FROM crole AS i INNER JOIN crole2crole AS r ON i.id = r.role WHERE (r.parentid = 1) GROUP BY i.id') {
 				echo $sql;
 				print_r($parser->parsed);
 				exit();
 			}
-			
+
 			/*switch (@$parser->parsed['SELECT'][0]['expr_type']) {
 				case 'aggregate_function':
 					switch (@$parser->parsed['SELECT'][0]['base_expr']) {
 						case 'COUNT':
-							
+
 							$result = count($all);
 							break;
 					}
@@ -98,17 +105,17 @@ class k_database_adapter_json extends database_adapter {
 					$result = $all;
 					break;
 			}*/
-			
-			
-			
-			
+
+
+
+
 			//$parser = new k_lib_phpsqlparser_class('SELECT * FROM `cuser`', true);
-			
+
 			/*echo $sql;
 			print_r($result);
 			exit();*/
-					
-			
+
+
 		}
 
 		// Разбираем ответ в соответствии с типом запроса
@@ -150,7 +157,7 @@ class k_database_adapter_json extends database_adapter {
 		}
 		return $ret;
 	}
-	
+
 	function load_table($name) {
 		$all = @$this->cache[$name];
 		if (!isset($this->cache[$name])) {

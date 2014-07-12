@@ -3,7 +3,13 @@
 if (!$this->level) {
 
 ?>
-<select<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?><?php echo $this->multiple ? ' multiple="multiple"' : '' ?> name="<?php echo $this->escape($this->name).($this->multiple ? '[]' : '') ?>">
+<select<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?><?php echo $this->multiple ? ' multiple="multiple"' : '' ?> name="<?php echo $this->escape($this->name).($this->multiple ? '[]' : '') ?>"<?php
+
+if ($this->attr) foreach ($this->attr as $k => $v) {
+	echo ' '.$this->escape($k).'="'.$this->escape($v).'"';
+}
+
+?>>
 <?php
 
 }

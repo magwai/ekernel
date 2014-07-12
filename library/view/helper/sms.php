@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_view_helper_sms extends view_helper {
 	function sms($operator, $message, $phones, $config = array()) {
@@ -16,7 +23,7 @@ class k_view_helper_sms extends view_helper {
 		}
 		return $phones ? $this->$operator($message, $phones, $config) : false;
 	}
-	
+
 	function iqsms($message, $phones, $config) {
 		$y = application::get_instance()->config->sms->iqsms;
 		$ok = 0;

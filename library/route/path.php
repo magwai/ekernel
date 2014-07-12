@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_route_path extends route {
 	public function route($request) {
@@ -35,7 +42,7 @@ class k_route_path extends route {
 		if ($request->param && count($request->param)) $request_param = array_merge($request_param, $request->param->to_array());
 		$assemble_request = $this->assemble($request_param, $request);
 		$assemble_data = $this->assemble($data, $request);
-		
+
 		return $assemble_data == '/'
 			? $assemble_request == $assemble_data && (@$data['controller'] || @$data['action'])
 			: stripos($assemble_request, $assemble_data) === 0;// $assemble_request === $assemble_data;

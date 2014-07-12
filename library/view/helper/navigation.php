@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_view_helper_navigation extends view_helper  {
 	private $_inited = false;
@@ -106,7 +113,7 @@ class k_view_helper_navigation extends view_helper  {
 			}
 			$data = array_reverse($data);
 		}
-		
+
 		if (@$param['start']) {
 			$data = array_merge($param['start'], $data);
 		}

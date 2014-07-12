@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_database_adapter_sqlite extends database_adapter {
 	private $_charset_default = 'utf8';
@@ -11,7 +18,7 @@ class k_database_adapter_sqlite extends database_adapter {
 			'sqlite:'.PATH_ROOT.'/'.DIR_DATA.'/db/'.(string)$this->config->database.'.db'
 		);
 		//$this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		
+
 		if (!function_exists('sqlite_sha1')) {
 			function sqlite_sha1($string) {
 				return sha1($string);
@@ -26,13 +33,13 @@ class k_database_adapter_sqlite extends database_adapter {
 
 		// Делаем запрос к БД, передавая числый SQL в PDO
 		$ret = null;
-		
+
 		$was_describe = preg_match('/^DESCRIBE\ /si', $sql);
 		if ($was_describe) $sql = str_ireplace('DESCRIBE ', 'PRAGMA table_info(', $sql).')';
 
 		try {
 			$result = $this->connection->query($sql);
-			
+
 		}
 		catch(PDOException $e) {
 			echo $e->getMessage();

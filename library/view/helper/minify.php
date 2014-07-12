@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_view_helper_minify extends view_helper {
 	public $item = array();
@@ -53,13 +60,13 @@ class k_view_helper_minify extends view_helper {
 		return '/'.DIR_CACHE.'/'.$type.'/'.$prefix.$md5.'.'.$type;
 	}
 
-	public function save($type, $path, $content) {
+	public function save($type, $path, $content, $compress = true) {
 		$config = application::get_instance()->config->$type;
 		if (!@file_exists(PATH_ROOT.'/'.DIR_CACHE.'/'.$type)) {
 			@mkdir(PATH_ROOT.'/'.DIR_CACHE.'/'.$type, 0777, true);
 			@chmod(PATH_ROOT.'/'.DIR_CACHE.'/'.$type, 0777);
 		}
-		if ($config->compress) {
+		if ($compress && $config->compress) {
 			$content = $this->minify($content, $type);
 		}
 		file_put_contents($path, $content);

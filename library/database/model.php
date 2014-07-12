@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_database_model {
 	public $adapter = null;
@@ -157,7 +164,7 @@ class k_database_model {
 		if ($result) foreach ($result as $el) $ret[$el['Field']] = $el;
 		return $ret;
 	}
-	
+
 	function fetch_control_list($where = null, $order = null, $count = null, $offset = null) {
 		$select = new database_select();
 		$select->from($this->name);

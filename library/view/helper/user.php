@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_view_helper_user extends view_helper  {
 	private $default_model_user = 'user';
@@ -118,7 +125,7 @@ class k_view_helper_user extends view_helper  {
 		// Добавляем правила
 		$rules = $this->model_rule->fetch_all(null, 'orderid');
 		if (!$rules) return false;
-		
+
 		foreach ($rules as $el) {
 			$select_1 = new database_select();
 			$select_1	->from(array(

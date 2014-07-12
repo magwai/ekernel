@@ -1,11 +1,18 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_acl {
 	public $role = array();
 	public $resource = array();
 	public $allow_role = array();
 	public $deny_role = array();
-	
+
 
 	public function add_role($role, $parents = array()) {
 		if (!isset($this->role[$role])) $this->role[$role] = array(
@@ -66,7 +73,7 @@ class k_acl {
 		$checked_roles = array();
 		$roles = $this->inner_role($role, $checked_roles);
 		if (!in_array($role, $checked_roles)) $roles[] = $role;
-	
+
 		$checked_resources = array();
 		$resources = $this->inner_resource($resource, $checked_resources);
 		if (!in_array($resource, $checked_resources)) $resources[] = $resource;

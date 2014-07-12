@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_view_helper_meta_collector extends view_helper_meta {
 	public $description = array();
@@ -57,7 +64,7 @@ class k_view_helper_meta_collector extends view_helper_meta {
 			$this->view->meta()->set('name', 'description', implode('. ', $this->description));
 		}
 	}
-	
+
 	function analize($str) {
 		$is_site_title = false;
 		$is_sign = '';

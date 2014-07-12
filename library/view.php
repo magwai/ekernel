@@ -1,4 +1,11 @@
 <?php
+/**
+ * ekernel
+ *
+ * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
+ * Licensed under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
 
 class k_view extends data {
 	public $name;
@@ -13,7 +20,7 @@ class k_view extends data {
 		if ($name) {
 			// Захватываем буфер
 			ob_start();
-			
+
 			$name_valid = substr($name, 0, 2) == 'k_' ? substr($name, 2) : $name;
 			$fn = 'view/'.$name_valid.'.php';
 
