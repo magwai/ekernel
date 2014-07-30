@@ -939,7 +939,8 @@ class k_view_helper_control extends view_helper  {
 				}
 			}
 		}
-		else {
+
+		if (!$this->config->count) {
 			$this->config->notify[] = array(
 				'title' => $this->view->translate('control_notify_delete_noel'),
 				'style' => 'warning'

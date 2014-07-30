@@ -52,6 +52,15 @@ $this->control(array(
 					'order' => 2
 				)
 			)
+		),
+		'delete' => array(
+			'callback' => array(
+				'before_el' => function(&$control) {
+					if (!$control->config->data->show_it && !$control->view->user()->is_allowed_by_key('admin')) {
+						$control->config->skip_el = true;
+					}
+				}
+			)
 		)
 	)
 ));

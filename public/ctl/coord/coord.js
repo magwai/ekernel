@@ -22,7 +22,7 @@
 			if (this.opt.map_type === 'yandex') {
 				ymaps.ready(function () {
 					this.map = new ymaps.Map(this.opt.id, {
-						center: val && val.length ? val.split(',') : this.opt.center,
+						center: val && val.length ? this.parse_val(val) : this.opt.center,
 						zoom: this.opt.zoom
 					});
 					this.map.events.add('click', function (e) {
@@ -32,13 +32,13 @@
 					}.bind(this));
 					this.map.cursors.push('crosshair');
 					if (val && val.length) {
-						this.mark_set(val.split(','));
+						this.mark_set(this.parse_val(val));
 					}
 				}.bind(this));
 			}
 			else if (this.opt.map_type === 'google') {
 				google.maps.event.addDomListener(window, 'load', function() {
-					var val_arr = val && val.length ? val.split(',') : this.opt.center;
+					var val_arr = val && val.length ? this.parse_val(val) : this.opt.center;
 					this.map = new google.maps.Map(document.getElementById(this.opt.id), {
 						draggableCursor: 'crosshair',
 						zoom: this.opt.zoom,
@@ -50,10 +50,13 @@
 						this.input_update();
 					}.bind(this));
 					if (val && val.length) {
-						this.mark_set(val.split(','));
+						this.mark_set(this.parse_val(val));
 					}
 				}.bind(this));
 			}
+		},
+		parse_val: function(str) {
+			return str.split(str.indexOf('|') === -1 ? ',' : '|');
 		},
 		mark_set: function(geo) {
 			if (this.opt.map_type === 'yandex') {

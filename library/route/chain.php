@@ -31,7 +31,7 @@ class k_route_chain extends route {
 				$ok = $v->route($request_clone);
 				if ($ok) {
 					$repl = $v->assemble($request_clone->param, $request_clone);
-					if ($repl && stripos($request_clone->url, $repl) === 0) $request_clone->url = trim(str_ireplace($repl, '', $request_clone->url), '/ ');
+					if ($repl && stripos($request_clone->url, $repl) === 0) $request_clone->url = trim(preg_replace('/^'.preg_quote($repl, '/').'/i', '', $request_clone->url), '/ ');
 					if (@$request_clone->ccontroller) $request->ccontroller = $request_clone->ccontroller;
 					if (@$request_clone->caction) $request->caction = $request_clone->caction;
 					if (@$request_clone->controller) $request->controller = $request_clone->controller;
@@ -65,7 +65,7 @@ class k_route_chain extends route {
 
 				if ($ok) {
 					$repl = $v->assemble($request_clone->param, $request_clone);
-					if ($repl && stripos($request_clone->url, $repl) === 0) $request_clone->url = trim(str_ireplace($repl, '', $request_clone->url), '/ ');
+					if ($repl && stripos($request_clone->url, $repl) === 0) $request_clone->url = trim(preg_replace('/^'.preg_quote($repl, '/').'/i', '', $request_clone->url), '/ ');
 
 					$maps = $v->param ? explode(',', $v->param->map) : array();
 					if ($maps) foreach ($maps as $el) unset($data[$el]);

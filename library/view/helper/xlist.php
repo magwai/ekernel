@@ -1,11 +1,4 @@
 <?php
-/**
- * ekernel
- *
- * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
- * Licensed under the MIT License:
- * http://www.opensource.org/licenses/mit-license.php
- */
 
 class k_view_helper_xlist extends view_helper {
 	public function xlist($data = array()) {
@@ -20,7 +13,7 @@ class k_view_helper_xlist extends view_helper {
 							)
 					)
 				:	'';
-			$data['fetch']['entity'] = @$data['fetch']['entity']
+			if (@$data['fetch']['entity'] != 'none') $data['fetch']['entity'] = @$data['fetch']['entity']
 				?	(class_exists($data['fetch']['entity'])
 						?	$data['fetch']['entity']
 						:	'entity_'.@$data['fetch']['entity']

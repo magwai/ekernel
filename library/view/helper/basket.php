@@ -1,11 +1,4 @@
 <?php
-/**
- * ekernel
- *
- * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
- * Licensed under the MIT License:
- * http://www.opensource.org/licenses/mit-license.php
- */
 
 class k_view_helper_basket extends view_helper {
 	protected $_uid = null;
@@ -14,6 +7,7 @@ class k_view_helper_basket extends view_helper {
 	protected $_model_order_item = null;
 	protected $_model_delivery = null;
 	protected $_field_order_item_id = 'itemid';
+	protected $_user_heler_name = 'user';
 
 	public function basket() {
 		return $this;
@@ -28,7 +22,7 @@ class k_view_helper_basket extends view_helper {
 
 	function basket_id($create = false) {
 		$id = 0;
-		$uid = (int)$this->view->user('id');
+		$uid = $this->view->{$this->_user_heler_name}('id');
 		$sid = session::get_id();
 		$id = $uid ? (int)$this->_model_order->fetch_one('id', array(
 			'author' => $uid,
@@ -246,11 +240,25 @@ class k_view_helper_basket extends view_helper {
 		return $oid;
 	}
 
-	function card() {
+	function card($id = null) {
 		$oid = $this->basket_id();
-		$res = $this->_model_order->fetch_row(array(
-			'id' => (int)$oid
-		));
+		if ($id) {
+			$ret = $this->_model_order_item->fetch_row(array(
+				'parentid' => (int)$oid,
+				'itemid' => $id
+			));
+			if ($ret) {
+				$item = $this->_model_item->fetch_order_card($id);
+				$res = $this->_model_item->entity(array_merge($ret->to_array(), $item->to_array()), 'orderitem');
+				$res->view = $this->view;
+			}
+		}
+		else {
+			$res = $this->_model_order->fetch_row(array(
+				'id' => (int)$oid
+			));
+		}
+
 		return $res ? $res : null;
 	}
 

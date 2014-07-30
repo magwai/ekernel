@@ -25,9 +25,9 @@ class k_view_helper_user extends view_helper  {
 	public $model_rule2resource = null;
 	public $salt = '';
 	private $_acl = null;
-	private $_key = 'user';
-	private $_data = null;
-	private $_inited = false;
+	protected $_key = 'user';
+	protected $_data = null;
+	protected $_inited = false;
 
 	public function init() {
 		if ($this->_inited) return;
@@ -75,7 +75,7 @@ class k_view_helper_user extends view_helper  {
 	}
 
 	public function is_allowed($resource) {
-		$role = (int)$this->user('role');
+		$role = (int)$this->_data->role;
 		if ($role && $this->_acl->is_allowed($role, $resource)) return true;
 		return false;
 	}

@@ -42,7 +42,8 @@ class k_response {
 	public function send() {
 		if ($this->body) {
 			$res = implode('', $this->body);
-			if (ob_start("ob_gzhandler")) ini_set('zlib.output_compression_level', 6);
+			$config = application::get_instance()->config->html;
+			if ($config->compress && ob_start("ob_gzhandler")) ini_set('zlib.output_compression_level', 6);
 			else ob_start();
 			echo $res;
 		}

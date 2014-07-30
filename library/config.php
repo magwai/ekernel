@@ -36,6 +36,10 @@ return array(
 		// Порядок использования компрессоров
 		'compressor' => array('gcc', 'jsmin')
 	),
+	'html' => array(
+		// Сжимать
+		'compress' => true,
+	),
 	'util' => array(
 		'host' => 'http://util.magwai.ru'
 	),

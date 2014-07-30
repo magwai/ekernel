@@ -25,7 +25,7 @@ if ($this->item) {
 		else {
 
 ?>
-	<option value="<?php echo $this->escape($k) ?>"<?php echo ($this->multiple ? ($this->value && is_object($this->value) ? in_array($k, $this->value->to_array()) : false) : $k == $this->value) ? ' selected="selected"' : '' ?>><?php echo $v ?></option>
+	<option value="<?php echo $this->escape($k) ?>"<?php echo ($this->multiple ? ($this->value && is_object($this->value) ? in_array($k, $this->value->to_array()) : false) : $k == $this->value && strlen($k) == strlen($this->value)) ? ' selected="selected"' : '' ?>><?php echo $v ?></option>
 <?php
 
 		}

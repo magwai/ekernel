@@ -9,6 +9,7 @@
 
 class k_form {
 	public $group = array();
+	public $attr = array();
 	public $view = null;
 	public $class = '';
 	public $class_wrap = '';
@@ -38,6 +39,7 @@ class k_form {
 		if (isset($param['class'])) $this->class = $param['class'];
 		if (isset($param['class_wrap'])) $this->class_wrap = $param['class_wrap'];
 		if (isset($param['legend'])) $this->legend = $param['legend'];
+		if (isset($param['attr'])) $this->attr = $param['attr'];
 		if (isset($param['class_element_frame'])) $this->class_element_frame = $param['class_element_frame'];
 		if (isset($param['class_element_control'])) $this->class_element_control = $param['class_element_control'];
 		if (isset($param['class_element_label'])) $this->class_element_label = $param['class_element_label'];
@@ -57,6 +59,7 @@ class k_form {
 		return $this->view->render($this->view_script, array(
 			'legend' => $this->legend,
 			'autocomplete' => $this->autocomplete,
+			'attr' => $this->attr,
 			'class' => $this->class,
 			'class_error_frame' => $this->class_error_frame,
 			'class_wrap' => $this->class_wrap,
@@ -76,7 +79,7 @@ class k_form {
 		if (!isset($param['class_label']) && $this->class_element_label) $param['class_label'] = $this->class_element_label;
 		if (!isset($param['class_error']) && $this->class_element_error) $param['class_error'] = $this->class_element_error;
 		if (!isset($param['frame_view_script']) && $this->element_view_script) $param['frame_view_script'] = $this->element_view_script;
-		if (($type == 'text' || $type == 'tagsinput' || $type == 'date' || $type == 'autocomplete' || $type == 'password') && !isset($param['class']) && $this->class_element_text) $param['class'] = $this->class_element_text;
+		if (($type == 'text' || $type == 'tagsinput' || $type == 'date' || $type == 'autocomplete' || $type == 'password' || $type == 'captcha') && !isset($param['class']) && $this->class_element_text) $param['class'] = $this->class_element_text;
 		if ($type == 'textarea' && !isset($param['class']) && $this->class_element_textarea) $param['class'] = $this->class_element_textarea;
 		if ($type == 'select' && !isset($param['class']) && $this->class_element_select) $param['class'] = $this->class_element_select;
 		$this->element->$name = new $class($name, $param);
@@ -85,7 +88,7 @@ class k_form {
 	public function populate($data) {
 		if ($this->element) {
 			foreach ($this->element as $k => $el) {
-				if (!isset($data[$k])) continue;
+				if (!isset($data[$k]) || !$el) continue;
 				$el->set($data[$k]);
 			}
 			if ($this->group) {
@@ -100,6 +103,7 @@ class k_form {
 		$ok = true;
 		if ($this->element) {
 			foreach ($this->element as $k => $el) {
+				if (!$el) continue;
 				if (!isset($data[$k]) && !($el instanceof form_element_file)) $data[$k] = '';
 				$el->validate($data[$k]);
 				if ($el->get_error()) $ok = false;
@@ -112,7 +116,7 @@ class k_form {
 		$data = array();
 		if ($this->element) {
 			foreach ($this->element as $k => $el) {
-				if (!$k) continue;
+				if (!$k || !$el) continue;
 				$data[$k] = $el->get();
 				if ($el instanceof form_element_file) {
 					if ($data[$k]) {
@@ -133,7 +137,7 @@ class k_form {
 		if (!isset($param['view_script'])) $param['view_script'] = 'form/group';
 		$form = new form($param);
 		foreach ($els as $el) {
-			$form->element->$el = clone $this->element->$el;
+			$form->element->$el = $this->element->$el;
 			unset($this->element->$el);
 		}
 		if (!$this->group) $this->group = new data;

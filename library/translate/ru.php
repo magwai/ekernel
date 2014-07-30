@@ -1,19 +1,14 @@
 <?php
-/**
- * ekernel
- *
- * Copyright (c) 2012 Magwai Ltd. <info@magwai.ru>, http://magwai.ru
- * Licensed under the MIT License:
- * http://www.opensource.org/licenses/mit-license.php
- */
 
 return array(
 	'form_element_error_fileerror' => 'Ошибка загрузки файла',
 	'form_element_error_filesize' => 'Файл слишком большой',
 	'form_element_error_empty' => 'Обязательно для заполнения',
 	'form_element_error_email' => 'Неверный e-mail',
-	'form_element_error_strlen_min' => 'Необходимо более {value} симв.',
-	'form_element_error_strlen_max' => 'Необходимо менее {value} симв.',
+	'form_element_error_captcha' => 'Неверный код',
+	'form_element_error_strlen_min' => 'Необходимо {value} или более симв.',
+	'form_element_error_strlen_max' => 'Необходимо {value} или менее симв.',
+	'form_element_error_strlen_exact' => 'Необходимо {value} симв.',
 	'form_element_error_numval_min' => 'Значение должно быть болше {value}',
 	'form_element_error_numval_max' => 'Значение должно быть меньше {value}',
 	'form_element_error_not_int' => 'Требуется указать целое цисло',

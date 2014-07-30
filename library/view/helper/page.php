@@ -13,6 +13,6 @@ class k_view_helper_page extends view_helper {
 		$card = $m->fetch_row(array(
 			'stitle' => $stitle
 		));
-		return (string)$card->$field;
+		return is_object($card) ? (string)$card->$field : '';
 	}
 }

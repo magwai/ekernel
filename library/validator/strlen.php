@@ -11,7 +11,12 @@ class k_validator_strlen extends validator {
 	public function validate($value) {
 		if ($value) {
 			$length = mb_strlen($value, 'utf-8');
-			if (@$this->option['max'] && $length > $this->option['max']) return array(
+			if (@$this->option['exact'] && $length != $this->option['exact']) return array(
+				'strlen_exact' => array(
+					'value' => $this->option['exact']
+				)
+			);
+			else if (@$this->option['max'] && $length > $this->option['max']) return array(
 				'strlen_max' => array(
 					'value' => $this->option['max']
 				)
