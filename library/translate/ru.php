@@ -20,6 +20,7 @@ return array(
 	'form_element_error_imagesize_width_less' => 'Картинка слишком широкая',
 	'form_element_error_imagesize_height_much' => 'Картинка слишком низкая',
 	'form_element_error_imagesize_height_less' => 'Картинка слишком высокая',
+	'form_element_error_file_extensions' => 'Недопустимое расширение файла',
 	'form_element_file_delete' => 'удалить',
 	'form_element_select_no_results_text' => 'Не найдено',
 	'form_element_select_placeholder_text' => 'Введите слово',
