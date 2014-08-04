@@ -16,7 +16,7 @@ class k_validator_file_extension extends validator {
 
 			$extensions = explode(',', $this->option->extensions);
 
-			if (is_array($info['extension'])) {
+			if (is_array($info)) {
 				foreach ($extensions as $extension) {
 					if (strtolower($extension) == strtolower($info['extension'])) {
 						return $ret;
