@@ -37,6 +37,10 @@ class k_form_element_file extends form_element_input {
 		if (isset($this->validator['image_size'])) {
 			if (!isset($this->validator['image_size']['path'])) $this->validator['image_size']['path'] = $this->path;
 		}
+		
+		if (isset($this->validator['file_extension'])) {
+			if (!isset($this->validator['file_extension']['path'])) $this->validator['file_extension']['path'] = $this->path;
+		}
 
 		if (isset($this->validator['file_extension'])) {
 			if (!isset($this->validator['file_extension']['path'])) $this->validator['file_extension']['path'] = $this->path;
