@@ -10,6 +10,12 @@
 class k_model_user extends database_model {
 	public $name = 'user';
 
+	function fetch_card_by_login($login) {
+		return $this->fetch_row(array(
+			'login' => $login
+		));
+	}
+
 	function fetch_card_by_id($id) {
 		return $this->fetch_row(array(
 			'id' => (int)$id
@@ -32,5 +38,15 @@ class k_model_user extends database_model {
 			'login' => (string)$login,
 			'password = SHA1(?)' => (string)$password.(string)$salt
 		));
+	}
+
+	function fetch_card_by_profile($profile) {
+		return $this->fetch_row(array(
+			'profile' => (string)$profile
+		));
+	}
+
+	function usersoc_register($data = array()) {
+		return $data['author'];
 	}
 }

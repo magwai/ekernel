@@ -9,6 +9,7 @@
 
 class k_view_helper_user extends view_helper  {
 	private $default_model_user = 'user';
+	private $default_model_usersoc = 'user';
 	private $default_model_role = 'role';
 	private $default_model_rule = 'rule';
 	private $default_model_resource = 'resource';
@@ -41,6 +42,8 @@ class k_view_helper_user extends view_helper  {
 			$this->model_user = new $this->model_user();
 			$this->_key = 'user_'.$this->model_user->name;
 		}
+		$this->model_usersoc = 'model_'.(isset($config->model->usersoc) ? $config->model->usersoc : $this->default_model_usersoc);
+		$this->model_usersoc = class_exists($this->model_usersoc) ? new $this->model_usersoc() : null;
 		if ($config->acl) {
 			$this->model_role = 'model_'.(isset($config->model->role) ? $config->model->role : $this->default_model_role);
 			$this->model_role = class_exists($this->model_role) ? new $this->model_role() : null;
@@ -185,6 +188,16 @@ class k_view_helper_user extends view_helper  {
 			if ($data) {
 				session::set($this->_key, $login);
 				$this->_data = $data;
+				if ($this->model_user->name != $this->model_usersoc->name) {
+					$soc_data = $this->model_usersoc->fetch_row(array(
+						'author' => $login,
+						'active' => 1
+					));
+					if ($soc_data) {
+						unset($soc_data['id']);unset($soc_data['author']);unset($soc_data['active']);
+						$this->_data->set($soc_data);
+					}
+				}
 				if ($remember) setcookie(
 					$this->_key,
 					sha1($this->_data->profile.$this->_data->login.$this->_data->password.$this->salt),
@@ -196,7 +209,17 @@ class k_view_helper_user extends view_helper  {
 		}
 		else {
 			$id = $this->model_user->login($login, $password, $this->salt);
-			if ($id) return $this->login($id, null, $remember);
+			if ($id) {
+				$ok = $this->login($id, null, $remember);
+				if ($ok && $this->model_user->name != $this->model_usersoc->name) {
+					$this->model_usersoc->update(array(
+						'active' => 0
+					), array(
+						'author' => $this->_data->id
+					));
+				}
+				return $ok;
+			}
 		}
 		return false;
 	}
@@ -226,14 +249,25 @@ class k_view_helper_user extends view_helper  {
 		return $this->model_user->insert($data);
 	}
 
+	function usersoc_register($data) {
+		$meta = $this->model_usersoc->metadata();
+		if ($data) foreach ($data as $k => $v) if (!array_key_exists($k, $meta)) unset($data[$k]);
+		return $this->model_usersoc->usersoc_register($data);
+	}
+
 	function update($data, $id = null) {
 		if ($id === null && isset($this->_data['id'])) $id = $this->_data['id'];
+		$same = $id == $this->_data['id'];
 		if (isset($data['password'])) $data['password'] = $this->password_hash((string)$data['password']);
 		$meta = $this->model_user->metadata();
 		if ($data) foreach ($data as $k => $v) if (!array_key_exists($k, $meta)) unset($data[$k]);
-		return $this->model_user->update($data, array(
+		$res = $this->model_user->update($data, array(
 			'id' => (int)$id
 		));
+		if ($res && $same) {
+			$this->_data = $this->fetch_profile($id);
+		}
+		return $res;
 	}
 
 	function ulogin_parse($data) {
@@ -247,16 +281,41 @@ class k_view_helper_user extends view_helper  {
 	}
 
 	function ulogin($token) {
+		$ok = false;
 		$res = @file_get_contents('http://ulogin.ru/token.php?token='.$token);
 		$res_decoded = $this->ulogin_parse($res);
 		if ($res_decoded && isset($res_decoded['profile'])) {
-			$ok = (int)$this->model_user->fetch_one('id', array(
-				'profile' => (string)@$res_decoded['profile']
-			));
-			if (!$ok) $ok = $this->register($this->ulogin_override($res_decoded));
-			if ($ok) return $this->login($ok, null, true);
+			$ex_soc = $this->model_usersoc->fetch_card_by_profile((string)@$res_decoded['profile']);
+			$ok = $ex_soc ? @(int)$ex_soc[$this->model_usersoc->name == $this->model_user->name ? 'id' : 'author'] : false;
+			if (!$ok) {
+				$d = $this->ulogin_override($res_decoded);
+				$ex = $this->model_user->fetch_card_by_login(@(string)$d['login']);
+				if ($ex) $ok = $ex->id;
+				else $ok = $this->register($d);
+				if ($ok) {
+					$d['author'] = $ok;
+					if (!$ex) $d['confirmed'] = 1;
+					$ok = $this->usersoc_register($d);
+					if ($ok) $ex_soc = $this->model_usersoc->fetch_card_by_profile((string)@$res_decoded['profile']);
+				}
+			}
+			if ($ok) {
+				$ok = $this->login($ok, null, true);
+				if ($ok && $ex_soc && $this->model_user->name != $this->model_usersoc->name) {
+					$this->model_usersoc->update(array(
+						'active' => 0
+					), array(
+						'author' => $this->_data->id
+					));
+					$this->model_usersoc->update(array(
+						'active' => 1
+					), array(
+						'id' => $ex_soc['id']
+					));
+				}
+			}
 		}
-		return false;
+		return $ok;
 	}
 
 	public function user($p = null) {

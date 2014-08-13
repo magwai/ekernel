@@ -58,18 +58,22 @@ class k_preview_image {
 			'correctPermissions' => true
 		));*/
 
-		/*if (@$param['crop']) {
-			$crop_data = explode(',', $param['crop']);
-			$image = $thumb->getOldImage();
-			$crop_width = $crop_data[2] - $crop_data[0];
-			$crop_height = $crop_data[3] - $crop_data[1];
-			$new_image = imagecreatetruecolor($crop_width, $crop_height);
-			imagecopyresampled($new_image, $image, 0, 0, $crop_data[0], $crop_data[1], $crop_width, $crop_height, $crop_width, $crop_height);
-			$thumb->setOldImage($new_image);
-			$thumb->setCurrentDimensions(array('width' => $crop_width, 'height' => $crop_height));
-		}*/
+
 
 		if ($fit) $thumb->setParameter('zc',  $fit);//$thumb->adaptiveResize($width, $height, $align);
+
+		if (@$param['crop']) {
+			$crop_data = explode(',', $param['crop']);
+			$crop_width = $crop_data[2] - $crop_data[0];
+			$crop_height = $crop_data[3] - $crop_data[1];
+			$thumb->setParameter('sx',  $crop_data[0]);
+			$thumb->setParameter('sy',  $crop_data[1]);
+			$thumb->setParameter('sw',  $crop_width);
+			$thumb->setParameter('sh',  $crop_height);
+			//$thumb->setParameter('w',  $crop_width);
+			//$thumb->setParameter('h',  $crop_height);
+			$thumb->setParameter('zc',  false);
+		}
 		//else $thumb->resize($width, $height);
 
 

@@ -38,6 +38,10 @@ class k_form_element_file extends form_element_input {
 			if (!isset($this->validator['image_size']['path'])) $this->validator['image_size']['path'] = $this->path;
 		}
 
+		if (isset($this->validator['file_extension'])) {
+			if (!isset($this->validator['file_extension']['path'])) $this->validator['file_extension']['path'] = $this->path;
+		}
+
 		if (@$_POST[$this->name.'_delete']) {
 			@unlink($this->path.'/'.$_POST[$this->name.'_delete']);
 			$this->set('DELETED');
@@ -87,6 +91,7 @@ class k_form_element_file extends form_element_input {
 						file.queueItem.find(".fileinfo").html(" - " + info);
 						file.queueItem.find(".image").remove();
 						var file_1 = file.queueItem.data("file");
+						delete file_1["name"];
 						file_1.name = "";
 					}
 					else {

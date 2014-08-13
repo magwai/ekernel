@@ -8,6 +8,7 @@ if ($this->attr) foreach ($this->attr as $k => $v) {
 	<div class="e-form<?php echo $this->class_wrap ? ' '.$this->class_wrap : '' ?>">
 <?php
 
+$error_view = $this->error_view_script;
 $group = $this->group;
 unset($this->group);
 if ($this->element) {
@@ -26,7 +27,7 @@ if ($this->element) {
 				'data' => $v->get_error()
 			),
 			'view' => array(
-				'script' => $this->error_view_script
+				'script' => $error_view
 			)
 		));
 		echo $v->frame_view_script ? $this->render($v->frame_view_script, array(
