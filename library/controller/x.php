@@ -29,6 +29,7 @@ class k_controller_x extends controller {
 		$this->view->file = $this->request->param->file;
 		$this->view->host = $this->request->param->host;
 		$this->view->ch = $this->request->param->ch;
+		$this->view->ip = $this->request->param->ip;
 	}
 
 	public function minify_action() {

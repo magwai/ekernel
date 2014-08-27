@@ -4,7 +4,8 @@ application::get_instance()->controller->layout = null;
 
 $d = array();
 if ($this->host && $this->file) {
-	$path = PATH_ROOT.'/'.DIR_CACHE.'/scss/'.$this->host.'/'.$this->file;
+	$ip = $this->ip ? $this->ip : 'noip';
+	$path = PATH_ROOT.'/'.DIR_CACHE.'/scss/'.$this->host.'/'.$this->file.'/'.$ip;
 	if (!file_exists($path)) mkdir($path, 0777, true);
 	if ($this->ch == 'get') {
 		function recursive_scss($path, $dir, &$d) {
@@ -18,7 +19,6 @@ if ($this->host && $this->file) {
 					$d[$dir.($dir ? '/' : '').$fn] = md5(file_get_contents($cur.'/'.$fn));
 				}
 			}
-
 		}
 		recursive_scss($path, '', $d);
 	}

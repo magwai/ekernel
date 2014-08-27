@@ -192,7 +192,7 @@ class k_view_helper_css extends view_helper_minify {
 
 			recursive_scss($path, '', $d);
 			if ($d) {
-				$res = file_get_contents($config->host.'/x/scss/ch/get/host/'.$_SERVER['HTTP_HOST'].'/file/'.basename($file));
+				$res = file_get_contents($config->host.'/x/scss/ch/get/host/'.$_SERVER['HTTP_HOST'].'/ip/'.$_SERVER['REMOTE_ADDR'].'/file/'.basename($file));
 				if ($res) {
 					if (!class_exists('Zip')) require PATH_ROOT.'/'.DIR_LIBRARY.'/lib/Zip.php';
 					$zip = new Zip();
@@ -210,7 +210,7 @@ class k_view_helper_css extends view_helper_minify {
 							'content' => $data
 						)
 					));
-					$res = file_get_contents($config->host.'/x/scss/ch/set/host/'.$_SERVER['HTTP_HOST'].'/file/'.basename($file), false, $context);
+					$res = file_get_contents($config->host.'/x/scss/ch/set/host/'.$_SERVER['HTTP_HOST'].'/ip/'.$_SERVER['REMOTE_ADDR'].'/file/'.basename($file), false, $context);
 					if ($res) {
 						$res = json_decode($res, true);
 						file_put_contents(PATH_ROOT.'/'.DIR_CACHE.'/css/temp.zip', urldecode($res['data']));
