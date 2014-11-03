@@ -10,25 +10,38 @@
 class k_validator_upload extends validator {
 	public function validate($key) {
 		$error = array();
-		if (isset($_FILES[$key]) && $_FILES[$key]['error'] != UPLOAD_ERR_NO_FILE) {
-			if (!file_exists($this->option->path)) {
-				@mkdir($this->option->path, 0777, true);
-				@chmod($this->option->path, 0777);
+		if (isset($_FILES[$key])) {
+			$files = array();
+			$files_array = array();
+			foreach ($_FILES[$key] as $k => $v) {
+				$files[$k] = is_array($v) ? $v : array($v);
+				if (!$files_array) $files_array = array_keys($files[$k]);
 			}
-			$old_path = @$_FILES[$key]['tmp_name'];
-			$old_name = @$_FILES[$key]['name'];
-			$filter = new filter_filename(array(
-				'directory' => $this->option->path,
-				'prefix' => $this->option->prefix,
-				'length' => $this->option->name_filer_length
-			));
-			$name = $filter->filter($old_name);
-			$ok = @move_uploaded_file($old_path, $this->option->path.'/'.$name);
-			if ($ok) {
-				@chmod($this->option->path.'/'.$name, 0777);
-				return $name;
+			$ret = array();
+			foreach ($files_array as $k) {
+				if ($files['error'][$k] == UPLOAD_ERR_NO_FILE) $error['fileerror'] = array();
+				else {
+					if (!file_exists($this->option->path)) {
+						@mkdir($this->option->path, 0777, true);
+						@chmod($this->option->path, 0777);
+					}
+					$old_path = @$files['tmp_name'][$k];
+					$old_name = @$files['name'][$k];
+					$filter = new filter_filename(array(
+						'directory' => $this->option->path,
+						'prefix' => $this->option->prefix,
+						'length' => $this->option->name_filer_length
+					));
+					$name = $filter->filter($old_name);
+					$ok = @move_uploaded_file($old_path, $this->option->path.'/'.$name);
+					if ($ok) {
+						@chmod($this->option->path.'/'.$name, 0777);
+						$ret[] = $name;
+					}
+					else $error['fileerror'] = array();
+				}
 			}
-			else $error['fileerror'] = array();
+			return implode('*', $ret);
 		}
 		else $error['fileerror'] = array();
 		return $error;

@@ -36,6 +36,22 @@ return array(
 		// Порядок использования компрессоров
 		'compressor' => array('gcc', 'jsmin')
 	),
+	'messify' => array(
+		'token' => 'magwai',
+		'token_secret' => 'magwai_secret',
+		'compress' => array(
+			'js' => true,
+			'css' => true
+		),
+		'merge' => array(
+			'js' => true,
+			'css' => true
+		),
+		'compressors' => array(
+			'js' => 'default',
+			'css' => 'default'
+		)
+	),
 	'html' => array(
 		// Сжимать
 		'compress' => true,
@@ -104,6 +120,8 @@ return array(
 					'oid' => 0
 				),
 				'model' => null,
+				'place' => null,
+				'bread' => array(),
 				'field' => array(),
 				'data' => array(),
 				'where' => array(),

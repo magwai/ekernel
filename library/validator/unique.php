@@ -12,10 +12,13 @@ class k_validator_unique extends validator {
 		$id = (int)$this->option['id'];
 		$field = $this->option['field'];
 		$model = $this->option['model'];
-		$ex = $model->fetch_count(array(
+		$where = $this->option['where'];
+		$w = array(
 			'`id` != ?' => $id,
 			$field => $value
-		));
+		);
+		if ($where) $w = array_merge($where instanceof data ? $where->to_array() : $where, $w);
+		$ex = $model->fetch_count($w);
 		if ($ex) return array(
 			'not_unique' => array()
 		);

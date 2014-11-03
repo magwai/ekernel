@@ -79,6 +79,7 @@ class k_view_helper_control extends view_helper  {
 		if ($this->config->action == 'edit') $d['type'] = 'edit';
 		if ($this->config->action == 'delete') $d['type'] = 'delete';
 		if ($this->config->action == 'drag') $d['type'] = 'drag';
+		if ($this->config->action == 'gt') $d['type'] = 'gt';
 
 		// Сохраняем
 		$this->config->set($d);
@@ -268,7 +269,7 @@ class k_view_helper_control extends view_helper  {
 		if (!$this->config->param->orderdir) $this->config->param->orderdir = $this->config->param_default->orderdir;
 
 		// Если мы рендерим дерево
-		if ($this->config->tree) {
+		if ($this->config->tree && $this->config->type != 'gt') {
 			// Добавляем в where условие для связи id - parentid
 			$this->config->where->parentid = $this->config->param->oid;
 
@@ -280,7 +281,7 @@ class k_view_helper_control extends view_helper  {
 			$this->config->post_field_extend->{$this->config->field_map->orderid} = $this->config->model->fetch_max($this->config->field_map->orderid) + 1;
 		}
 
-		if ($this->config->param->cid) {
+		if ($this->config->param->cid && $this->config->type != 'gt') {
 			$this->config->where->parentid = $this->config->param->cid;
 			$this->config->post_field_extend->parentid = $this->config->param->cid;
 		}
@@ -291,7 +292,7 @@ class k_view_helper_control extends view_helper  {
 		if (!$this->config->request->cancel->controller) $this->config->request->cancel->controller = $this->config->controller;
 
 		// Если у нас присутствует кнопка Apply, то возвратный экшн для типов завершения success и fail равно текущему
-		if ($this->config->post->is_apply) {
+		if ($this->config->post && $this->config->post->is_apply) {
 			$this->config->request->success->action = $this->config->action;
 			$this->config->request->success->param = $this->config->param;
 			$this->config->request->fail->action = $this->config->action;
@@ -299,7 +300,7 @@ class k_view_helper_control extends view_helper  {
 		}
 
 		// При работе раздела типа edit добавляем в where условие выборки по id текущего объекта
-		if ($this->config->type == 'edit') $this->config->where->id = $this->config->param->id;
+		if ($this->config->type == 'edit' || $this->config->type == 'gt') $this->config->where->id = $this->config->param->id;
 
 		// Добавляем where из фильтра
 		if ($this->config->type == 'list' && $this->config->field) {
@@ -409,7 +410,7 @@ class k_view_helper_control extends view_helper  {
 		}
 
 		// Заполняем место из типа раздела, если оно не заполнено
-		if (!$this->config->place) $this->config->place = $this->view->translate('control_place_'.$this->config->type);
+		if (!$this->config->place) $this->config->place = $this->config->type;
 
 		//Устанавливаем для текущего роута значения по-умолчанию
 		$this->view->url()->default = $this->config->param_default;
@@ -618,6 +619,32 @@ class k_view_helper_control extends view_helper  {
 
 		if ($this->config->type == 'edit' && $this->config->model && $this->config->use_db) {
 			$this->config->data = $this->config->model->fetch_control_card($this->config->where->to_array());
+			if ($this->config->data) {
+				$d = $this->config->model->entity($this->config->data);
+				$map = array(
+					'title_control',
+					'login_control',
+					'date_control',
+					'id_control'
+				);
+				$title = '';
+				foreach ($map as $el) {
+					$title = $d->$el;
+					if ($title) break;
+				}
+				if ($title) {
+					$bread = $this->config->bread->to_array();
+					$bread[] = new navigation(array(
+						'title' => $title,
+						'route' => 'control',
+						'controller' => $this->config->controller,
+						'action' => $this->config->action,
+						'param' => $this->config->param
+
+					));
+					$this->config->bread = $bread;
+				}
+			}
 		}
 		if ($this->config->type == 'edit' && (($this->config->model && $this->config->use_db && !count($this->config->data)) || ((!$this->config->model || !$this->config->use_db) && !$this->config->param->id))) {
 			$this->config->notify[] = array(
@@ -762,9 +789,9 @@ class k_view_helper_control extends view_helper  {
 						}
 
 						if ($this->config->ok) {
+							if (!$this->config->id) $this->config->id = $this->config->ok;
 							$this->update_single();
 							$this->update_clink();
-
 						}
 					}
 				}
@@ -941,7 +968,7 @@ class k_view_helper_control extends view_helper  {
 		}
 
 		if (!$this->config->count) {
-			$this->config->notify[] = array(
+			if (!$this->config->stop_info) $this->config->notify[] = array(
 				'title' => $this->view->translate('control_notify_delete_noel'),
 				'style' => 'warning'
 			);
@@ -955,7 +982,7 @@ class k_view_helper_control extends view_helper  {
 		}
 		if ($this->config->ok) {
 			$this->config->request->current = $this->config->request->success;
-			$this->config->notify[] = array(
+			if (!$this->config->stop_info) $this->config->notify[] = array(
 				'title' => sprintf($this->view->translate('control_notify_delete_success'), $this->config->count),
 				'style' => 'success'
 			);
@@ -1011,7 +1038,7 @@ class k_view_helper_control extends view_helper  {
 
 	public function route_list() {
 		$active = $this->view->navigation()->find_active();
-		if ($active && $active->is_inner && !$this->config->param->cid) {
+		if ($active && $active->is_inner && !$this->config->param->cid && (!$this->config->request->current || !count($this->config->request->current))) {
 			$this->config->notify[] = array(
 				'title' => $this->view->translate('control_notify_link_noel'),
 				'style' => 'warning'
@@ -1088,6 +1115,27 @@ class k_view_helper_control extends view_helper  {
 		if ($this->config->callback->after) {
 			$f = $this->config->callback->after;
 			$f($this);
+		}
+	}
+
+	public function route_gt() {
+		if ($this->config->model && $this->config->use_db) {
+			$data = $this->config->model->fetch_control_card($this->config->where->to_array());
+			if ($data) {
+				$d = $this->config->model->entity($data);
+				$map = array(
+					'title_control',
+					'login_control',
+					'date_control',
+					'id_control'
+				);
+				$title = '';
+				foreach ($map as $el) {
+					$title = $d->$el;
+					if ($title) break;
+				}
+				echo $title;
+			}
 		}
 	}
 }

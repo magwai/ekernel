@@ -293,7 +293,7 @@ class k_view_helper_user extends view_helper  {
 				if ($ex) $ok = $ex->id;
 				else $ok = $this->register($d);
 				if ($ok) {
-					$d['author'] = $ok;
+					$d[$this->model_usersoc->name == $this->model_user->name ? 'id' : 'author'] = $ok;
 					if (!$ex) $d['confirmed'] = 1;
 					$ok = $this->usersoc_register($d);
 					if ($ok) $ex_soc = $this->model_usersoc->fetch_card_by_profile((string)@$res_decoded['profile']);

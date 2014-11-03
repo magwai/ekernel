@@ -127,6 +127,26 @@ class k_view_helper_basket extends view_helper {
 			: (string)$v;
 	}
 
+	function pay() {
+		$pay_ret = 0;
+		if ($this->_model_pay) {
+			$card = $this->card();
+			if ($card) {
+				$delivery = $this->_model_pay->fetch_row(array(
+					'id' => $card->pay
+				));
+				if ($pay && (float)$pay->price) {
+					$price_clean = $this->price_clean();
+					$price_from = $this->get_percent((float)$pay->price_from, $price_clean);
+					$price_to = $this->get_percent((float)$pay->price_to, $price_clean);
+					if ((!$price_from || $price_from  < $price_clean) && (!$price_to || $price_to > $price_clean)) $pay_ret = $this->get_percent((float)$pay->price, $price_clean);
+				}
+			}
+		}
+		$this->on_pay($pay_ret);
+		return $pay_ret;
+	}
+
 	function delivery() {
 		$delivery_ret = 0;
 		if ($this->_model_delivery) {
@@ -153,6 +173,16 @@ class k_view_helper_basket extends view_helper {
 		$ok = $this->_model_order_item->delete(array(
 			'parentid' => $oid,
 			$this->_field_order_item_id => $id
+		));
+		$this->on_change();
+		return $ok;
+	}
+
+	function clean() {
+		$oid = $this->basket_id();
+		if (!$oid) return false;
+		$ok = $this->_model_order_item->delete(array(
+			'parentid' => $oid
 		));
 		$this->on_change();
 		return $ok;
@@ -214,6 +244,7 @@ class k_view_helper_basket extends view_helper {
 		$card = $this->card();
 		$price = $this->price_clean($id);
 		$price += (float)$card->price_delivery;
+		$price += (float)$card->price_pay;
 		$this->on_price($price);
 		return $price;
 	}
@@ -339,9 +370,12 @@ class k_view_helper_basket extends view_helper {
 
 	function on_delivery(&$delivery) { }
 
+	function on_pay(&$delivery) { }
+
 	function on_change() {
 		$this->save_clean(array(
-			'price_delivery' => $this->delivery()
+			'price_delivery' => $this->delivery(),
+			'price_pay' => $this->pay()
 		));
 	}
 

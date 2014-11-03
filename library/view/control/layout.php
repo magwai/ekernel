@@ -33,7 +33,15 @@ $this->meta	->set('name', 'viewport', 'width=device-width, initial-scale=1.0, ma
 
 $this->title('CP');
 
-//$bread = (string)$this->navigation()->bread();
+$place_title = $this->translate('control_place_'.$this->control()->config->place);
+if (!$place_title) $place_title = $this->control()->config->place;
+$finish = $this->control()->config->bread->to_array();
+$finish[] = array(
+	'title' => $place_title
+);
+$bread = (string)$this->navigation()->bread(array(
+	'finish' => $finish
+));
 
 $active = $this->navigation()->find_active();
 
@@ -112,6 +120,7 @@ $reg = $this->lang(true);
 		<div class="c-middle">
 			<div class="sidebar collapse c-menu" id="d_menu"><?php echo $menu ?></div>
 			<div class="c-inner-menu c-invisible" id="d_inner_menu"></div>
+			<?php echo $bread ?>
 			<div id="d_content"><?php echo $this->control()->config->content ?></div>
 		</div>
 		<?php echo $this->control()->config->content_bottom ?>

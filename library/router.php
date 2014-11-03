@@ -9,6 +9,8 @@
 
 class k_router {
 	public $route = array();
+	public $current = null;
+
 
 	public function __construct($routes) {
 		// Добавляем маршрут по-умолчанию
@@ -28,7 +30,10 @@ class k_router {
 			// Роутинг состоит в поочередном запуске каждого роута. Первый совпадающий с адресом заполняем request своими данными и роутинг прекращается
 			$route = array_reverse($this->route);
 
-			foreach ($route as $el) if ($el instanceof route && $el->route($request)) break;
+			foreach ($route as $k => $el) if ($el instanceof route && $el->route($request)) {
+				$this->current = $k;
+				break;
+			}
 		}
 	}
 }

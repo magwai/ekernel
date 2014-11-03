@@ -135,4 +135,222 @@ class k_view_helper_pay extends view_helper {
 	function pay_uniteller_fail($order, $param = array(), $callback_success = null) {
 		$this->pay_uniteller_success($order, $param, $callback_success);
 	}
+
+	function pay_yandex_form($order, $param = array()) {
+		$config = $this->config->yandex ? $this->config->yandex : new data;
+		if ($param) $config->set($param);
+
+		$card = $this->view->basket()->pay_card($order);
+		if (@!$card) return false;
+
+		$data = array(
+			'shopId' => $config->shopId,
+			'scid' => $config->scid,
+			'sum' => $config->price,
+			'customerNumber' => $config->author,
+			'paymentType' => $config->paymentType ? $config->paymentType : 'AC',
+			'orderNumber' => $card->id,
+			'cps_email' => $config->mail
+		);
+
+		echo $this->gen_form($config->test ? 'https://demomoney.yandex.ru/eshop.xml' : 'https://money.yandex.ru/eshop.xml', $data);
+
+		exit();
+	}
+
+	function pay_yandex_check($order, $param = array()) {
+		header('Content-Type: text/xml');
+		$res = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+
+		$config = $this->config->yandex ? $this->config->yandex : new data;
+		if (@$param['shopId'] != $config->shopId || @$param['scid'] != $config->scid) {
+			echo '<checkOrderResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="100" invoiceId="'.@$param['invoiceId'].'" shopId="'.@$param['shopId'].'" message="Неверный магазин" />';
+			exit();
+		}
+
+		if ($param) $config->set($param);
+
+		$arr = array(
+			$config->action,
+			$config->orderSumAmount,
+			$config->orderSumCurrencyPaycash,
+			$config->orderSumBankPaycash,
+			$config->shopId,
+			$config->invoiceId,
+			$config->customerNumber,
+			$config->password
+		);
+		if ($config->md5 != strtoupper(md5(implode(';', $arr)))) {
+			echo $res.'<checkOrderResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="1" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" message="Ошибка авторизации" />';
+			exit();
+		}
+
+		if (!$order) $order = @(int)$param['orderNumber'];
+		$card = $this->view->basket()->pay_card($order);
+		if (@!$card) {
+			echo $res.'<checkOrderResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="100" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" message="Заказ не найден" />';
+			exit();
+		}
+
+		if (number_format(@(float)$config->orderSumAmount, 2, '.', '') != number_format(@(float)$card->total, 2, '.', '')) {
+			echo $res.'<checkOrderResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="100" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" message="Неверная сумма заказа" />';
+			exit();
+		}
+		if (@(int)$card->payed) {
+			echo $res.'<checkOrderResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="100" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" message="Заказ был оплачен ранее" />';
+			exit();
+		}
+
+		echo $res.'<checkOrderResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="0" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" />';
+		exit();
+	}
+
+	function pay_yandex_result($order, $param = array(), $callback_success = null) {
+		$this->pay_yandex_aviso($order, $param, $callback_success);
+	}
+
+	function pay_yandex_aviso($order, $param = array(), $callback_success = null) {
+		header('Content-Type: text/xml');
+		$res = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+
+		$config = $this->config->yandex ? $this->config->yandex : new data;
+		if (@$param['shopId'] != $config->shopId || @$param['scid'] != $config->scid) {
+			echo '<paymentAvisoResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="100" invoiceId="'.@$param['invoiceId'].'" shopId="'.@$param['shopId'].'" message="Неверный магазин" />';
+			exit();
+		}
+
+		if ($param) $config->set($param);
+
+		$arr = array(
+			$config->action,
+			$config->orderSumAmount,
+			$config->orderSumCurrencyPaycash,
+			$config->orderSumBankPaycash,
+			$config->shopId,
+			$config->invoiceId,
+			$config->customerNumber,
+			$config->password
+		);
+		if ($config->md5 != strtoupper(md5(implode(';', $arr)))) {
+			echo $res.'<paymentAvisoResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="1" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" message="Ошибка авторизации" />';
+			exit();
+		}
+
+		if (!$order) $order = @(int)$param['orderNumber'];
+		$card = $this->view->basket()->pay_card($order);
+		if (@!$card) {
+			echo $res.'<paymentAvisoResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="100" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" message="Заказ не найден" />';
+			exit();
+		}
+
+		if (number_format(@(float)$config->orderSumAmount, 2, '.', '') != number_format(@(float)$card->total, 2, '.', '')) {
+			echo $res.'<paymentAvisoResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="100" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" message="Неверная сумма заказа" />';
+			exit();
+		}
+		if (@(int)$card->payed) {
+			$callback_success = null;
+		}
+
+		if ($callback_success !== null) $callback_success($card);
+
+		echo $res.'<paymentAvisoResponse performedDatetime="'.date('Y-m-d\TH:i:s').'" code="0" invoiceId="'.$config->invoiceId.'" shopId="'.$config->shopId.'" />';
+		exit();
+	}
+
+	function pay_yandex_success($order, $param = array(), $callback_success = null) {
+		$config = $this->config->yandex ? $this->config->yandex : new data;
+		if ($param) $config->set($param);
+
+		if (!$order) $order = @(int)$param['orderNumber'];
+		$card = $this->view->basket()->pay_card($order);
+		if (@!$card) return false;
+
+		if ($callback_success !== null) $callback_success($card);
+
+		exit();
+	}
+
+	function pay_yandex_fail($order, $param = array(), $callback_success = null) {
+		$this->pay_yandex_success($order, $param, $callback_success);
+	}
+
+	function pay_robokassa_form($order, $param = array()) {
+		
+		$config = $this->config->robokassa ? $this->config->robokassa : new data;
+		if ($param) $config->set($param);
+
+		$card = $this->view->basket()->pay_card($order);
+		if (@!$card) return false;
+		
+		$mrh_login = $config->login;
+		$mrh_pass1 = $config->password;
+
+		$inv_id = $card->id;
+
+		$inv_desc = "Оплата заказа №" . $inv_id;
+
+		$out_summ = number_format($card->total, 2, '.', '');
+
+		$in_curr = $config->curr ? $config->curr : "";
+
+		$culture = $config->culture ? $config->culture : "ru";
+
+		$crc = md5("$mrh_login:$out_summ:$inv_id:$mrh_pass1");
+
+		$data = array(
+			'MrchLogin' => $mrh_login,
+			'OutSum' => $out_summ,
+			'InvId' => $inv_id,
+			'Desc' => $inv_desc,
+			'SignatureValue' => $crc,
+			'IncCurrLabel' => $in_curr,
+			'Culture' => $culture
+		);
+
+		echo $this->gen_form($config->test ? 'http://test.robokassa.ru/Index.aspx' : 'http://robokassa.ru/Index.aspx', $data);
+
+		exit();
+		
+	}
+	
+	function pay_robokassa_result($order, $param = array(), $callback_success = null) {
+	
+		$config = $this->config->robokassa ? $this->config->robokassa : new data;
+		if ($param) $config->set($param);
+		
+		$mrh_pass2 = $config->password2;
+
+		$tm = getdate(time() + 9 * 3600);
+		$date = "$tm[year]-$tm[mon]-$tm[mday] $tm[hours]:$tm[minutes]:$tm[seconds]";
+
+		$out_summ = $config->OutSum;
+		$inv_id = $config->InvId;
+		$crc = $config->SignatureValue;
+
+		$crc = strtoupper($crc);
+
+		$my_crc = strtoupper(md5("$out_summ:$inv_id:$mrh_pass2"));
+
+		if ($my_crc != $crc) {
+			echo "Bad sign\n";
+			exit();
+		}
+
+		$card = $this->view->basket()->pay_card($inv_id);
+		if (@!$card) {
+			echo "Bad sign\n";
+			exit();
+		}
+		
+		if (@(int)$card->payed) {
+			$callback_success = null;
+		}
+
+		if ($callback_success !== null) $callback_success($card);
+		
+		echo "OK$inv_id\n";
+
+		exit();
+
+	}
 }

@@ -99,4 +99,9 @@ class k_common {
 		$text = mb_substr($text, 0, $pos);
 		return $text.($dots ? ($text == $ftext ? '' : '&nbsp;...') : '');
 	}
+
+	static function to_array(&$obj) {
+		if ($obj instanceof data) $obj = $obj->to_array();
+		if (is_array($obj)) foreach ($obj as &$el) self::to_array($el);
+	}
 }

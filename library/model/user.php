@@ -47,6 +47,6 @@ class k_model_user extends database_model {
 	}
 
 	function usersoc_register($data = array()) {
-		return $data['author'];
+		return @$data['id'];
 	}
 }

@@ -9,6 +9,7 @@
 
 class k_model_cmenu extends model_menu {
 	public $name = 'cmenu';
+	public $lang_field = array();
 
 	function fetch_menu_list($pid = 0) {
 		//$mn = new model_cnotify;

@@ -65,6 +65,19 @@ $this->control(array(
 					'active' => false
 				)
 			)
+		),
+		'delete' => array(
+			'callback' => array(
+				'before_el' => function(&$control) {
+					if ($control->config->data && $control->config->data->key && !$control->view->user()->is_allowed_by_key('admin')) {
+						$control->config->skip_el = true;
+						$control->config->notify[] = array(
+							'title' => 'Запрещено удалять системные пункты меню. Обратитесь к администратору',
+							'style' => 'warning'
+						);
+					}
+				}
+			)
 		)
 	)
 ));

@@ -53,13 +53,13 @@ return array(
 	'control_pager_next' => '»',
 	'control_perpager_all' => 'Все',
 	'control_place_list' => 'Список',
-	'control_place_add' => 'Добавить',
-	'control_place_edit' => 'Изменить',
+	'control_place_add' => 'Новый элемент',
+	'control_place_edit' => 'Редактирование',
 	'control_button_add' => 'Добавить',
 	'control_button_edit' => 'Изменить',
 	'control_button_delete' => 'Удалить',
 	'control_field_title_title' => 'Название',
 	'control_download' => 'скачать',
 	'control_notify_drag_moved' => 'Элемент перемещен',
-	'control_notify_drag_not_moved' => 'Элемент не перемещен'
+	'control_notify_drag_not_moved' => 'Элемент не перемещен',
 );

@@ -16,12 +16,21 @@ class k_entity_menu extends entity {
 			'controller' => $this->controller,
 			'action' => $this->action
 		);
-		$param = is_string($this->param) ? explode(',', $this->param) : array();
-		$map = is_string($this->map) ? explode(',', $this->map) : array();
-		if ($map) {
-			foreach ($map as $n => $el) {
-				$el = trim($el);
-				if ($el) $p[$el] = trim(@$param[$n]);
+		if ($this->param) {
+			if (is_string($this->param)) {
+				$param = explode(',', $this->param);
+				$map = is_string($this->map) ? explode(',', $this->map) : array();
+				if ($map) {
+					foreach ($map as $n => $el) {
+						$el = trim($el);
+						if ($el) $p[$el] = trim(@$param[$n]);
+					}
+				}
+			}
+			else {
+				$pp = clone $this->param;
+				if ($pp instanceof data) $pp = $pp->to_array();
+				$p = array_merge($p, $pp);
 			}
 		}
 		$view = application::get_instance()->controller->view;

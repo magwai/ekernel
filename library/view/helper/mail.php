@@ -26,10 +26,11 @@ class k_view_helper_mail extends view_helper {
 				if ($template) {
 					$p = array_merge(array(
 						'site_title' => $this->view->translate('site_title'),
-						'site_url' => 'http://'.$_SERVER['HTTP_HOST']
+						'site_url' => 'http://'.$_SERVER['HTTP_HOST'],
+						'lang_stitle' => $this->view->lang('stitle')
 					), $param);
-					$param['message'] = $this->process_template($template->message, $p);
-					if (!@$param['subject']) $param['subject'] = $this->process_template($template->subject, $p);
+					$param['message'] = $this->process_template($template->message_lang, $p);
+					if (!@$param['subject']) $param['subject'] = $this->process_template($template->subject_lang, $p);
 				}
 			}
 			if (@$param['view']) $param['message'] = $this->view->render('mail/'.$param['view'], $param);
