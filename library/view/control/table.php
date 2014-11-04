@@ -129,7 +129,7 @@ if ($is_search) {
 <?php
 
 if (count($data)) {
-	if ($this->control()->config->drag) $this->js->append('/'.DIR_KERNEL.'/js/jquery/jquery.tablednd.js');
+	if ($this->control()->config->drag) $this->messify->append('js', '/'.DIR_KERNEL.'/js/jquery/jquery.tablednd.js');
 
 ?>
 			<tbody>

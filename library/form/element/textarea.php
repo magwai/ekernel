@@ -108,23 +108,23 @@ class k_form_element_textarea extends form_element {
 		if (@$this->markitup) {
 			$opt = clone $this->markitup->opt;
 			to_array($opt);
-			$this->view->css->append('/'.DIR_KERNEL.'/ctl/markitup/skins/'.$this->markitup->skin.'/style.css');
-			$this->view->css->append($this->markitup->set_style);
-			$this->view->js->append('/'.DIR_KERNEL.'/ctl/markitup/jquery.markitup.js');
-			$this->view->js->append_inline('$("textarea[name=\''.$this->name.'\']").markItUp('.Zend\Json\Json::encode($opt, false, array(
-				'enableJsonExprFinder' => true
-			)).');');
+			$this->view->messify->append('css', '/'.DIR_KERNEL.'/ctl/markitup/skins/'.$this->markitup->skin.'/style.css')
+								->append('css', $this->markitup->set_style)
+								->append('js', '/'.DIR_KERNEL.'/ctl/markitup/jquery.markitup.js')
+								->append_inline('js', '$("textarea[name=\''.$this->name.'\']").markItUp('.Zend\Json\Json::encode($opt, false, array(
+									'enableJsonExprFinder' => true
+								)).');');
 			if ($this->markitup->class) $res = '<div class="'.$this->markitup->class.'">'.$res.'</div>';
 		}
 		if (@$this->ckeditor) {
 			$opt = clone $this->ckeditor->opt;
 			to_array($opt);
 
-			$this->view->js->append('/'.DIR_KERNEL.'/ctl/ckeditor/ckeditor.js');
-			$this->view->js->append('/'.DIR_KERNEL.'/ctl/ckfinder/ckfinder.js');
-			$this->view->js->append_inline('var editor_'.$this->name.' = CKEDITOR.replace("'.$this->name.'", '.Zend\Json\Json::encode($opt, false, array(
-				'enableJsonExprFinder' => true
-			)).');CKFinder.setupCKEditor(editor_'.$this->name.', "/'.DIR_KERNEL.'/ctl/ckfinder/");');
+			$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/ckeditor/ckeditor.js')
+								->append('js', '/'.DIR_KERNEL.'/ctl/ckfinder/ckfinder.js')
+								->append_inline('js', 'var editor_'.$this->name.' = CKEDITOR.replace("'.$this->name.'", '.Zend\Json\Json::encode($opt, false, array(
+									'enableJsonExprFinder' => true
+								)).');CKFinder.setupCKEditor(editor_'.$this->name.', "/'.DIR_KERNEL.'/ctl/ckfinder/");');
 			if ($this->ckeditor->class) $res = '<div class="'.$this->ckeditor->class.'">'.$res.'</div>';
 		}
 		return $res;

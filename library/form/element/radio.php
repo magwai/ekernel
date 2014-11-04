@@ -24,11 +24,11 @@ class k_form_element_radio extends form_element_input {
 	public function render() {
 		if ($this->uniform) {
 			$opt = array();
-			$this->view->js->append('/'.DIR_KERNEL.'/ctl/uniform/jquery.uniform.js');
-			$this->view->js->append_inline('$("input[type=radio][name=\''.$this->name.'\']").uniform('.Zend\Json\Json::encode($opt, false, array(
-				'enableJsonExprFinder' => true
-			)).');');
-			if ($this->uniform->css) $this->view->css->append('/'.DIR_KERNEL.'/ctl/uniform/themes/default/css/uniform.default.css');
+			$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/uniform/jquery.uniform.js')
+								->append_inline('js', '$("input[type=radio][name=\''.$this->name.'\']").uniform('.Zend\Json\Json::encode($opt, false, array(
+									'enableJsonExprFinder' => true
+								)).');');
+			if ($this->uniform->css) $this->view->messify->append('css', '/'.DIR_KERNEL.'/ctl/uniform/themes/default/css/uniform.default.css');
 		}
 		return parent::render();
 	}

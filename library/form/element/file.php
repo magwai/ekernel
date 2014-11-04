@@ -37,7 +37,7 @@ class k_form_element_file extends form_element_input {
 		if (isset($this->validator['image_size'])) {
 			if (!isset($this->validator['image_size']['path'])) $this->validator['image_size']['path'] = $this->path;
 		}
-		
+
 		if (isset($this->validator['file_extension'])) {
 			if (!isset($this->validator['file_extension']['path'])) $this->validator['file_extension']['path'] = $this->path;
 		}
@@ -155,9 +155,8 @@ class k_form_element_file extends form_element_input {
 				unset($opt1['customCancel']);
 				$opt = array_merge($opt, $opt1);
 			}
-			$this->view->js->append('/'.DIR_KERNEL.'/ctl/uploadifive/jquery.uploadifive.js');
-			$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/uploadifive/jquery.uploadifive.js');
-			$inline = 'if (typeof window.uploadifive_update == "undefined") window.uploadifive_update = function(o) {
+			$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/uploadifive/jquery.uploadifive.js')
+								->append_inline('js', 'if (typeof window.uploadifive_update == "undefined") window.uploadifive_update = function(o) {
 	var val = [];
 	o.find(".uploadifive-queue-item").each(function() {
 		var file = $(this).data("file");
@@ -176,11 +175,8 @@ if (typeof window.uploadifive_data == "undefined") window.uploadifive_data = fun
 };
 $("input[type=file][name=\''.$this->name.($this->multiple ? '[]' : '').'\']").uploadifive('.Zend\Json\Json::encode($opt, false, array(
 	'enableJsonExprFinder' => true
-)).');';
-			$this->view->js->append_inline($inline);
-			$this->view->messify->append_inline('js', $inline);
+)).');');
 			if ($this->uploadifive->css) {
-				$this->view->css->append('/'.DIR_KERNEL.'/ctl/uploadifive/uploadifive.css');
 				$this->view->messify->append('css', '/'.DIR_KERNEL.'/ctl/uploadifive/uploadifive.css');
 			}
 		}

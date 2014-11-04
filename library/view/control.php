@@ -3,29 +3,27 @@
 $model_notify = new model_cnotify;
 $notify = $model_notify->fetch_control_no_read_count();
 
-$this->js	->prepend('/'.DIR_KERNEL.'/ctl/noty/themes/default.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/noty/layouts/top.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/noty/jquery.noty.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/control/js/plugins/ui/jquery.collapsible.min.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/uniform/jquery.uniform.js')
-			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery-migrate.js')
-			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery.js')
-			->set(1000, '/'.DIR_KERNEL.'/ctl/control/js/custom.js');
-
-$this->css	->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css')
-			->prepend('/'.DIR_KERNEL.'/ctl/control/css/ui_custom.css')
-			->prepend('/'.DIR_KERNEL.'/ctl/control/css/dataTable.css')
-			->prepend('/'.DIR_KERNEL.'/ctl/control/css/reset.css')
-			->set(1000, '/'.DIR_KERNEL.'/ctl/control/css/main.css')
-			->append('http://fonts.googleapis.com/css?family=Cuprum');
-
-$this->js	->set_inline(1000, '$(function() { c.init('.json_encode(array(
-	'url' => $this->url(array('ccontroller' => 'cindex', 'caction' => 'index'), 'control'),
-	'url_current' => str_replace('/replace/replace', '', $this->url(array(
-		'replace' => 'replace'
-	), 'control'))
-)).') });');
+$this->messify	->prepend('js', '/'.DIR_KERNEL.'/ctl/noty/themes/default.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/noty/layouts/top.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/noty/jquery.noty.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/control/js/plugins/ui/jquery.collapsible.min.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/uniform/jquery.uniform.js')
+				->prepend('js', '/'.DIR_KERNEL.'/js/jquery/jquery-migrate.js')
+				->prepend('js', '/'.DIR_KERNEL.'/js/jquery/jquery.js')
+				->set('js', 1000, '/'.DIR_KERNEL.'/ctl/control/js/custom.js')
+				->set_inline('js', 1200, '$(function() { c.init('.json_encode(array(
+					'url' => $this->url(array('ccontroller' => 'cindex', 'caction' => 'index'), 'control'),
+					'url_current' => str_replace('/replace/replace', '', $this->url(array(
+						'replace' => 'replace'
+					), 'control'))
+				)).') });')
+				->prepend('css', '/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css')
+				->prepend('css', '/'.DIR_KERNEL.'/ctl/control/css/ui_custom.css')
+				->prepend('css', '/'.DIR_KERNEL.'/ctl/control/css/dataTable.css')
+				->prepend('css', '/'.DIR_KERNEL.'/ctl/control/css/reset.css')
+				->set('css', 1300, '/'.DIR_KERNEL.'/ctl/control/css/main.css')
+				->append('css', 'http://fonts.googleapis.com/css?family=Cuprum');
 
 $this->meta	->set('http-equiv', 'Content-Type', 'text/html; charset=utf-8')
 			->set('name', 'viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
@@ -39,7 +37,7 @@ $bread = (string)$this->navigation()->bread();
 	<head>
 		<?php echo (string)$this->meta() ?>
 		<?php echo (string)$this->title() ?>
-		<?php echo (string)$this->css() ?>
+		<?php echo $this->messify->render('css') ?>
 		<link href="/<?php echo DIR_KERNEL ?>/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
 	</head>
 	<body>
@@ -93,6 +91,6 @@ $bread = (string)$this->navigation()->bread();
 				<span><?php echo $this->translate('control_copy') ?></span>
 			</div>
 		</div>
-		<?php echo (string)$this->js() ?>
+		<?php echo $this->messify->render('js') ?>
 	</body>
 </html>

@@ -31,14 +31,14 @@ class k_form_element_crop extends form_element_hidden {
 			'jcrop' => $this->jcrop
 		);
 		to_array($opt);
-		$this->view->js		->append('/'.DIR_KERNEL.'/ctl/crop/crop.js')
-							->append('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js')
-							->append('/'.DIR_KERNEL.'/ctl/jcrop/js/jquery.Jcrop.js')
-							->append_inline('$("input[name=\''.$this->name.'\']").crop('.Zend\Json\Json::encode($opt, false, array(
+		$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/crop/crop.js')
+							->append('js', '/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js')
+							->append('js', '/'.DIR_KERNEL.'/ctl/jcrop/js/jquery.Jcrop.js')
+							->append_inline('js', '$("input[name=\''.$this->name.'\']").crop('.Zend\Json\Json::encode($opt, false, array(
 								'enableJsonExprFinder' => true
-							)).');');
-		$this->view->css	->append('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css')
-							->append('/'.DIR_KERNEL.'/ctl/jcrop/css/jquery.Jcrop.css');
+							)).');')
+							->append('css', '/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css')
+							->append('css', '/'.DIR_KERNEL.'/ctl/jcrop/css/jquery.Jcrop.css');
 		return parent::render();
 	}
 }

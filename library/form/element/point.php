@@ -23,8 +23,8 @@ class k_form_element_point extends form_element_input {
 			'type' => $this->point,
 			'url' => $this->url
 		);
-		$this->view->js		->append('/'.DIR_KERNEL.'/ctl/point/point.js')
-							->append_inline('$("input[name=\''.$this->name.'\']").point('.Zend\Json\Json::encode($opt, false, array(
+		$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/point/point.js')
+							->append_inline('js', '$("input[name=\''.$this->name.'\']").point('.Zend\Json\Json::encode($opt, false, array(
 								'enableJsonExprFinder' => true
 							)).');');
 		return parent::render();

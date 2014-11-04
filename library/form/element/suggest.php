@@ -50,21 +50,20 @@ class k_form_element_suggest extends form_element_text {
 				}')
 			)
 		), $this->ui->opt->to_array());
-		$this->view->js->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.core.js');
-		$this->view->js->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.widget.js');
-		$this->view->js->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.position.js');
-		$this->view->js->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.menu.js');
-		$this->view->js->append('/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.autocomplete.js');
-		$this->view->js->append('/'.DIR_KERNEL.'/ctl/tagsinput/jquery.tagsinput.js');
-		$this->view->js->append_inline('var o = $("input[name=\''.$this->name.'\']");o.tagsInput('.Zend\Json\Json::encode($opt, false, array(
-			'enableJsonExprFinder' => true
-		)).');');
-
-		$this->view->css	->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
-							->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
-							->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.menu.css')
-							->append('/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.autocomplete.css')
-							->append('/'.DIR_KERNEL.'/ctl/tagsinput/jquery.tagsinput.css');
+		$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.core.js')
+							->append('js', '/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.widget.js')
+							->append('js', '/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.position.js')
+							->append('js', '/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.menu.js')
+							->append('js', '/'.DIR_KERNEL.'/ctl/ui/ui/jquery.ui.autocomplete.js')
+							->append('js', '/'.DIR_KERNEL.'/ctl/tagsinput/jquery.tagsinput.js')
+							->append_inline('js', 'var o = $("input[name=\''.$this->name.'\']");o.tagsInput('.Zend\Json\Json::encode($opt, false, array(
+								'enableJsonExprFinder' => true
+							)).');')
+							->append('css', '/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.core.css')
+							->append('css', '/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.theme.css')
+							->append('css', '/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.menu.css')
+							->append('css', '/'.DIR_KERNEL.'/ctl/ui/themes/'.$this->ui->theme.'/jquery.ui.autocomplete.css')
+							->append('css', '/'.DIR_KERNEL.'/ctl/tagsinput/jquery.tagsinput.css');
 		return parent::render();
 	}
 }

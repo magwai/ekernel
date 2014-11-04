@@ -35,19 +35,19 @@ class k_form_element_select extends form_element {
 				'placeholder_text' => $this->view->translate('form_element_select_placeholder_text'),
 				'placeholder_text_multiple' => $this->view->translate('form_element_select_placeholder_text_multiple')
 			);
-			$this->view->js->append('/'.DIR_KERNEL.'/ctl/chosen/chosen.jquery.js');
-			$this->view->js->append_inline('$("select[name=\''.$this->name.($this->multiple ? '\[\]' : '').'\']").chosen('.Zend\Json\Json::encode($opt, false, array(
-				'enableJsonExprFinder' => true
-			)).');');
-			if ($this->chosen->css) $this->view->css->append('/'.DIR_KERNEL.'/ctl/chosen/chosen.css');
+			$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/chosen/chosen.jquery.js')
+								->append_inline('js', '$("select[name=\''.$this->name.($this->multiple ? '\[\]' : '').'\']").chosen('.Zend\Json\Json::encode($opt, false, array(
+									'enableJsonExprFinder' => true
+								)).');');
+			if ($this->chosen->css) $this->view->messify->append('css', '/'.DIR_KERNEL.'/ctl/chosen/chosen.css');
 		}
 		if ($this->uniform) {
 			$opt = array();
-			$this->view->js->append('/'.DIR_KERNEL.'/ctl/uniform/jquery.uniform.js');
-			$this->view->js->append_inline('$("select[name=\''.$this->name.'\']").uniform('.Zend\Json\Json::encode($opt, false, array(
-				'enableJsonExprFinder' => true
-			)).');');
-			if ($this->chosen->css) $this->view->css->append('/'.DIR_KERNEL.'/ctl/uniform/themes/default/css/uniform.default.css');
+			$this->view->messify->append('js', '/'.DIR_KERNEL.'/ctl/uniform/jquery.uniform.js')
+								->append_inline('js', '$("select[name=\''.$this->name.'\']").uniform('.Zend\Json\Json::encode($opt, false, array(
+									'enableJsonExprFinder' => true
+								)).');');
+			if ($this->chosen->css) $this->view->messify->append('css', '/'.DIR_KERNEL.'/ctl/uniform/themes/default/css/uniform.default.css');
 		}
 		return parent::render();
 	}

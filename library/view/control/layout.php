@@ -1,32 +1,32 @@
 <?php
 
 if (stripos($this->control()->config->content, 'c-fancy') !== false) {
-	$this->js->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js');
-	$this->css->prepend('/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css');
+	$this->messify	->prepend('js', '/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.js')
+					->prepend('css', '/'.DIR_KERNEL.'/ctl/fancybox2/jquery.fancybox.css');
 }
 
 $p = clone $this->control()->config->param;
 unset($p['page']);
 $p['replace'] = 'replace';
 
-$this->js	->prepend('/'.DIR_KERNEL.'/ctl/control/noty/layouts/top.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/control/noty/themes/default.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/noty/jquery.noty.js')
-			->prepend('/'.DIR_KERNEL.'/ctl/bootstrap/js/bootstrap.js')
-			->prepend('/'.DIR_KERNEL.'/js/respond.js')
-			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery-migrate.js')
-			->prepend('/'.DIR_KERNEL.'/js/jquery/jquery.js')
-			->set(1000, '/'.DIR_KERNEL.'/ctl/control/main.js')->set_inline(1000, '$(function() { c.init('.json_encode(array(
-				'url' => $this->url(array('ccontroller' => 'cindex', 'caction' => 'index'), 'control'),
-				'url_current' => str_replace('/replace/replace', '', $this->url($p, 'control'))
-			)).') });');
-
-$this->css	->prepend('/'.DIR_KERNEL.'/ctl/bootstrap/css/bootstrap-theme.css')
-			->prepend('/'.DIR_KERNEL.'/ctl/bootstrap/css/bootstrap.css')
-			->set(1000, '/'.DIR_KERNEL.'/ctl/control/main.css');
+$this->messify	->prepend('js', '/'.DIR_KERNEL.'/ctl/control/noty/layouts/top.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/control/noty/themes/default.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/noty/jquery.noty.js')
+				->prepend('js', '/'.DIR_KERNEL.'/ctl/bootstrap/js/bootstrap.js')
+				->prepend('js', '/'.DIR_KERNEL.'/js/respond.js')
+				->prepend('js', '/'.DIR_KERNEL.'/js/jquery/jquery-migrate.js')
+				->prepend('js', '/'.DIR_KERNEL.'/js/jquery/jquery.js')
+				->set('js', 1000, '/'.DIR_KERNEL.'/ctl/control/main.js')
+				->set_inline('js', 1200, '$(function() { c.init('.json_encode(array(
+					'url' => $this->url(array('ccontroller' => 'cindex', 'caction' => 'index'), 'control'),
+					'url_current' => str_replace('/replace/replace', '', $this->url($p, 'control'))
+				)).') });')
+				->prepend('css', '/'.DIR_KERNEL.'/ctl/bootstrap/css/bootstrap-theme.css')
+				->prepend('css', '/'.DIR_KERNEL.'/ctl/bootstrap/css/bootstrap.css')
+				->set('css', 1300, '/'.DIR_KERNEL.'/ctl/control/main.css');
 
 if (stripos($this->control()->config->content_bottom, 'navbar-fixed-bottom') !== false) {
-	$this->css->append('/'.DIR_KERNEL.'/ctl/control/bottom.css');
+	$this->messify->append('css', '/'.DIR_KERNEL.'/ctl/control/bottom.css');
 }
 
 $this->meta	->set('name', 'viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
@@ -80,7 +80,7 @@ $reg = $this->lang(true);
 		<meta charset="utf-8">
 		<?php echo (string)$this->meta() ?>
 		<?php echo (string)$this->title() ?>
-		<?php echo (string)$this->css() ?>
+		<?php echo $this->messify->render('css') ?>
 		<link href="/<?php echo DIR_KERNEL ?>/ctl/control/favicon.ico" rel="icon" type="image/x-icon" />
 	</head>
 	<body>
@@ -125,6 +125,6 @@ $reg = $this->lang(true);
 		</div>
 		<?php echo $this->control()->config->content_bottom ?>
 		<script type="text/javascript">window.CKEDITOR_BASEPATH = '/<?php echo DIR_KERNEL ?>/ctl/ckeditor/';</script>
-		<?php echo (string)$this->js() ?>
+		<?php echo $this->messify->render('js') ?>
 	</body>
 </html>
