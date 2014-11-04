@@ -13,7 +13,7 @@ class k_plugin_lang extends plugin {
 		$ids = $ml->fetch_col('stitle', array(
 			'show_it' => 1
 		));
-		if (application::get_instance()->config->resource->lang->type == 'session') {
+		if (@application::get_instance()->config->resource->lang->type == 'session') {
 			if ($ids) {
 				$lang_session = session::get('lang');
 				$lang_cookie = @$_COOKIE['lang'];

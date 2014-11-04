@@ -8,8 +8,8 @@
  */
 
 $yn = array(
-	'0' => 'Слева в основном меню',
-	'1' => 'Внутри раздела'
+	'0' => $this->view->translate('control_cmenu_is_inner_0'),
+	'1' => $this->view->translate('control_cmenu_is_inner_1')
 );
 
 $mr = new model_cresource;
@@ -22,34 +22,34 @@ $this->control(array(
 	'tree' => true,
 	'field' => array(
 		'controller' => array(
-			'title' => 'Контроллер',
-			'description' => 'Контроллер можно не указывать у пунктов меню, содержащих вложенные пункты',
+			'title' => $this->view->translate('control_cmenu_controller_title'),
+			'description' => $this->view->translate('control_cmenu_controller_description'),
 			'order' => 2
 		),
 		'action' => array(
-			'title' => 'Действие',
-			'description' => 'Если не указано - будет index',
+			'title' => $this->view->translate('control_cmenu_action_title'),
+			'description' => $this->view->translate('control_cmenu_action_description'),
 			'order' => 3
 		),
 		'param' => array(
-			'title' => 'Параметры',
-			'description' => 'Через запятую без пробелов',
+			'title' => $this->view->translate('control_cmenu_param_title'),
+			'description' => $this->view->translate('control_cmenu_param_description'),
 			'order' => 4
 		),
 		'map' => array(
-			'title' => 'Значения параметров',
-			'description' => 'Через запятую без пробелов',
+			'title' => $this->view->translate('control_cmenu_map_title'),
+			'description' => $this->view->translate('control_cmenu_map_description'),
 			'order' => 5
 		),
 		'is_inner' => array(
-			'title' => 'Расположение',
+			'title' => $this->view->translate('control_cmenu_is_inner_title'),
 			'type' => 'select',
 			'item' => $yn,
 			'value' => '0',
 			'order' => 6
 		),
 		'resource' => array(
-			'title' => 'Ресурс',
+			'title' => $this->view->translate('control_cmenu_resource_title'),
 			'type' => 'select',
 			'item' => $resource,
 			'order' => 7

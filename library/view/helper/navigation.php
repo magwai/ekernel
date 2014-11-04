@@ -137,7 +137,7 @@ class k_view_helper_navigation extends view_helper  {
 
 	function control_get_rubric() {
 		$rubric = array(
-			'' => '[ Использовать URL ]'
+			'' => '[ '.$this->view->translate('control_navigation_rubric_all').' ]'
 		);
 		foreach (application::get_instance()->config->route as $k => $route) {
 			if (!$route->title) continue;

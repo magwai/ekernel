@@ -22,24 +22,24 @@ $c = array(
 		'url' => array(
 			'search' => true,
 			'sortable' => true,
-			'title' => 'Маска URL страницы',
-			'description' => 'Адрес должен быть внутренним. Напимер: /news/*, /page/about',
+			'title' => $this->view->translate('control_meta_url_title'),
+			'description' => $this->view->translate('control_meta_url_description'),
 			'order' => 1,
 			'required' => true
 		),
 		'title' => array(
 			'title' => 'TITLE',
-			'description' => 'Отображается в заголовке окна браузера. Если вначале +, то добавит к содержимому, если -, то вставит перед содержимым. Если в самом начале вписать @, то будет дописано название сайта',
+			'description' => $this->view->translate('control_meta_title_description'),
 			'order' => 2
 		),
 		'keywords' => array(
 			'title' => 'META: KEYWORDS',
-			'description' => 'Ключевые слова перечисляются через запятую. Если вначале +, то добавит к содержимому, если -, то вставит перед содержимым',
+			'description' => $this->view->translate('control_meta_keywords_description'),
 			'order' => 3
 		),
 		'description' => array(
 			'title' => 'META: DESCRIPTION',
-			'description' => 'Описание должно характеризовать содержимое страницы. Если вначале +, то добавит к содержимому, если -, то вставит перед содержимым',
+			'description' => $this->view->translate('control_meta_description_description'),
 			'order' => 4
 		),
 		'data' => array(

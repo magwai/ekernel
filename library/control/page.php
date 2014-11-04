@@ -12,25 +12,24 @@ $this->control(array(
 	'static_field' => true,
 	'field' => array(
 		'title' => array(
-			'title' => 'Название',
 			'sortable' => true,
 			'order' => 1,
 			'required' => true
 		),
 		'stitle' => array(
-			'title' => 'Псевдоним',
+			'title' => $this->view->translate('control_page_stitle_title'),
 			'order' => 2,
 			'required' => true
 		),
 		'message' => array(
 			'type' => 'textarea',
-			'title' => 'Текст',
+			'title' => $this->view->translate('control_page_message_title'),
 			'order' => 6,
 			'ckeditor' => true
 		),
 		'show_it' => array(
 			'active' => $this->view->user()->is_allowed_by_key('admin'),
-			'title' => 'Отображать',
+			'title' => $this->view->translate('control_page_show_it_title'),
 			'order' => 7,
 			'align' => 'center',
 			'width' => 10,

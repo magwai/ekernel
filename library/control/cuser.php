@@ -29,19 +29,19 @@ $cb = function($control) {
 $this->control(array(
 	'field' => array(
 		'login' => array(
-			'title' => 'Логин',
+			'title' => $this->view->translate('control_cuser_login_title'),
 			'order' => 1,
 			'active' => true,
 			'required' => true
 		),
 		'password' => array(
-			'title' => 'Пароль',
+			'title' => $this->view->translate('control_cuser_password_title'),
 			'type' => 'password',
 			'active' => true,
 			'order' => 2
 		),
 		'role' => array(
-			'title' => 'Роль',
+			'title' => $this->view->translate('control_cuser_role_title'),
 			'type' => 'password',
 			'type' => 'select',
 			'active' => true,

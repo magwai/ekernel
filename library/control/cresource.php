@@ -11,7 +11,7 @@ $this->control(array(
 	'tree' => true,
 	'field' => array(
 		'key' => array(
-			'title' => 'Ключ',
+			'title' => $this->view->translate('control_cresource_key_title'),
 			'order' => 2
 		)
 	)

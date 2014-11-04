@@ -11,14 +11,13 @@ $this->control(array(
 	'tree' => true,
 	'field' => array(
 		'title' => array(
-			'title' => 'Название',
 			'sortable' => true,
 			'order' => 1,
 			'active' => $this->view->user()->is_allowed_by_key('admin'),
 			'required' => true
 		),
 		'key' => array(
-			'title' => 'Ключ',
+			'title' => $this->view->translate('control_translate_key_title'),
 			'sortable' => true,
 			'order' => 2,
 			'active' => $this->view->user()->is_allowed_by_key('admin'),
@@ -26,7 +25,7 @@ $this->control(array(
 		),
 		'value' => array(
 			'type' => 'textarea',
-			'title' => 'Значение',
+			'title' => $this->view->translate('control_translate_value_title'),
 			'order' => 3
 		)
 	),

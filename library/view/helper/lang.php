@@ -16,7 +16,7 @@ class k_view_helper_lang extends view_helper {
 	public function init() {
 		if ($this->_inited) return;
 		$this->_inited = true;
-		if (application::get_instance()->config->resource->lang->type == 'session') {
+		if (@application::get_instance()->config->resource->lang->type == 'session') {
 			$lang_cookie = @$_COOKIE[$this->_key];
 			$lang_session = session::get('lang');
 			if ($lang_session) {

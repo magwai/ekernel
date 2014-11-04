@@ -10,14 +10,13 @@
 $this->control(array(
 	'field' => array(
 		'title' => array(
-			'title' => 'Название',
 			'sortable' => true,
 			'order' => 1,
 			'required' => true
 		),
 		'stitle' => array(
-			'title' => 'Ключ языка',
-			'description' => 'Используется в URL. Только латиница и символы -, _',
+			'title' => $this->view->translate('control_lang_stitle_title'),
+			'description' => $this->view->translate('control_lang_stitle_description'),
 			'validator' => array(
 				'regex' => '/^[a-z0-9\-\_]+$/si'
 			),
@@ -25,7 +24,7 @@ $this->control(array(
 			'required' => true
 		),
 		'is_default' => array(
-			'title' => 'По-умолчанию',
+			'title' => $this->view->translate('control_lang_is_default_title'),
 			'order' => 7,
 			'align' => 'center',
 			'width' => 10,
@@ -37,7 +36,7 @@ $this->control(array(
 			'type' => 'checkbox'
 		),
 		'show_it' => array(
-			'title' => 'Использовать',
+			'title' => $this->view->translate('control_lang_show_it_title'),
 			'order' => 8,
 			'align' => 'center',
 			'width' => 10,
@@ -49,14 +48,14 @@ $this->control(array(
 	'callback' => array(
 		'check' => function($control) {
 			if ($control->config->post->is_default && !$control->config->post->show_it) {
-				$control->config->form->element->show_it->error_user[] = 'Язык по-умолчанию нельзя выключить';
+				$control->config->form->element->show_it->error_user[] = $control->view->translate('control_lang_stitle_is_default_active');
 			}
 		},
 		'before_el' => function($control) {
 			if ($control->config->data->is_default) {
 				$control->config->skip_el = true;
 				$control->config->notify[] = array(
-					'title' => 'Язык по-умолчанию нельзя удалить',
+					'title' => $control->view->translate('control_lang_stitle_is_default_delete'),
 					'style' => 'warning'
 				);
 			}

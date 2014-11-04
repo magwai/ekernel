@@ -13,11 +13,11 @@ $role = $mr->fetch_pairs('id', 'title', null, 'title');
 $this->control(array(
 	'field' => array(
 		'key' => array(
-			'title' => 'Ключ',
+			'title' => $this->view->translate('control_crole_key_title'),
 			'order' => 2
 		),
 		'role' => array(
-			'title' => 'Родительские роли',
+			'title' => $this->view->translate('control_crole_role_title'),
 			'order' => 3,
 			'type' => 'checkbox',
 			'multiple' => true,

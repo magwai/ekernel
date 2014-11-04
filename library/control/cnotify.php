@@ -14,15 +14,15 @@ $this->control(array(
 	),
 	'field' => array(
 		'title' => array(
-			'title' => 'Краткий текст',
+			'title' => $this->view->translate('control_cnotify_title_title'),
 			'order' => 1
 		),
 		'message' => array(
-			'title' => 'Подробный текст',
+			'title' => $this->view->translate('control_cnotify_message_title'),
 			'order' => 2
 		),
 		'date' => array(
-			'title' => 'Дата',
+			'title' => $this->view->translate('control_cnotify_date_title'),
 			'width' => 8,
 			'sortable' => true,
 			'align' => 'center',

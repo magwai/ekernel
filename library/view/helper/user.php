@@ -78,7 +78,7 @@ class k_view_helper_user extends view_helper  {
 	}
 
 	public function is_allowed($resource) {
-		$role = (int)$this->_data->role;
+		$role = @(int)$this->_data->role;
 		if ($role && $this->_acl->is_allowed($role, $resource)) return true;
 		return false;
 	}

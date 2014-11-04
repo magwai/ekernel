@@ -8,8 +8,8 @@
  */
 
 $yn = array(
-	'0' => 'Запретить',
-	'1' => 'Разрешить'
+	'0' => $this->view->translate('control_crule_is_allow_0'),
+	'1' => $this->view->translate('control_crule_is_allow_1')
 );
 
 $mr = new model_crole;
@@ -21,14 +21,14 @@ $resource = $ms->fetch_pairs('id', 'title', null, 'title');
 $this->control(array(
 	'field' => array(
 		'is_allow' => array(
-			'title' => 'Правило',
+			'title' => $this->view->translate('control_crule_is_allow_title'),
 			'order' => 1,
 			'type' => 'select',
 			'item' => $yn,
 			'script' => 'control/crule/cell/is_allow'
 		),
 		'role' => array(
-			'title' => 'Роли',
+			'title' => $this->view->translate('control_crule_role_title'),
 			'order' => 2,
 			'type' => 'checkbox',
 			'multiple' => true,
@@ -41,7 +41,7 @@ $this->control(array(
 			'script' => 'control/crule/cell/role'
 		),
 		'resource' => array(
-			'title' => 'Ресурсы',
+			'title' => $this->view->translate('control_crule_resource_title'),
 			'order' => 3,
 			'type' => 'checkbox',
 			'multiple' => true,

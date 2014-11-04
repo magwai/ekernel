@@ -11,24 +11,23 @@ $this->control(array(
 	'tree' => true,
 	'field' => array(
 		'title' => array(
-			'title' => 'Название',
 			'order' => 1,
 			'required' => true
 		),
 		'key' => array(
-			'title' => 'Ключ',
+			'title' => $this->view->translate('control_menu_key_title'),
 			'order' => 2,
 			'active' => $this->view->user()->is_allowed_by_key('admin')
 		),
 		'rubric' => array(
-			'title' => 'Раздел сайта',
+			'title' => $this->view->translate('control_menu_rubric_title'),
 			'type' => 'select',
 			'item' => $this->view->navigation()->control_get_rubric(),
 			'order' => 3
 		),
 		'url' => array(
 			'title' => 'URL',
-			'description' => 'Если указан URL, то он будет использован вместо указанного выше раздела сайта',
+			'description' => $this->view->translate('control_menu_url_description'),
 			'order' => 4
 		),
 		'controller' => array(
@@ -72,7 +71,7 @@ $this->control(array(
 					if ($control->config->data && $control->config->data->key && !$control->view->user()->is_allowed_by_key('admin')) {
 						$control->config->skip_el = true;
 						$control->config->notify[] = array(
-							'title' => 'Запрещено удалять системные пункты меню. Обратитесь к администратору',
+							'title' => $control->view->translate('control_menu_notify_key'),
 							'style' => 'warning'
 						);
 					}

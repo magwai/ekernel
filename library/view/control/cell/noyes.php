@@ -1,3 +1,3 @@
 <?php
 
-echo $this->value ? 'нет' : 'да';
+echo $this->translate('control_cell_value_'.($this->value ? 'no' : 'yes'));

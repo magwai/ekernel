@@ -16,25 +16,23 @@ $this->control(array(
 		'cancel' => false,
 		'apply' => false,
 		'ok' => array(
-			'value' => 'Войти',
+			'value' => $this->view->translate('control_cuser_login_ok_value'),
 		)
 	),
-	'place' => 'Авторизация',
+	'place' => $this->view->translate('control_cuser_login_place'),
 	'field' => array(
 		'login' => array(
-			'title' => 'Логин',
 			'required' => true,
 			'order' => 1
 		),
 		'password' => array(
 			'type' => 'password',
 			'required' => true,
-			'title' => 'Пароль',
 			'order' => 2
 		),
 		'remember' => array(
 			'type' => 'checkbox',
-			'title' => 'Запомнить меня',
+			'title' => $this->view->translate('control_cuser_remember_title'),
 			'value' => 1,
 			'order' => 3
 		),
@@ -56,7 +54,7 @@ $this->control(array(
 			$ok = $control->view->user()->login($control->config->data->login, $control->config->data->password, $control->config->data->remember);
 			unset($control->config->notify);
 			$control->config->notify = array(array(
-				'title' => $ok ? 'Добро пожаловать, '.$control->config->data->login : 'Логин/пароль неверны',
+				'title' => $ok ? $control->view->translate('control_cuser_login_notify_ok').', '.$control->config->data->login : $control->view->translate('control_cuser_login_notify_nok'),
 				'style' => $ok ? 'success' : 'warning'
 			));
 			if ($ok) $control->config->request->current = array(

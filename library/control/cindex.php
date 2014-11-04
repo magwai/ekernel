@@ -8,6 +8,6 @@
  */
 
 $this->control(array(
-	'place' => 'Панель управления',
-	'text' => 'С помощью панели управления вы можете менять содержимое страниц сайта'
+	'place' => $this->view->translate('control_cindex_place'),
+	'text' => $this->view->translate('control_cindex_text')
 ));
