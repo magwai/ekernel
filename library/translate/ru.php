@@ -46,6 +46,7 @@ return array(
 	'control_name' => 'Панель управления',
 	'control_copy' => '&copy; 2013',
 	'control_list_empty' => 'Нет данных',
+	'control_list_number' => '№',
 	'control_perpage' => 'На странице',
 	'control_pager_first' => '««',
 	'control_pager_last' => '»»',

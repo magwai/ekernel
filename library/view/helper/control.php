@@ -99,7 +99,7 @@ class k_view_helper_control extends view_helper  {
 				$d->title = $el['Field'];
 
 				// Скрываем сервисные поля
-				if ($el['Field'] == 'id' || $el['Field'] == 'parentid' || $el['Field'] == 'orderid' || preg_match('/ml\_(.*?)\_\d+/si', $el['Field'])) $d->active = false;
+				if ($el['Field'] == 'id' || $el['Field'] == $this->config->field_map->parentid || $el['Field'] == 'orderid' || preg_match('/ml\_(.*?)\_\d+/si', $el['Field'])) $d->active = false;
 
 				// Некоторые настройки по-умолчанию для поля title
 				if ($el['Field'] == 'title') {
@@ -271,10 +271,10 @@ class k_view_helper_control extends view_helper  {
 		// Если мы рендерим дерево
 		if ($this->config->tree && $this->config->type != 'gt') {
 			// Добавляем в where условие для связи id - parentid
-			$this->config->where->parentid = $this->config->param->oid;
+			$this->config->where->{$this->config->field_map->parentid} = $this->config->param->oid;
 
 			// Добавляем в расширенные поля значение parentid равное oid из параметров
-			if ($this->config->type == 'add') $this->config->post_field_extend->parentid = $this->config->param->id ? $this->config->param->id : $this->config->param->oid;
+			if ($this->config->type == 'add') $this->config->post_field_extend->{$this->config->field_map->parentid} = $this->config->param->id ? $this->config->param->id : $this->config->param->oid;
 		}
 
 		if ($this->config->type == 'add' && $this->config->drag) {
@@ -282,8 +282,8 @@ class k_view_helper_control extends view_helper  {
 		}
 
 		if ($this->config->param->cid && $this->config->type != 'gt') {
-			$this->config->where->parentid = $this->config->param->cid;
-			$this->config->post_field_extend->parentid = $this->config->param->cid;
+			$this->config->where->{$this->config->field_map->parentid} = $this->config->param->cid;
+			$this->config->post_field_extend->{$this->config->field_map->parentid} = $this->config->param->cid;
 		}
 
 		// Выставляем возвратный контроллер для всех типов завершения равным текущему
@@ -902,9 +902,9 @@ class k_view_helper_control extends view_helper  {
 				if (!class_exists($class) || !$s) continue;
 				$m = new $class;
 				$m->update(array(
-					'parentid' => $this->config->ok
+					$this->config->field_map->parentid => $this->config->ok
 				), array(
-					'parentid' => $s
+					$this->config->field_map->parentid => $s
 				));
 				session::remove($v->controller.'_clink');
 			}
@@ -1089,7 +1089,7 @@ class k_view_helper_control extends view_helper  {
 										$p = clone $xlist->view->control()->config->param;
 										if ($el->param) $p = array_merge($p, $el->param);
 										$p->id = $p->oid;
-										$p->oid = $card->parentid;
+										$p->oid = $card->{$this->config->field_map->parentid};
 										$xlist->view->control()->config->request->current = array(
 											'controller' => $el->controller,
 											'action' => $el->action,

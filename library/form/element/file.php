@@ -173,7 +173,7 @@ if (typeof window.uploadifive_data == "undefined") window.uploadifive_data = fun
 		complete: true
 	};
 };
-$("input[type=file][name=\''.$this->name.($this->multiple ? '[]' : '').'\']").uploadifive('.Zend\Json\Json::encode($opt, false, array(
+$("input[type=file][name=\''.$this->name.($this->multiple && !$this->uploadifive ? '[]' : '').'\']").uploadifive('.Zend\Json\Json::encode($opt, false, array(
 	'enableJsonExprFinder' => true
 )).');');
 			if ($this->uploadifive->css) {

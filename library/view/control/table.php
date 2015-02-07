@@ -50,6 +50,7 @@ $data = $this->data ? clone $this->data : array();
 		<table class="table table-striped table-bordered table-hover c-table<?php echo $this->control()->config->tree ? ' c-table-tree' : '' ?><?php echo count($data) && $this->control()->config->drag ? ' c-table-drag' : '' ?>"<?php echo count($data) && $this->control()->config->drag ? ' data-dragurl="'.$dragurl.'"' : '' ?>>
 			<thead>
 				<tr>
+					<?php echo $this->control()->config->table->number ? '<td>'.$this->translate('control_list_number').'</td>' : '' ?>
 					<?php echo $this->control()->config->table->checkbox && (count($data) || $is_search) ? '<th class="c-table-cb">'.(count($data) ? '<input type="checkbox" />' : '<div style="width:13px;">&nbsp;</div>').'</th>' : '' ?>
 <?php
 
@@ -98,6 +99,7 @@ if ($is_search) {
 
 ?>
 				<tr class="c-table-filter">
+					<?php echo $this->control()->config->table->number ? '<td></td>' : '' ?>
 					<?php echo $this->control()->config->table->checkbox ? '<td><a href="'.$this->url($p, 'control').'" class="glyphicon glyphicon-remove c-table-filter-clear"></a></td>' : '' ?>
 <?php
 
@@ -139,6 +141,7 @@ if (count($data)) {
 
 ?>
 				<tr data-id="<?php echo $el->id ?>">
+					<?php echo $this->control()->config->table->number ? '<td class="c-table-number">'.((($this->control()->config->param->page - 1) * $this->control()->config->param->perpage) + ($n + 1)).'</td>' : '' ?>
 					<?php echo $this->control()->config->table->checkbox ? '<td class="c-table-cb"><input type="checkbox" /></td>' : '' ?>
 <?php
 

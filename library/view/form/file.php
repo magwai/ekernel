@@ -1,4 +1,4 @@
-<input<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?> type="file" name="<?php echo $this->escape($this->name).($this->multiple ? '[]' : '') ?>"<?php echo $this->id ? ' id="'.$this->escape($this->id).'"' : '' ?> />
+<input<?php echo $this->class ? ' class="'.$this->class.'"' : '' ?> type="file" name="<?php echo $this->escape($this->name).($this->multiple && !$this->uploadifive ? '[]' : '') ?>"<?php echo $this->id ? ' id="'.$this->escape($this->id).'"' : '' ?> />
 <?php
 
 if ($this->value) {

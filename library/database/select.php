@@ -12,8 +12,8 @@ class k_database_select {
 	public $parts = array();
 	public $sql = '';
 
-	function __construct($sql = '') {
-		$this->adapter = application::get_instance()->bootstrap->resource->database->adapter;
+	function __construct($sql = '', $adapter = null) {
+		$this->adapter = $adapter ? $adapter : application::get_instance()->bootstrap->resource->database->adapter;
 		$this->sql = $sql;
 	}
 

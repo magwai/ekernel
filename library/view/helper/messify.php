@@ -12,7 +12,7 @@ class k_view_helper_messify extends view_helper {
 	public function __call($method, $args) {
 		if ($this->_messify === null) {
 			$messify = application::get_instance()->config->messify;
-			if (!class_exists('messify')) include PATH_ROOT.'/'.DIR_LIBRARY.'/lib/messify/Messify.php';
+			if (!class_exists('\Magwai\Messify\Messify')) include PATH_ROOT.'/'.DIR_LIBRARY.'/lib/messify/Messify.php';
 			try {
 				$opt = clone $messify;
 				common::to_array($opt);

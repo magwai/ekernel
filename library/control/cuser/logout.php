@@ -13,7 +13,7 @@ $ok = $this->view->user()->logout();
 $this->control(array(
 	'notify' => array(
 		array(
-			'title' => $ok ? $control->view->translate('control_cuser_logout_notify_ok').', '.$login : $control->view->translate('control_cuser_logout_notify_nok'),
+			'title' => $ok ? $this->view->translate('control_cuser_logout_notify_ok').', '.$login : $this->view->translate('control_cuser_logout_notify_nok'),
 			'style' => $ok ? 'success' : 'warning'
 		)
 	),

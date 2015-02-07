@@ -41,7 +41,7 @@ class k_database_model {
 
 	// Упрощенный запрос на выборку одной колонки
 	function fetch_col($col, $where = null, $order = null, $count = null, $offset = 0) {
-		$select = new database_select();
+		$select = new database_select(null, $this->adapter);
 		$select->from($this->name, $col);
 		if ($where) $select->where($where);
 		if ($order) $select->order($order);
@@ -51,7 +51,7 @@ class k_database_model {
 
 	// Упрощенный запрос на выборку одного значения
 	function fetch_one($col, $where = null, $order = null) {
-		$select = new database_select();
+		$select = new database_select(null, $this->adapter);
 		$select->from($this->name, $col)->limit(1);
 		if ($where) $select->where($where);
 		if ($order) $select->order($order);
@@ -60,7 +60,7 @@ class k_database_model {
 
 	// Упрощенный запрос на выборку пары ключ => значение
 	function fetch_pairs($key, $value, $where = null, $order = null, $count = null, $offset = 0) {
-		$select = new database_select();
+		$select = new database_select(null, $this->adapter);
 		$select->from($this->name, array(
 			$key,
 			$value
@@ -73,7 +73,7 @@ class k_database_model {
 
 	// Упрощенный запрос на выборку всех колонок и всех рядов
 	function fetch_all($where = null, $order = null, $count = null, $offset = null) {
-		$select = new database_select();
+		$select = new database_select(null, $this->adapter);
 		$select->from($this->name);
 		if ($where) $select->where($where);
 		if ($order) $select->order($order);
@@ -95,7 +95,7 @@ class k_database_model {
 
 	// Упрощенный запрос на выборку всех колонок одного ряда
 	function fetch_row($where = null, $order = null) {
-		$select = new database_select();
+		$select = new database_select(null, $this->adapter);
 		$select->from($this->name);
 		if ($where) $select->where($where);
 		if ($order) $select->order($order);
@@ -166,7 +166,7 @@ class k_database_model {
 	}
 
 	function fetch_control_list($where = null, $order = null, $count = null, $offset = null) {
-		$select = new database_select();
+		$select = new database_select(null, $this->adapter);
 		$select->from($this->name);
 		if ($where) $select->where($where);
 		if ($order) $select->order($order);

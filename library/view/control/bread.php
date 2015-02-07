@@ -25,7 +25,7 @@ if (count($this->data) > 1) {
 		if ($el->route == 'control') {
 			$title_1 = '';
 			if (($this->control()->config->param->cid && $cid_array) || $this->control()->config->param->oid) {
-				$pid = $this->control()->config->param->cid ? $this->control()->config->param->cid : $this->control()->config->param->oid;
+				$pid = $this->control()->config->param->pid ? $this->control()->config->param->pid : ($this->control()->config->param->cid ? $this->control()->config->param->cid : $this->control()->config->param->oid);
 				$prev = @$this->data[$n - 1];
 				if ($prev) {
 					$view = new view();

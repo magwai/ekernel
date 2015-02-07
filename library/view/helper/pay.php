@@ -113,7 +113,7 @@ class k_view_helper_pay extends view_helper {
 			return ($Signature == strtoupper(md5($Order_ID . $Status . $password)));
 		}
 
-		if (checkSignature($param["Order_ID"], $param["Status"], $param["Signature"], $config->password) && ($param['Status'] == 'authorized' || $param['Status'] == 'payed')) {
+		if (checkSignature($param["Order_ID"], $param["Status"], $param["Signature"], $config->password) && ($param['Status'] == 'authorized' || $param['Status'] == 'paid')) {
 			if ($callback_success !== null) $callback_success($card);
 		}
 
