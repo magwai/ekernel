@@ -25,6 +25,13 @@
 						center: val && val.length ? this.parse_val(val) : this.opt.center,
 						zoom: this.opt.zoom
 					});
+					var searchControl = this.map.controls.get('searchControl');
+					searchControl.events.add("resultshow", function (e) {
+					    this.mark_remove();
+					    this.mark_set(searchControl.getResultsArray()[e.get('index')].geometry.getCoordinates());
+					    this.input_update();
+					    $('.ymaps-2-1-22-input__clear').click();
+					}.bind(this));
 					this.map.events.add('click', function (e) {
 						this.mark_remove();
 						this.mark_set(e.get('coords'));
