@@ -17,7 +17,26 @@ $before = function($control) {
 	}
 };
 
+if ($this->config->action == 'edit' && $this->config->param->id)
+{
+	$mm = new model_meta;
+	$res = $mm->fetch_row(array('id' => $this->config->param->id));
+	if ($res->controller){
+		$model = 'model_'.$res->controller;
+		$m = new $model;
+		$mc = new model_cmenu;
+		$mname = $mc->fetch_one('title', array('controller' => $res->controller));
+		$sname = $m->fetch_one('title', array('id' => $res->parentid));
+		$text = '<h2>'.$mname.': '.$sname.'</h2>';
+	}
+	else{
+		$text = '<h2>'.$res->url.'</h2>';
+	}
+	
+}
+
 $c = array(
+	'text' => $this->config->action == 'edit' ? $text : '',
 	'field' => array(
 		'url' => array(
 			'search' => true,
@@ -25,7 +44,8 @@ $c = array(
 			'title' => $this->view->translate('control_meta_url_title'),
 			'description' => $this->view->translate('control_meta_url_description'),
 			'order' => 1,
-			'required' => true
+			'required' => true,
+			'active' => $this->config->action == 'add' ? true : false
 		),
 		'title' => array(
 			'title' => 'TITLE',
@@ -52,6 +72,9 @@ $c = array(
 	'config_action' => array(
 		'index' => array(
 			'field' => array(
+				'url' => array(
+				    'active' => true
+				),
 				'title' => array(
 					'active' => false
 				),
