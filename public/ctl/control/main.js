@@ -112,6 +112,10 @@ c.init = function(d) {
 	if (c.clink) {
 		window.setInterval(c.clink_init, 100);
 	}
+	
+	if($('.c-table tbody').length) {
+        $('.c-table tbody .c-table-cb input:checked:last').parents('tr:first').addClass('success');
+    }
 };
 
 c.clink_init = function() {
