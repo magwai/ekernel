@@ -21,7 +21,7 @@ if ($this->config->action == 'edit' && $this->config->param->id)
 {
 	$mm = new model_meta;
 	$res = $mm->fetch_row(array('id' => $this->config->param->id));
-	if ($res->controller){
+	if ($res && $res->controller){
 		$model = 'model_'.$res->controller;
 		$m = new $model;
 		$mc = new model_cmenu;
@@ -30,7 +30,8 @@ if ($this->config->action == 'edit' && $this->config->param->id)
 		$text = '<h2>'.$mname.': '.$sname.'</h2>';
 	}
 	else{
-		$text = '<h2>'.$res->url.'</h2>';
+		if ($res)
+			$text = '<h2>'.$res->url.'</h2>';
 	}
 	
 }
