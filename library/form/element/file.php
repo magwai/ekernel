@@ -97,6 +97,9 @@ class k_form_element_file extends form_element_input {
 						var file_1 = file.queueItem.data("file");
 						delete file_1["name"];
 						file_1.name = "";
+						window.setTimeout(function() {
+							file.queueItem.find(".close").click();
+						}, 800);
 					}
 					else {
 						file.queueItem.find(".image img").attr("src", "'.$this->url.'/" + file.name + "?" + Math.random() * 10000);
