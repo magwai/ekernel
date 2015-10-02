@@ -7,6 +7,9 @@
  * http://www.opensource.org/licenses/mit-license.php
  */
 
+$mp = new model_page;
+$is_visible = $mp->fetch_one('show_it', array('id' => $this->config->param->id));
+ 
 $this->control(array(
 	'meta' => true,
 	'static_field' => true,
@@ -17,6 +20,7 @@ $this->control(array(
 			'required' => true
 		),
 		'stitle' => array(
+			'active' => $this->view->user()->is_allowed_by_key('admin') ? true : ($is_visible ? true : false),
 			'title' => $this->view->translate('control_page_stitle_title'),
 			'order' => 2,
 			'required' => true
