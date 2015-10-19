@@ -13,6 +13,7 @@ if (count($this->data)) {
 		$p['action'] = $el->action;
 		if ($el->key == 'cid') {
 			unset($p['cid']);
+			unset($p['page']);
 			$p['replace'] = 'replace';
 		}
 		if ($el->key == 'oid') {
