@@ -6,6 +6,7 @@ class k_view_helper_basket extends view_helper {
 	protected $_model_order = null;
 	protected $_model_order_item = null;
 	protected $_model_delivery = null;
+	protected $_model_pay = null;
 	protected $_field_order_item_id = 'itemid';
 	protected $_user_heler_name = 'user';
 
@@ -18,6 +19,7 @@ class k_view_helper_basket extends view_helper {
 		if ($this->_model_order === null) $this->_model_order = new model_order;
 		if ($this->_model_order_item === null) $this->_model_order_item = new model_orderitem;
 		if ($this->_model_delivery === null && class_exists('model_delivery')) $this->_model_delivery = new model_delivery;
+		if ($this->_model_pay === null && class_exists('model_pay')) $this->_model_pay = new model_pay;
 	}
 
 	function basket_id($create = false) {
@@ -132,7 +134,7 @@ class k_view_helper_basket extends view_helper {
 		if ($this->_model_pay) {
 			$card = $this->card();
 			if ($card) {
-				$delivery = $this->_model_pay->fetch_row(array(
+				$pay = $this->_model_pay->fetch_row(array(
 					'id' => $card->pay
 				));
 				if ($pay && (float)$pay->price) {
