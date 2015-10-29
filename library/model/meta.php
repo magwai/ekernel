@@ -25,8 +25,8 @@ class k_model_meta extends database_model {
 				), array(
 					'\-',
 					'\/',
-					'_',
-					'%'
+					'+[\w]?',
+					'+[\w]*'
 				), $v->url).'$/i', $url)) {
 					return (array)@json_decode($v->data_lang);
 				}
